@@ -158,3 +158,10 @@ Use a clearly organized `plots` array in JavaScript.
 - Store tile data separately from rendering logic
 - Keep code readable with small comments where they help
 - Use CSS shapes and gradients instead of external art assets
+
+## Version 2 Plan
+1. Add a mode system with setup-screen selection and mode-based starting rules.
+2. Preserve token selection, dice animation, token movement, and decision-card flow.
+3. Expand yearly systems with recurring investments, financial events, loan pressure, and clearer summaries.
+4. Add educational feedback hooks, especially for Education Mode and major yearly outcomes.
+5. Keep the board-first layout intact while refactoring data and rules into cleaner long-term modules.
