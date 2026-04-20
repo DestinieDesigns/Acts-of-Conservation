@@ -474,42 +474,187 @@
     { id: "boat", name: "Boat", icon: "⛵" }
   ];
 
+  data.gameLengths = [
+    { id: "short", name: "Short", turns: 10, description: "A compact run with quicker consequences." },
+    { id: "medium", name: "Medium", turns: 20, description: "A balanced session with room for recovery and risk." },
+    { id: "long", name: "Long", turns: 30, description: "A full planning arc with deeper trade-offs over time." }
+  ];
+
   data.modes = [
     {
       id: "classic",
       name: "Classic",
-      description: "Balanced gameplay focused on keeping budget, environment, and trust working together.",
-      startingStats: { money: 100, environment: 50, trust: 50 },
-      winText: "Reach the final turn with budget above 0 and both environment and trust in a healthy range.",
-      loseText: "Lose if one pillar collapses before the final turn.",
-      modifiers: { difficulty: "steady", education: false, financialEventWeight: 1 }
+      philosophy: "Balance all systems equally.",
+      shortDescription: "Balanced gameplay across all systems.",
+      description: "A balanced mode where money, environment, and trust must all be managed carefully.",
+      goal: "Finish the game with all systems stable.",
+      winConditionText: "Finish all turns with money above 0 and both environment and trust above safe levels.",
+      loseConditionText: "Lose only if Money drops below -100, or Environment or Trust reach -100 or lower.",
+      riskText: "Classic feels thoughtful and steady. It rewards balance and punishes overcommitting to a single pillar.",
+      startingStats: { money: 100, environment: 25, trust: 25 },
+      modifiers: {
+        difficulty: "steady",
+        education: false,
+        financialEventWeight: 1,
+        moneyGainMultiplier: 1,
+        moneyLossMultiplier: 1,
+        environmentGainMultiplier: 1,
+        environmentLossMultiplier: 1,
+        trustGainMultiplier: 1,
+        trustLossMultiplier: 1,
+        positiveEventMultiplier: 1,
+        negativeEventMultiplier: 1
+      }
     },
     {
       id: "wealth",
       name: "Wealth",
-      description: "Push for strong money growth while trying not to trigger social or environmental collapse.",
-      startingStats: { money: 130, environment: 45, trust: 42 },
-      winText: "Finish with the strongest reserves while keeping the island from collapsing.",
-      loseText: "Lose if budget reaches 0 or another pillar collapses completely.",
-      modifiers: { difficulty: "growth", education: false, financialEventWeight: 1.15 }
+      philosophy: "Prioritize economic growth, even if social and environmental risks increase.",
+      shortDescription: "Focus on economic growth.",
+      description: "Build wealth aggressively while trying to prevent social and ecological breakdown.",
+      goal: "End the game with high money.",
+      winConditionText: "Finish all turns with strong economic growth and no total collapse.",
+      loseConditionText: "Lose only if Money drops below -100, or Environment or Trust reach -100 or lower.",
+      riskText: "Wealth mode feels ambitious and tense. Strong reserves can still leave an island emotionally hollow if trust collapses.",
+      startingStats: { money: 120, environment: 0, trust: -10 },
+      modifiers: {
+        difficulty: "growth",
+        education: false,
+        financialEventWeight: 1.12,
+        moneyGainMultiplier: 1.2,
+        moneyLossMultiplier: 1,
+        environmentGainMultiplier: 1,
+        environmentLossMultiplier: 1.25,
+        trustGainMultiplier: 1,
+        trustLossMultiplier: 1.2,
+        positiveEventMultiplier: 1.05,
+        negativeEventMultiplier: 1.08
+      }
     },
     {
       id: "conservation",
       name: "Conservation",
-      description: "Protect ecosystems aggressively while surviving on tighter operating funds.",
-      startingStats: { money: 85, environment: 65, trust: 48 },
-      winText: "Finish with very strong environment health while keeping the island financially alive.",
-      loseText: "Lose if budget collapses or trust falls too low to support conservation work.",
-      modifiers: { difficulty: "eco", education: false, financialEventWeight: 1 }
+      philosophy: "Protect ecosystems first, even when growth becomes difficult.",
+      shortDescription: "Protect nature first.",
+      description: "Prioritize environmental stability even when funding becomes difficult.",
+      goal: "Maximize environment health while surviving financially.",
+      winConditionText: "Finish with strong environment values while avoiding collapse.",
+      loseConditionText: "Lose only if Environment reaches -100 or lower, or Money drops below -100.",
+      riskText: "Conservation mode feels principled and pressurized. Ecological success may still leave the island financially strained if reserves fall too low.",
+      startingStats: { money: 80, environment: -25, trust: 10 },
+      modifiers: {
+        difficulty: "eco",
+        education: false,
+        financialEventWeight: 1,
+        moneyGainMultiplier: 0.85,
+        moneyLossMultiplier: 1,
+        environmentGainMultiplier: 1.3,
+        environmentLossMultiplier: 0.95,
+        trustGainMultiplier: 1,
+        trustLossMultiplier: 1,
+        positiveEventMultiplier: 1.04,
+        negativeEventMultiplier: 1
+      }
+    },
+    {
+      id: "community",
+      name: "Community",
+      philosophy: "Put people first and maintain public trust.",
+      shortDescription: "Support people and trust.",
+      description: "Prioritize public well-being and social stability while keeping the island functioning.",
+      goal: "Maximize community trust.",
+      winConditionText: "Finish with strong community trust and no total collapse.",
+      loseConditionText: "Lose only if Trust reaches -100 or lower, or Money or Environment collapse below -100.",
+      riskText: "Community mode feels compassionate and relational. Supporting people matters, but goodwill alone cannot fund every repair or protect every habitat.",
+      startingStats: { money: 90, environment: 0, trust: 40 },
+      modifiers: {
+        difficulty: "social",
+        education: false,
+        financialEventWeight: 1,
+        moneyGainMultiplier: 1,
+        moneyLossMultiplier: 1.1,
+        environmentGainMultiplier: 1,
+        environmentLossMultiplier: 1,
+        trustGainMultiplier: 1.3,
+        trustLossMultiplier: 0.95,
+        positiveEventMultiplier: 1.06,
+        negativeEventMultiplier: 1
+      }
     },
     {
       id: "survival",
       name: "Survival",
-      description: "Hard mode. Start with lower resources and survive a more fragile island state.",
-      startingStats: { money: 60, environment: 35, trust: 35 },
-      winText: "Survive to the final turn without triggering any collapse.",
-      loseText: "Any major collapse ends the run immediately.",
-      modifiers: { difficulty: "hard", education: false, financialEventWeight: 1.2 }
+      philosophy: "You are entering an island already in crisis. Survive.",
+      shortDescription: "Hard mode with limited resources.",
+      description: "Start under pressure and survive a harsher version of island planning.",
+      goal: "Survive all turns.",
+      winConditionText: "Reach the end of the game without total collapse.",
+      loseConditionText: "Lose if Money drops below -100, or Environment or Trust reach -100 or lower.",
+      riskText: "Survival mode feels urgent from the first turn. There is little room for waste, and even good decisions can come at a painful cost.",
+      startingStats: { money: 50, environment: -50, trust: -25 },
+      modifiers: {
+        difficulty: "hard",
+        education: false,
+        financialEventWeight: 1.25,
+        moneyGainMultiplier: 0.9,
+        moneyLossMultiplier: 1.2,
+        environmentGainMultiplier: 0.9,
+        environmentLossMultiplier: 1.2,
+        trustGainMultiplier: 0.9,
+        trustLossMultiplier: 1.2,
+        positiveEventMultiplier: 0.9,
+        negativeEventMultiplier: 1.2
+      }
+    },
+    {
+      id: "sandbox",
+      name: "Sandbox",
+      philosophy: "Experiment freely without strict success criteria.",
+      shortDescription: "Free play with no strict win or lose state.",
+      description: "Experiment with the system without pressure.",
+      goal: "Explore the consequences of choices freely.",
+      winConditionText: "None. Use the run to learn how the systems interact.",
+      loseConditionText: "None. Natural collapse still appears in the ending for reflection, but it does not stop the run early.",
+      riskText: "Sandbox mode feels open and exploratory. It is the best place to test bold ideas and observe their long-term consequences.",
+      startingStats: { money: 100, environment: 25, trust: 25 },
+      modifiers: {
+        difficulty: "open",
+        education: false,
+        financialEventWeight: 1,
+        moneyGainMultiplier: 1,
+        moneyLossMultiplier: 1,
+        environmentGainMultiplier: 1,
+        environmentLossMultiplier: 1,
+        trustGainMultiplier: 1,
+        trustLossMultiplier: 1,
+        positiveEventMultiplier: 1,
+        negativeEventMultiplier: 1
+      }
+    },
+    {
+      id: "education",
+      name: "Education",
+      philosophy: "Learn how systems interact and how trade-offs build over time.",
+      shortDescription: "Learn through guided feedback.",
+      description: "Play a balanced version of the game with added explanations after decisions.",
+      goal: "Understand long-term planning and trade-offs.",
+      winConditionText: "Finish all turns while maintaining a functioning island.",
+      loseConditionText: "Lose if Money drops below -100, or Environment or Trust reach -100 or lower.",
+      riskText: "Education mode feels reflective and instructive. It slows the pace just enough to make cause and effect clearer after each choice.",
+      startingStats: { money: 100, environment: -10, trust: -10 },
+      modifiers: {
+        difficulty: "steady",
+        education: true,
+        financialEventWeight: 1,
+        moneyGainMultiplier: 1,
+        moneyLossMultiplier: 1,
+        environmentGainMultiplier: 1,
+        environmentLossMultiplier: 1,
+        trustGainMultiplier: 1,
+        trustLossMultiplier: 1,
+        positiveEventMultiplier: 1,
+        negativeEventMultiplier: 1
+      }
     }
   ];
 

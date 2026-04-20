@@ -5,15 +5,7 @@ window.VOTF_BOOTED = true;
   var el = AOC.createElementRegistry();
 
   function selectRounds(rounds) {
-    var i;
     state.selectedRounds = rounds;
-    for (i = 0; i < el.roundOptions.length; i += 1) {
-      if (parseInt(el.roundOptions[i].getAttribute("data-rounds"), 10) === rounds) {
-        el.roundOptions[i].className = "round-option selected";
-      } else {
-        el.roundOptions[i].className = "round-option";
-      }
-    }
     AOC.ui.updateUI(el, state);
   }
 
@@ -41,6 +33,38 @@ window.VOTF_BOOTED = true;
     AOC.ui.updateUI(el, state);
   }
 
+  function goToScreen(screenId) {
+    state.currentScreen = screenId;
+    AOC.ui.showScreen(el, screenId);
+  }
+
+  function openHowTo() {
+    AOC.ui.showHowToModal(el);
+  }
+
+  function closeHowTo() {
+    AOC.ui.hideHowToModal(el);
+  }
+
+  function goToModeSelect() {
+    closeHowTo();
+    goToScreen("modeSelect");
+  }
+
+  function continueFromMode() {
+    if (!state.selectedMode) {
+      return;
+    }
+    goToScreen("roundSelect");
+  }
+
+  function continueFromRounds() {
+    if (!state.selectedRounds) {
+      return;
+    }
+    goToScreen("rules");
+  }
+
   function startGame() {
     if (!state.selectedMode || !state.selectedRounds) {
       return;
@@ -48,7 +72,7 @@ window.VOTF_BOOTED = true;
     resetStateForNewSession();
     applySelectedModeSetup();
     seedInvestmentOffers(4);
-    AOC.ui.showScreen(el, "game");
+    goToScreen("playing");
     AOC.ui.updateStatus(el, state.selectedMode.name + " is active. Roll to move and face new planning challenges.");
     AOC.ui.setCenterMessage(el, state.selectedMode.name, state.selectedMode.description);
   }
@@ -57,6 +81,13 @@ window.VOTF_BOOTED = true;
     state.selectedMode = null;
     state.selectedRounds = null;
     AOC.ui.updateUI(el, state);
+  }
+
+  function returnHome() {
+    closeHowTo();
+    resetSetupSelections();
+    resetStateForNewSession();
+    goToScreen("home");
   }
 
   function applySelectedModeSetup() {
@@ -460,13 +491,13 @@ window.VOTF_BOOTED = true;
   function checkEndConditions() {
     var modeFailure;
 
-    if (state.stats.money < 10 && maybeOfferLoan()) {
-      return;
-    }
-
     modeFailure = AOC.rules.getModeFailureEnding(state);
     if (modeFailure) {
       endGame(modeFailure);
+      return;
+    }
+
+    if (state.stats.money < 10 && maybeOfferLoan()) {
       return;
     }
 
@@ -476,7 +507,7 @@ window.VOTF_BOOTED = true;
   }
 
   function endGame(endingType) {
-    var summary = AOC.rules.buildEndContent(state.stats, endingType);
+    var summary = AOC.rules.buildEndContent(state, endingType);
     var verdict = AOC.rules.getOutcomeVerdict(state.selectedMode, endingType);
     var ranking = AOC.rules.rankStats(state.stats);
     var performanceSummary = AOC.rules.buildPerformanceSummary(state, endingType);
@@ -511,15 +542,16 @@ window.VOTF_BOOTED = true;
     el.endEnvironment.textContent = state.stats.environment;
     el.endTrust.textContent = state.stats.trust;
     el.reflectionLine.textContent = summary.reflection;
-    AOC.ui.showScreen(el, "end");
+    goToScreen("gameOver");
   }
 
   function resetGame() {
     resetStateForNewSession();
-    AOC.ui.showScreen(el, "start");
+    goToScreen("rules");
   }
 
   function resetStateForNewSession() {
+    var currentScreen = state.currentScreen;
     var selectedRounds = state.selectedRounds;
     var selectedMode = state.selectedMode;
     var selectedToken = state.selectedToken;
@@ -528,10 +560,12 @@ window.VOTF_BOOTED = true;
     state.selectedRounds = selectedRounds;
     state.selectedMode = selectedMode;
     state.selectedToken = selectedToken;
+    state.currentScreen = currentScreen || "home";
     AOC.ui.hideChoiceModal(el);
     AOC.ui.hideYearSummary(el);
     AOC.ui.hideLoanModal(el);
     AOC.ui.hideInvestmentModal(el);
+    AOC.ui.hideHowToModal(el);
     AOC.ui.hideBoardTooltip(el);
     AOC.ui.updateUI(el, state);
   }
@@ -539,13 +573,28 @@ window.VOTF_BOOTED = true;
   function boot() {
     AOC.ui.initElements(el);
     AOC.ui.bindEvents(el, {
-      onSelectRounds: selectRounds,
+      onGoToModeSelect: goToModeSelect,
+      onOpenHowTo: openHowTo,
+      onCloseHowTo: closeHowTo,
       onSelectMode: selectMode,
+      onSelectRounds: selectRounds,
       onSelectToken: selectToken,
+      onContinueFromMode: continueFromMode,
+      onContinueFromRounds: continueFromRounds,
       onStartGame: startGame,
-      onBack: resetSetupSelections,
+      onBackToHome: function () {
+        resetSetupSelections();
+        goToScreen("home");
+      },
+      onBackToModeSelect: function () {
+        goToScreen("modeSelect");
+      },
+      onBackToRounds: function () {
+        goToScreen("roundSelect");
+      },
       onRoll: handleRoll,
       onRestart: resetGame,
+      onReturnHome: returnHome,
       onContinueYear: continueAfterYearSummary,
       onReviewInvestments: reviewInvestments,
       onCloseInvestments: closeInvestmentModal
@@ -557,6 +606,7 @@ window.VOTF_BOOTED = true;
     });
     AOC.ui.renderBoard(el);
     AOC.ui.updateUI(el, state);
+    goToScreen("home");
   }
 
   if (document.readyState === "loading") {

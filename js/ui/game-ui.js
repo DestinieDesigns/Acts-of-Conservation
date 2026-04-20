@@ -43,19 +43,38 @@
 
   AOC.ui = {
     initElements: function (el) {
+      el.homeScreen = AOC.utils.byId("home-screen");
       el.startScreen = AOC.utils.byId("start-screen");
+      el.roundsScreen = AOC.utils.byId("rounds-screen");
+      el.rulesScreen = AOC.utils.byId("rules-screen");
       el.gameScreen = AOC.utils.byId("game-screen");
       el.endScreen = AOC.utils.byId("end-screen");
+      el.homeStartButton = AOC.utils.byId("home-start-button");
+      el.homeHowButton = AOC.utils.byId("home-how-button");
+      el.howToModal = AOC.utils.byId("how-to-modal");
+      el.howToCloseButton = AOC.utils.byId("how-to-close-button");
       el.startButton = AOC.utils.byId("start-button");
       el.backButton = AOC.utils.byId("back-button");
+      el.roundsNextButton = AOC.utils.byId("rounds-next-button");
+      el.roundsBackButton = AOC.utils.byId("rounds-back-button");
+      el.rulesStartButton = AOC.utils.byId("rules-start-button");
+      el.rulesBackButton = AOC.utils.byId("rules-back-button");
       el.rollButton = AOC.utils.byId("roll-button");
       el.restartButton = AOC.utils.byId("restart-button");
+      el.returnHomeButton = AOC.utils.byId("return-home-button");
       el.roundOptions = document.querySelectorAll(".round-option");
       el.modePicker = AOC.utils.byId("mode-picker");
       el.modeName = AOC.utils.byId("mode-name");
       el.modeDescription = AOC.utils.byId("mode-description");
       el.modeWin = AOC.utils.byId("mode-win");
       el.modeLose = AOC.utils.byId("mode-lose");
+      el.modeGoal = AOC.utils.byId("mode-goal");
+      el.modeRisk = AOC.utils.byId("mode-risk");
+      el.rulesModeName = AOC.utils.byId("rules-mode-name");
+      el.rulesLengthName = AOC.utils.byId("rules-length-name");
+      el.rulesModeGoal = AOC.utils.byId("rules-mode-goal");
+      el.rulesModeWin = AOC.utils.byId("rules-mode-win");
+      el.rulesModeLose = AOC.utils.byId("rules-mode-lose");
       el.tokenPicker = AOC.utils.byId("token-picker");
       el.selectedTokenName = AOC.utils.byId("selected-token-name");
       el.board = AOC.utils.byId("board");
@@ -66,6 +85,9 @@
       el.moneyStat = AOC.utils.byId("money-stat");
       el.environmentStat = AOC.utils.byId("environment-stat");
       el.trustStat = AOC.utils.byId("trust-stat");
+      el.moneyCondition = AOC.utils.byId("money-condition");
+      el.environmentCondition = AOC.utils.byId("environment-condition");
+      el.trustCondition = AOC.utils.byId("trust-condition");
       el.yearCounter = AOC.utils.byId("year-counter");
       el.turnCounter = AOC.utils.byId("turn-counter");
       el.diceResult = AOC.utils.byId("dice-result");
@@ -130,17 +152,41 @@
           callbacks.onSelectRounds(parseInt(this.getAttribute("data-rounds"), 10));
         };
       }
+      if (el.homeStartButton) {
+        el.homeStartButton.onclick = callbacks.onGoToModeSelect;
+      }
+      if (el.homeHowButton) {
+        el.homeHowButton.onclick = callbacks.onOpenHowTo;
+      }
+      if (el.howToCloseButton) {
+        el.howToCloseButton.onclick = callbacks.onCloseHowTo;
+      }
       if (el.startButton) {
-        el.startButton.onclick = callbacks.onStartGame;
+        el.startButton.onclick = callbacks.onContinueFromMode;
       }
       if (el.backButton) {
-        el.backButton.onclick = callbacks.onBack;
+        el.backButton.onclick = callbacks.onBackToHome;
+      }
+      if (el.roundsNextButton) {
+        el.roundsNextButton.onclick = callbacks.onContinueFromRounds;
+      }
+      if (el.roundsBackButton) {
+        el.roundsBackButton.onclick = callbacks.onBackToModeSelect;
+      }
+      if (el.rulesStartButton) {
+        el.rulesStartButton.onclick = callbacks.onStartGame;
+      }
+      if (el.rulesBackButton) {
+        el.rulesBackButton.onclick = callbacks.onBackToRounds;
       }
       if (el.rollButton) {
         el.rollButton.onclick = callbacks.onRoll;
       }
       if (el.restartButton) {
         el.restartButton.onclick = callbacks.onRestart;
+      }
+      if (el.returnHomeButton) {
+        el.returnHomeButton.onclick = callbacks.onReturnHome;
       }
       if (el.continueYearButton) {
         el.continueYearButton.onclick = callbacks.onContinueYear;
@@ -210,7 +256,7 @@
         button.setAttribute("aria-checked", selectedModeId === mode.id ? "true" : "false");
         button.innerHTML =
           "<strong>" + mode.name + "</strong>" +
-          "<span>" + mode.description + "</span>";
+          "<span>" + mode.shortDescription + "</span>";
         button.onclick = onSelectMode(mode.id);
         el.modePicker.appendChild(button);
       }
@@ -226,11 +272,17 @@
         if (el.modeDescription) {
           el.modeDescription.textContent = "Choose a play style to preview its focus and difficulty.";
         }
+        if (el.modeGoal) {
+          el.modeGoal.textContent = "Your chosen mode will set the main objective for this run.";
+        }
         if (el.modeWin) {
-          el.modeWin.textContent = "Your chosen mode will set the main objective for this run.";
+          el.modeWin.textContent = "Finish conditions will appear here once you select a mode.";
         }
         if (el.modeLose) {
-          el.modeLose.textContent = "Your selections determine how the game can be won or lost.";
+          el.modeLose.textContent = "Failure conditions will update with the selected mode.";
+        }
+        if (el.modeRisk) {
+          el.modeRisk.textContent = "Each mode creates a different emotional and strategic rhythm.";
         }
         return;
       }
@@ -240,11 +292,45 @@
       if (el.modeDescription) {
         el.modeDescription.textContent = mode.description;
       }
+      if (el.modeGoal) {
+        el.modeGoal.textContent = mode.goal;
+      }
       if (el.modeWin) {
-        el.modeWin.textContent = mode.winText;
+        el.modeWin.textContent = mode.winConditionText;
       }
       if (el.modeLose) {
-        el.modeLose.textContent = mode.loseText;
+        el.modeLose.textContent = mode.loseConditionText;
+      }
+      if (el.modeRisk) {
+        el.modeRisk.textContent = mode.philosophy + " " + mode.riskText;
+      }
+    },
+
+    updateRulesSummary: function (el, state) {
+      var lengthLabel = "-";
+
+      if (state.selectedRounds === 10) {
+        lengthLabel = "Short - 10 turns";
+      } else if (state.selectedRounds === 20) {
+        lengthLabel = "Medium - 20 turns";
+      } else if (state.selectedRounds === 30) {
+        lengthLabel = "Long - 30 turns";
+      }
+
+      if (el.rulesModeName) {
+        el.rulesModeName.textContent = state.selectedMode ? state.selectedMode.name : "-";
+      }
+      if (el.rulesLengthName) {
+        el.rulesLengthName.textContent = lengthLabel;
+      }
+      if (el.rulesModeGoal) {
+        el.rulesModeGoal.textContent = state.selectedMode ? state.selectedMode.goal : "Select a mode to preview its goal.";
+      }
+      if (el.rulesModeWin) {
+        el.rulesModeWin.textContent = state.selectedMode ? state.selectedMode.winConditionText : "Complete the run with a stable island.";
+      }
+      if (el.rulesModeLose) {
+        el.rulesModeLose.textContent = state.selectedMode ? state.selectedMode.loseConditionText : "Avoid a system collapse before the end.";
       }
     },
 
@@ -704,6 +790,21 @@
       el.moneyStat.textContent = state.stats.money;
       el.environmentStat.textContent = state.stats.environment;
       el.trustStat.textContent = state.stats.trust;
+      var moneyCondition = AOC.rules.getMoneyCondition(state.stats.money);
+      var environmentCondition = AOC.rules.getEnvironmentCondition(state.stats.environment);
+      var trustCondition = AOC.rules.getTrustCondition(state.stats.trust);
+      if (el.moneyCondition) {
+        el.moneyCondition.textContent = moneyCondition.label;
+        el.moneyCondition.title = moneyCondition.message;
+      }
+      if (el.environmentCondition) {
+        el.environmentCondition.textContent = environmentCondition.label;
+        el.environmentCondition.title = environmentCondition.message;
+      }
+      if (el.trustCondition) {
+        el.trustCondition.textContent = trustCondition.label;
+        el.trustCondition.title = trustCondition.message;
+      }
       if (el.centerMoneyMini) {
         el.centerMoneyMini.textContent = state.stats.money;
       }
@@ -723,8 +824,15 @@
         el.selectedTokenName.textContent = state.selectedToken ? state.selectedToken.name : "None yet";
       }
       if (el.startButton) {
-        el.startButton.disabled = !(state.selectedMode && state.selectedRounds);
+        el.startButton.disabled = !state.selectedMode;
       }
+      if (el.roundsNextButton) {
+        el.roundsNextButton.disabled = !state.selectedRounds;
+      }
+      if (el.rulesStartButton) {
+        el.rulesStartButton.disabled = !(state.selectedMode && state.selectedRounds);
+      }
+      this.updateRulesSummary(el, state);
       if (el.roundOptions && el.roundOptions.length) {
         for (var roundIndex = 0; roundIndex < el.roundOptions.length; roundIndex += 1) {
           var selectedLength = parseInt(el.roundOptions[roundIndex].getAttribute("data-rounds"), 10) === state.selectedRounds;
@@ -754,6 +862,22 @@
       }
       el.rollButton.disabled = !!(state.awaitingChoice || state.awaitingYearSummary || state.awaitingLoanDecision || state.awaitingInvestmentDecision || state.gameOver || state.isAnimating);
       this.renderToken(el, state);
+    },
+
+    showHowToModal: function (el) {
+      if (!el.howToModal) {
+        return;
+      }
+      el.howToModal.className = "modal";
+      el.howToModal.setAttribute("aria-hidden", "false");
+    },
+
+    hideHowToModal: function (el) {
+      if (!el.howToModal) {
+        return;
+      }
+      el.howToModal.className = "modal hidden";
+      el.howToModal.setAttribute("aria-hidden", "true");
     },
 
     animateDiceDisplay: async function (el, finalValue) {
@@ -833,12 +957,30 @@
     },
 
     showScreen: function (el, screen) {
-      el.startScreen.className = "screen start-screen" + (screen === "start" ? " active" : "");
-      el.gameScreen.className = "screen game-screen" + (screen === "game" ? " active" : "");
-      el.endScreen.className = "screen end-screen" + (screen === "end" ? " active" : "");
-      el.startScreen.setAttribute("aria-hidden", screen === "start" ? "false" : "true");
-      el.gameScreen.setAttribute("aria-hidden", screen === "game" ? "false" : "true");
-      el.endScreen.setAttribute("aria-hidden", screen === "end" ? "false" : "true");
+      if (el.homeScreen) {
+        el.homeScreen.className = "screen home-screen" + (screen === "home" ? " active" : "");
+        el.homeScreen.setAttribute("aria-hidden", screen === "home" ? "false" : "true");
+      }
+      if (el.startScreen) {
+        el.startScreen.className = "screen start-screen" + (screen === "modeSelect" ? " active" : "");
+        el.startScreen.setAttribute("aria-hidden", screen === "modeSelect" ? "false" : "true");
+      }
+      if (el.roundsScreen) {
+        el.roundsScreen.className = "screen rounds-screen" + (screen === "roundSelect" ? " active" : "");
+        el.roundsScreen.setAttribute("aria-hidden", screen === "roundSelect" ? "false" : "true");
+      }
+      if (el.rulesScreen) {
+        el.rulesScreen.className = "screen rules-screen" + (screen === "rules" ? " active" : "");
+        el.rulesScreen.setAttribute("aria-hidden", screen === "rules" ? "false" : "true");
+      }
+      if (el.gameScreen) {
+        el.gameScreen.className = "screen game-screen" + (screen === "playing" ? " active" : "");
+        el.gameScreen.setAttribute("aria-hidden", screen === "playing" ? "false" : "true");
+      }
+      if (el.endScreen) {
+        el.endScreen.className = "screen end-screen" + (screen === "gameOver" ? " active" : "");
+        el.endScreen.setAttribute("aria-hidden", screen === "gameOver" ? "false" : "true");
+      }
     }
   };
 }());

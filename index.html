@@ -4,17 +4,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Acts of Conservation</title>
-  <link rel="stylesheet" href="styles.css?v=2026-04-20-6">
+  <link rel="stylesheet" href="styles.css?v=2026-04-20-8">
 </head>
 <body>
   <div class="app-shell">
-    <section id="start-screen" class="screen start-screen active">
+    <section id="home-screen" class="screen home-screen active" aria-hidden="false">
+      <div class="home-card">
+        <p class="eyebrow">Acts of Conservation</p>
+        <p class="build-stamp">Version</p>
+        <h1>Acts of Conservation</h1>
+        <p class="home-subtitle">Build. Balance. Survive.</p>
+        <p class="lead home-lead">
+          Manage a living island through trade-offs that shape its future. Every turn asks how budget, ecosystems, and people should be balanced.
+        </p>
+        <div class="home-actions">
+          <button id="home-start-button" class="primary-button" type="button">Start Game</button>
+          <button id="home-how-button" class="secondary-button" type="button">How To Play</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="start-screen" class="screen start-screen" aria-hidden="true">
       <div class="start-card setup-card">
         <p class="eyebrow">Acts of Conservation</p>
         <p class="build-stamp">Version</p>
-        <h1>START NEW GAME</h1>
+        <p class="step-indicator">Step 1 of 3</p>
+        <h1>Select a Game Mode</h1>
         <p class="lead">
-          Choose a mode and length before you begin guiding the island.
+          Pick the planning philosophy you want this run to follow.
         </p>
 
         <div class="mode-picker-block setup-block">
@@ -32,15 +49,40 @@
             <div class="mode-detail-grid">
               <div>
                 <span>Goal</span>
-                <strong id="mode-win">Your chosen mode will set the main objective for this run.</strong>
+                <strong id="mode-goal">Your chosen mode will set the main objective for this run.</strong>
               </div>
               <div>
-                <span>Risk</span>
-                <strong id="mode-lose">Your selections determine how the game can be won or lost.</strong>
+                <span>How to Win</span>
+                <strong id="mode-win">Finish conditions will appear here once you select a mode.</strong>
+              </div>
+              <div>
+                <span>How to Lose</span>
+                <strong id="mode-lose">Failure conditions will update with the selected mode.</strong>
+              </div>
+              <div>
+                <span>Experience</span>
+                <strong id="mode-risk">Each mode creates a different emotional and strategic rhythm.</strong>
               </div>
             </div>
           </div>
         </div>
+
+        <div class="setup-actions">
+          <button id="back-button" class="secondary-button" type="button">Back</button>
+          <button id="start-button" class="primary-button" disabled>Next</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="rounds-screen" class="screen rounds-screen" aria-hidden="true">
+      <div class="start-card setup-card rounds-card">
+        <p class="eyebrow">Acts of Conservation</p>
+        <p class="build-stamp">Version</p>
+        <p class="step-indicator">Step 2 of 3</p>
+        <h1>Choose the Game Length</h1>
+        <p class="lead">
+          Decide how long you want this island planning run to last.
+        </p>
 
         <div class="round-picker setup-block">
           <p class="picker-label">Select Length</p>
@@ -52,28 +94,63 @@
           </div>
         </div>
 
-        <div class="start-guide">
-          <section class="start-guide-card">
-            <h3>How to Play</h3>
-            <p>Balance your island’s future by managing three core stats: Available Budget, Environment Health, and Community Trust.</p>
-            <p>Each turn, roll the dice and move across the board. Every location presents a new challenge or situation.</p>
-            <p>Every choice affects all three stats. Short-term profit can harm long-term sustainability, and overspending can also lead to collapse.</p>
+        <div class="setup-actions">
+          <button id="rounds-back-button" class="secondary-button" type="button">Back</button>
+          <button id="rounds-next-button" class="primary-button" disabled>Next</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="rules-screen" class="screen rules-screen" aria-hidden="true">
+      <div class="start-card rules-card">
+        <p class="eyebrow">Acts of Conservation</p>
+        <p class="build-stamp">Version</p>
+        <p class="step-indicator">Step 3 of 3</p>
+        <h1>Ready to Play</h1>
+        <p class="lead">
+          Review your choices, then start the island planning run when you feel ready.
+        </p>
+
+        <div class="rules-summary-grid">
+          <section class="rules-summary-card">
+            <span class="summary-label">Mode</span>
+            <strong id="rules-mode-name">Classic</strong>
           </section>
-          <section class="start-guide-card">
-            <h3>Token</h3>
-            <p>You are represented by a visible game token on the board.</p>
-            <p>The token shows your current position and moves with each roll. Follow it to track your progress across the island.</p>
-          </section>
-          <section class="start-guide-card">
-            <h3>Year System</h3>
-            <p>Each full loop around the board represents one year.</p>
-            <p>When you pass the Start tile, a Year Summary will appear and your progress and impacts will be reviewed.</p>
+          <section class="rules-summary-card">
+            <span class="summary-label">Length</span>
+            <strong id="rules-length-name">Short - 10 turns</strong>
           </section>
         </div>
 
+        <div class="rules-layout">
+          <section class="rules-info-card">
+            <h3>How the Game Works</h3>
+            <ul class="rules-list">
+              <li>Roll the dice to move across the island.</li>
+              <li>Each stop presents a decision or event.</li>
+              <li>Your choices affect Available Budget, Environment, and Community Trust.</li>
+              <li>Passing Start completes a year and triggers a planning summary.</li>
+            </ul>
+          </section>
+
+          <section class="rules-info-card">
+            <h3>Mode Goal</h3>
+            <p id="rules-mode-goal">Select a mode to preview its goal.</p>
+            <div class="rules-mode-meta">
+              <p><strong>Win:</strong> <span id="rules-mode-win">Complete the run with a stable island.</span></p>
+              <p><strong>Lose:</strong> <span id="rules-mode-lose">Avoid a system collapse before the end.</span></p>
+            </div>
+          </section>
+        </div>
+
+        <section class="rules-reminder">
+          <h3>Reminder</h3>
+          <p>Short-term gains can create long-term consequences. Balance matters unless your chosen mode deliberately pushes you toward a riskier path.</p>
+        </section>
+
         <div class="setup-actions">
-          <button id="back-button" class="secondary-button" type="button">Back</button>
-          <button id="start-button" class="primary-button" disabled>Start Game</button>
+          <button id="rules-back-button" class="secondary-button" type="button">Back</button>
+          <button id="rules-start-button" class="primary-button" type="button">Start Game</button>
         </div>
       </div>
     </section>
@@ -92,14 +169,17 @@
             <div class="hud-pill money">
               <span>Available Budget</span>
               <strong id="money-stat">100</strong>
+              <small id="money-condition" class="hud-condition">Stable Reserves</small>
             </div>
             <div class="hud-pill environment">
-              <span>Environment Health</span>
+              <span>Environment</span>
               <strong id="environment-stat">50</strong>
+              <small id="environment-condition" class="hud-condition">Stable</small>
             </div>
             <div class="hud-pill trust">
               <span>Community Trust</span>
               <strong id="trust-stat">50</strong>
+              <small id="trust-condition" class="hud-condition">Stable Trust</small>
             </div>
           </div>
 
@@ -159,7 +239,7 @@
             <strong id="end-money">0</strong>
           </div>
           <div>
-            <span>Environment Health</span>
+            <span>Environment</span>
             <strong id="end-environment">0</strong>
           </div>
           <div>
@@ -197,9 +277,22 @@
         </div>
 
         <p class="reflection-line">Small choices create long-term impact.</p>
-        <button id="restart-button" class="primary-button">Play Again</button>
+        <div class="end-actions">
+          <button id="return-home-button" class="secondary-button" type="button">Return Home</button>
+          <button id="restart-button" class="primary-button" type="button">Restart</button>
+        </div>
       </div>
     </section>
+  </div>
+
+  <div id="how-to-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card info-card">
+      <p class="eyebrow">How To Play</p>
+      <h3>Guide the island one turn at a time.</h3>
+      <p class="lead">Roll the dice, move your token, and respond to the issue at each stop. Every choice changes Available Budget, Environment, and Community Trust together.</p>
+      <p class="education-copy">A full loop around the board counts as one year. Year summaries review your progress, while the final reflection shows what your priorities created over time.</p>
+      <button id="how-to-close-button" class="primary-button" type="button">Back to Home</button>
+    </div>
   </div>
 
   <div id="choice-modal" class="modal card-modal hidden" aria-hidden="true">
@@ -228,7 +321,7 @@
           <strong id="year-money">0</strong>
         </div>
         <div>
-          <span>Environment Health</span>
+          <span>Environment</span>
           <strong id="year-environment">0</strong>
         </div>
         <div>
@@ -275,19 +368,20 @@
 
   <div id="stat-feedback" class="stat-feedback-layer" aria-live="polite" aria-atomic="false"></div>
 
-  <script src="js/data/game-content.js?v=2026-04-20-6"></script>
-  <script src="js/core/game-state.js?v=2026-04-20-6"></script>
-  <script src="js/core/game-rules.js?v=2026-04-20-6"></script>
-  <script src="js/ui/game-ui.js?v=2026-04-20-6"></script>
-  <script src="js/app.js?v=2026-04-20-6"></script>
+  <script src="js/data/game-content.js?v=2026-04-20-8"></script>
+  <script src="js/core/game-state.js?v=2026-04-20-8"></script>
+  <script src="js/core/game-rules.js?v=2026-04-20-8"></script>
+  <script src="js/ui/game-ui.js?v=2026-04-20-8"></script>
+  <script src="js/app.js?v=2026-04-20-8"></script>
   <script>
     (function () {
-      window.GAME_VERSION = "2.1.0";
+      window.GAME_VERSION = "2.0.3";
 
       function setVersionStatus(text) {
-        var stamp = document.querySelector(".build-stamp");
-        if (stamp) {
-          stamp.textContent = text;
+        var stamps = document.querySelectorAll(".build-stamp");
+        var i;
+        for (i = 0; i < stamps.length; i += 1) {
+          stamps[i].textContent = text;
         }
       }
 
@@ -301,7 +395,7 @@
 
         setVersionStatus("Version " + window.GAME_VERSION);
         var retryScript = document.createElement("script");
-        retryScript.src = "js/app.js?v=2026-04-20-6-retry";
+        retryScript.src = "js/app.js?v=2026-04-20-8-retry";
         document.body.appendChild(retryScript);
       }, 60);
     })();

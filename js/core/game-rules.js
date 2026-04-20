@@ -10,15 +10,37 @@
       var base = (mode && mode.startingStats) || AOC.config.startingStats;
       return {
         money: base.money,
-        environment: AOC.utils.clampMeter(base.environment),
-        trust: AOC.utils.clampMeter(base.trust)
+        environment: base.environment,
+        trust: base.trust
+      };
+    },
+
+    getModeModifiers: function (mode) {
+      return (mode && mode.modifiers) || {};
+    },
+
+    scaleEffectValue: function (value, positiveMultiplier, negativeMultiplier) {
+      if (value > 0) {
+        return Math.round(value * (positiveMultiplier || 1));
+      }
+      if (value < 0) {
+        return Math.round(value * (negativeMultiplier || 1));
+      }
+      return 0;
+    },
+
+    applyModeMultipliers: function (effects, modifiers) {
+      return {
+        money: this.scaleEffectValue(effects.money || 0, modifiers.moneyGainMultiplier, modifiers.moneyLossMultiplier),
+        environment: this.scaleEffectValue(effects.environment || 0, modifiers.environmentGainMultiplier, modifiers.environmentLossMultiplier),
+        trust: this.scaleEffectValue(effects.trust || 0, modifiers.trustGainMultiplier, modifiers.trustLossMultiplier)
       };
     },
 
     applyStatEffects: function (stats, effects) {
       stats.money += effects.money || 0;
-      stats.environment = AOC.utils.clampMeter(stats.environment + (effects.environment || 0));
-      stats.trust = AOC.utils.clampMeter(stats.trust + (effects.trust || 0));
+      stats.environment += effects.environment || 0;
+      stats.trust += effects.trust || 0;
     },
 
     pickScenarioIndex: function (state, plotIndex) {
@@ -59,14 +81,16 @@
     resolveChoiceOutcome: function (state, choice) {
       var outcomeIndex = this.pickOutcomeIndex(state, choice);
       var outcome = choice.outcomes[outcomeIndex];
+      var modifiers = this.getModeModifiers(state.selectedMode);
+      var adjusted = this.applyModeMultipliers(outcome, modifiers);
 
       return {
         choiceId: choice.id,
         label: choice.label,
         outcomeIndex: outcomeIndex,
-        money: outcome.money,
-        environment: outcome.environment,
-        trust: outcome.trust,
+        money: adjusted.money,
+        environment: adjusted.environment,
+        trust: adjusted.trust,
         feedback: outcome.feedback
       };
     },
@@ -102,18 +126,50 @@
 
     resolveFinancialEvent: function (state) {
       var event = this.pickFinancialEvent(state);
+      var modifiers;
+      var adjusted;
+      var trustCondition;
+      var environmentCondition;
+      var description;
 
       if (!event) {
         return null;
       }
 
+      modifiers = this.getModeModifiers(state.selectedMode);
+      adjusted = {
+        money: this.scaleEffectValue(event.effects.money || 0, modifiers.positiveEventMultiplier, modifiers.negativeEventMultiplier),
+        environment: this.scaleEffectValue(event.effects.environment || 0, modifiers.positiveEventMultiplier, modifiers.negativeEventMultiplier),
+        trust: this.scaleEffectValue(event.effects.trust || 0, modifiers.positiveEventMultiplier, modifiers.negativeEventMultiplier)
+      };
+      description = event.description;
+      trustCondition = this.getTrustCondition(state.stats.trust);
+      environmentCondition = this.getEnvironmentCondition(state.stats.environment);
+
+      if (trustCondition.level <= -50 && (adjusted.money < 0 || adjusted.trust < 0)) {
+        adjusted.trust -= 3;
+        description += " Public resistance made the situation harder to stabilize.";
+      } else if (trustCondition.level >= 51 && (adjusted.money > 0 || adjusted.trust > 0)) {
+        adjusted.trust += 3;
+        description += " Strong public cooperation helped the island absorb the change.";
+      }
+
+      if (environmentCondition.level <= -50 && adjusted.environment < 0) {
+        adjusted.environment -= 3;
+        adjusted.money -= 5;
+        description += " Existing ecological weakness increased the damage and recovery cost.";
+      } else if (environmentCondition.level >= 51 && adjusted.environment > 0) {
+        adjusted.environment += 2;
+        description += " Healthy ecosystems improved the island's ability to recover.";
+      }
+
       return {
         id: event.id,
         title: event.title,
-        description: event.description,
-        money: event.effects.money || 0,
-        environment: event.effects.environment || 0,
-        trust: event.effects.trust || 0
+        description: description,
+        money: adjusted.money,
+        environment: adjusted.environment,
+        trust: adjusted.trust
       };
     },
 
@@ -216,11 +272,14 @@
     },
 
     getBudgetWarningLevel: function (money) {
-      if (money < 10) {
-        return "crisis";
+      if (money < -100) {
+        return "crash";
       }
-      if (money < 20) {
-        return "warning";
+      if (money < 0) {
+        return "debt";
+      }
+      if (money < 10) {
+        return "critical";
       }
       if (money < 40) {
         return "caution";
@@ -234,10 +293,12 @@
 
       if (level === "caution") {
         text = "Budget caution: reserves are getting tight. Delayed repairs or rising costs could disrupt your plan.";
-      } else if (level === "warning") {
-        text = "Budget warning: low reserves are increasing risk. Preserving operating funds now matters more than ever.";
-      } else if (level === "crisis") {
-        text = "Budget crisis: reserves are critically low. Repairs, staffing, and restoration work are now at risk.";
+      } else if (level === "critical") {
+        text = "Budget critical: operating funds are nearly exhausted, and one more setback could trigger debt pressure.";
+      } else if (level === "debt") {
+        text = "Debt state: the island is now operating below zero reserves. Loans may help in the short term, but debt pressure will shape future choices.";
+      } else if (level === "crash") {
+        text = "Total financial collapse: debt pressure has overwhelmed the island's ability to keep functioning.";
       } else {
         text = activeLoan ? "Operating funds are stable for now, but debt repayments still need attention." : "Operating funds are stable enough to support steady planning.";
       }
@@ -250,6 +311,80 @@
         level: level,
         text: text
       };
+    },
+
+    getEnvironmentCondition: function (value) {
+      if (value >= 51) {
+        return { level: value, label: "Thriving", message: "The island's ecosystems are recovering strongly and helping stabilize the future.", tone: "positive" };
+      }
+      if (value >= 26) {
+        return { level: value, label: "Stable", message: "Ecological conditions are holding steady, though careful planning still matters.", tone: "positive" };
+      }
+      if (value >= 1) {
+        return { level: value, label: "Stressed", message: "Nature is still functioning, but the strain is becoming visible.", tone: "warning" };
+      }
+      if (value === 0) {
+        return { level: value, label: "Warning", message: "This is the start of something going wrong.", tone: "warning" };
+      }
+      if (value >= -24) {
+        return { level: value, label: "Early Damage", message: "Environmental damage is beginning to spread.", tone: "warning" };
+      }
+      if (value >= -49) {
+        return { level: value, label: "Close Call", message: "The island is approaching a dangerous ecological state.", tone: "danger" };
+      }
+      if (value >= -74) {
+        return { level: value, label: "Critical", message: "Systems are failing and recovery is becoming difficult.", tone: "danger" };
+      }
+      if (value >= -99) {
+        return { level: value, label: "Severe Collapse", message: "Environmental breakdown is widespread.", tone: "danger" };
+      }
+      return { level: value, label: "Full Environmental Crash", message: "The ecosystem has completely crashed.", tone: "collapse" };
+    },
+
+    getTrustCondition: function (value) {
+      if (value >= 51) {
+        return { level: value, label: "Strong Trust", message: "People believe in the direction of the island and are more willing to cooperate.", tone: "positive" };
+      }
+      if (value >= 26) {
+        return { level: value, label: "Stable Trust", message: "Public confidence is holding, even if not every choice feels easy.", tone: "positive" };
+      }
+      if (value >= 1) {
+        return { level: value, label: "Uneasy", message: "Support still exists, but many people are beginning to worry.", tone: "warning" };
+      }
+      if (value === 0) {
+        return { level: value, label: "Warning", message: "This is the point where confidence begins to slip.", tone: "warning" };
+      }
+      if (value >= -24) {
+        return { level: value, label: "Distrust Growing", message: "More people feel unheard and disconnected from leadership.", tone: "warning" };
+      }
+      if (value >= -49) {
+        return { level: value, label: "Fractured", message: "The community is divided and support is weakening.", tone: "danger" };
+      }
+      if (value >= -74) {
+        return { level: value, label: "Unrest", message: "Public frustration is rising and cooperation is becoming difficult.", tone: "danger" };
+      }
+      if (value >= -99) {
+        return { level: value, label: "Severe Breakdown", message: "Trust in leadership has nearly collapsed.", tone: "danger" };
+      }
+      return { level: value, label: "Social Collapse", message: "The community no longer supports the system guiding the island.", tone: "collapse" };
+    },
+
+    getMoneyCondition: function (value) {
+      var level = this.getBudgetWarningLevel(value);
+
+      if (level === "stable") {
+        return { level: value, label: "Stable Reserves", message: "Operating funds are strong enough to support planning flexibility.", tone: "positive" };
+      }
+      if (level === "caution") {
+        return { level: value, label: "Caution", message: "Reserves are thinning and future risk is increasing.", tone: "warning" };
+      }
+      if (level === "critical") {
+        return { level: value, label: "Critical", message: "Budget pressure is high and reserves are almost exhausted.", tone: "danger" };
+      }
+      if (level === "debt") {
+        return { level: value, label: "Debt State", message: "The island is operating below zero and carrying growing pressure into future years.", tone: "danger" };
+      }
+      return { level: value, label: "Financial Collapse", message: "Debt has overwhelmed the island's operating capacity.", tone: "collapse" };
     },
 
     buildAnnualFinancialSummary: function (items) {
@@ -272,7 +407,30 @@
     },
 
     buildEducationNote: function (state, option) {
-      return "";
+      var environmentCondition;
+      var trustCondition;
+
+      if (this.getModeId(state.selectedMode) !== "education") {
+        return "";
+      }
+
+      environmentCondition = this.getEnvironmentCondition(state.stats.environment);
+      trustCondition = this.getTrustCondition(state.stats.trust);
+
+      if (option.money > 0 && option.environment < 0) {
+        return "Short-term revenue can feel helpful, but environmental strain often creates delayed repair costs and weaker resilience later. The island is now in " + environmentCondition.label.toLowerCase() + " ecological condition.";
+      }
+      if (option.money < 0 && option.trust > 0) {
+        return "Funding public support can reduce reserves now, yet stronger trust often makes future plans easier to carry through. Community confidence now sits in " + trustCondition.label.toLowerCase() + ".";
+      }
+      if (option.environment > 0 && option.money < 0) {
+        return "Environmental protection usually asks for early investment, but it can prevent larger losses from erosion, pollution, and habitat decline. The island is now in " + environmentCondition.label.toLowerCase() + " ecological condition.";
+      }
+      if (option.trust < 0) {
+        return "When trust drops, even financially useful decisions can become harder to sustain because cooperation and public confidence weaken. The community is now in " + trustCondition.label.toLowerCase() + ".";
+      }
+
+      return "Trade-offs rarely stay in one category. Budget, ecology, and community outcomes tend to reinforce each other over time.";
     },
 
     describeDelta: function (value, label) {
@@ -286,13 +444,16 @@
     },
 
     buildYearSummaryContent: function (stats) {
-      var ranked = [
-        { label: "Available Budget", value: stats.money },
-        { label: "Environment Health", value: stats.environment },
-        { label: "Community Trust", value: stats.trust }
-      ];
+        var ranked = [
+          { label: "Available Budget", value: stats.money },
+          { label: "Environment Health", value: stats.environment },
+          { label: "Community Trust", value: stats.trust }
+        ];
       var strongest;
       var weakest;
+      var envCondition = this.getEnvironmentCondition(stats.environment);
+      var trustCondition = this.getTrustCondition(stats.trust);
+      var moneyCondition = this.getMoneyCondition(stats.money);
       var summary = "This year stayed fairly balanced, with no single priority completely taking over the board.";
       var reflection = "Sustainable progress requires balancing growth with environmental care.";
 
@@ -322,11 +483,24 @@
         reflection = "Even strong community and environmental plans need stable reserves, grants, and realistic budgeting to last.";
       }
 
+      if (envCondition.tone === "danger" || envCondition.tone === "collapse") {
+        summary = "Ecological systems are under heavy strain this year, and recovery is becoming more difficult.";
+      }
+      if (trustCondition.tone === "danger" || trustCondition.tone === "collapse") {
+        summary = "Social stability weakened this year, and people are finding it harder to trust the island's direction.";
+      }
+      if (moneyCondition.tone === "danger" || moneyCondition.tone === "collapse") {
+        reflection = "Low reserves and debt pressure can quietly reshape every later decision, even when the original goals were sound.";
+      }
+
       return {
         strongest: strongest,
         weakest: weakest,
         summary: summary,
-        reflection: reflection
+        reflection: reflection,
+        environmentCondition: envCondition,
+        trustCondition: trustCondition,
+        moneyCondition: moneyCondition
       };
     },
 
@@ -337,26 +511,17 @@
     getModeFailureEnding: function (state) {
       var modeId = this.getModeId(state.selectedMode);
 
-      if (state.stats.money <= 0) {
+      if (modeId === "sandbox") {
+        return null;
+      }
+
+      if (state.stats.money < -100) {
         return "Financial Collapse";
       }
-      if (state.stats.environment <= 0) {
+      if (state.stats.environment <= -100) {
         return "Environmental Decline";
       }
-      if (state.stats.trust <= 0) {
-        return "Community Breakdown";
-      }
-
-      if (modeId === "classic") {
-        if (state.stats.environment < 40) {
-          return "Environmental Decline";
-        }
-        if (state.stats.trust < 40) {
-          return "Community Breakdown";
-        }
-      }
-
-      if (modeId === "conservation" && state.stats.trust < 30) {
+      if (modeId !== "conservation" && state.stats.trust <= -100) {
         return "Community Breakdown";
       }
 
@@ -366,45 +531,80 @@
     getModeFinalEnding: function (state) {
       var modeId = this.getModeId(state.selectedMode);
       var stats = state.stats;
+      var balanced = stats.money >= 40 && stats.environment >= 25 && stats.trust >= 25;
+
+      if (stats.money < -100) {
+        return "Financial Collapse";
+      }
+      if (stats.environment <= -100) {
+        return "Environmental Decline";
+      }
+      if (stats.trust <= -100) {
+        return "Community Breakdown";
+      }
 
       if (modeId === "classic") {
-        if (stats.money > 0 && stats.environment >= 40 && stats.trust >= 40) {
+        if (balanced) {
           return "Thriving Future";
         }
         return this.getFinalEnding(stats);
       }
 
       if (modeId === "wealth") {
-        if (stats.money >= 180 && stats.environment > 10 && stats.trust > 10) {
+        if (stats.money >= 180 && stats.environment > -25 && stats.trust > -25) {
           return "Thriving Future";
         }
-        if (stats.environment <= 10) {
+        if (stats.environment <= -75) {
           return "Environmental Decline";
         }
-        if (stats.trust <= 10) {
+        if (stats.trust <= -75) {
           return "Community Breakdown";
         }
-        return stats.money >= 110 ? "Fragile Progress" : "Financial Collapse";
+        return stats.money >= 140 ? "Fragile Progress" : this.getFinalEnding(stats);
       }
 
       if (modeId === "conservation") {
-        if (stats.environment >= 78 && stats.money > 0 && stats.trust >= 35) {
+        if (stats.environment >= 60 && stats.money > -25) {
           return "Thriving Future";
         }
-        if (stats.trust < 30) {
-          return "Community Breakdown";
-        }
-        if (stats.money <= 0) {
+        if (stats.money <= -75) {
           return "Financial Collapse";
         }
-        return stats.environment >= 55 ? "Fragile Progress" : "Environmental Decline";
+        if (stats.trust <= -75) {
+          return "Community Breakdown";
+        }
+        return stats.environment >= 10 ? "Fragile Progress" : "Environmental Decline";
       }
 
       if (modeId === "survival") {
-        if (stats.money >= 55 && stats.environment >= 45 && stats.trust >= 45) {
+        if (stats.money >= 20 && stats.environment >= -10 && stats.trust >= -10) {
           return "Thriving Future";
         }
         return "Fragile Progress";
+      }
+
+      if (modeId === "community") {
+        if (stats.trust >= 60 && stats.money > -25 && stats.environment > -25) {
+          return "Thriving Future";
+        }
+        if (stats.money <= -75) {
+          return "Financial Collapse";
+        }
+        if (stats.environment <= -75) {
+          return "Environmental Decline";
+        }
+        return stats.trust >= 20 ? "Fragile Progress" : "Community Breakdown";
+      }
+
+      if (modeId === "sandbox") {
+        return this.getFinalEnding(stats);
+      }
+
+      if (modeId === "education") {
+        if (stats.money > -25 && stats.environment >= 10 && stats.trust >= 10) {
+          return "Thriving Future";
+        }
+        return this.getFinalEnding(stats);
       }
 
       return this.getFinalEnding(stats);
@@ -415,22 +615,30 @@
       var maxValue = Math.max(stats.money, stats.environment, stats.trust);
       var spread = maxValue - minValue;
 
-      if (stats.money >= 45 && stats.environment >= 45 && stats.trust >= 45 && spread <= 32) {
+      if (stats.money >= 40 && stats.environment >= 25 && stats.trust >= 25 && spread <= 90) {
         return "Thriving Future";
       }
-      if (stats.environment <= 25) {
+      if (stats.environment <= -75) {
         return "Environmental Decline";
       }
-      if (stats.trust <= 25) {
+      if (stats.trust <= -75) {
         return "Community Breakdown";
       }
-      if (stats.money <= 25) {
+      if (stats.money <= -75) {
         return "Financial Collapse";
       }
       return "Fragile Progress";
     },
 
     getOutcomeVerdict: function (mode, endingType) {
+      var modeId = this.getModeId(mode);
+
+        if (modeId === "sandbox") {
+        return {
+          label: endingType === "Thriving Future" ? "Reflective Outcome" : "Open Outcome",
+          tone: endingType === "Thriving Future" ? "win" : "mixed"
+        };
+      }
       if (endingType === "Thriving Future") {
         return {
           label: "Win",
@@ -479,9 +687,61 @@
       return "You spread attention across all three pillars, even if the balance was not perfect every round.";
     },
 
-    buildEndContent: function (stats, endingType) {
+    buildEndContent: function (state, endingType) {
+      var stats = state.stats;
+      var modeId = this.getModeId(state.selectedMode);
       var strategyStyle = this.describeStrategy(stats);
-      var content = {
+      var balanced = stats.money >= 40 && stats.environment >= 25 && stats.trust >= 25;
+
+      if (modeId === "wealth" && stats.money >= 160 && stats.trust < 35) {
+        return {
+          strategy: "You built extraordinary wealth, but your island no longer feels united. " + strategyStyle,
+          education: "Economic growth can expand services and options, but when communities feel excluded from that growth, prosperity can arrive with social fragmentation and weakened long-term cooperation.",
+          reflection: "Prosperity means more when people can still recognize themselves in it."
+        };
+      }
+
+      if (modeId === "conservation" && stats.environment >= 75 && stats.money < 35) {
+        return {
+          strategy: "You protected the island's ecosystems with real conviction, even as the budget tightened around you. " + strategyStyle,
+          education: "Ecological recovery often requires early sacrifice. Real-world conservation can succeed environmentally while still leaving leaders under financial strain if funding and reserves are not stabilized alongside it.",
+          reflection: "Protection lasts longer when care for nature is backed by durable resources."
+        };
+      }
+
+      if (modeId === "community" && stats.trust >= 75 && stats.money < 30) {
+        return {
+          strategy: "People felt supported under your leadership, even though the island's reserves stayed under pressure. " + strategyStyle,
+          education: "Community-centered planning builds loyalty and cooperation, but trusted systems still need enough budget to maintain infrastructure, health services, and environmental care over time.",
+          reflection: "Belonging is powerful, but it still needs material support to endure."
+        };
+      }
+
+      if (modeId === "wealth" && stats.money >= 160 && stats.environment <= -50) {
+        return {
+          strategy: "You built a powerful economy, but much of that growth came by hollowing out the land that sustained it. " + strategyStyle,
+          education: "Real-world growth can look successful on paper while eroding coastlines, habitats, water quality, and long-term resilience underneath it. Ecological debt eventually becomes economic debt too.",
+          reflection: "A strong balance sheet cannot replace a damaged living system."
+        };
+      }
+
+      if (balanced && endingType === "Thriving Future") {
+        return {
+          strategy: "You reached a hopeful balance across budget, environment, and trust. " + strategyStyle + " The island feels governed with restraint, care, and long-term perspective.",
+          education: "This reflects sustainable planning in the real world: reserves, ecological resilience, and public trust reinforce each other when decisions are paced carefully instead of optimized for a single short-term win.",
+          reflection: "Harmony is built through repeated choices, not one perfect decision."
+        };
+      }
+
+      if (stats.money < 0 && stats.environment < -25 && stats.trust < -25) {
+        return {
+          strategy: "By the end, every pillar was under strain. " + strategyStyle + " The island could no longer absorb the weight of so many unresolved trade-offs at once.",
+          education: "System-wide collapse rarely arrives from one decision alone. It usually grows from repeated shortfalls in funding, environmental care, and public cooperation that compound over time.",
+          reflection: "Collapse is often cumulative long before it becomes visible."
+        };
+      }
+
+      return {
         "Thriving Future": {
           strategy: "You finished with a healthy balance across budget, environment, and trust. " + strategyStyle + " Your decisions suggest a steady strategy built on sustainable development rather than quick wins alone.",
           education: "This kind of outcome reflects how real communities benefit when habitat protection, pollution prevention, reserve management, grants, repairs, and local cooperation are treated as connected goals. Balanced planning often avoids the long-term costs that come from chasing short-term profit too aggressively.",
@@ -507,8 +767,7 @@
           education: "In real life, operating funds shape what communities can maintain. If reserves collapse or debt pressure overwhelms a budget, it becomes harder to support water systems, habitat restoration, animal care, cleanup work, and trusted public services.",
           reflection: "A resilient future needs both resources and restraint."
         }
-      };
-      return content[endingType];
+      }[endingType];
     },
 
     buildPerformanceSummary: function (state, endingType) {

@@ -4,8 +4,8 @@
   AOC.config = {
     startingStats: {
       money: 100,
-      environment: 50,
-      trust: 50
+      environment: 25,
+      trust: 25
     }
   };
 
@@ -22,10 +22,10 @@
       return value.charAt(0).toUpperCase() + value.slice(1);
     },
     clampMeter: function (value) {
-      return Math.max(0, Math.min(100, value));
+      return value;
     },
     clampStat: function (value) {
-      return Math.max(0, Math.min(100, value));
+      return value;
     },
     formatDelta: function (value) {
       return value >= 0 ? "+" + value : String(value);
@@ -34,6 +34,7 @@
 
   AOC.createInitialState = function () {
     return {
+      currentScreen: "home",
       stats: {
         money: AOC.config.startingStats.money,
         environment: AOC.config.startingStats.environment,
@@ -70,13 +71,25 @@
 
   AOC.createElementRegistry = function () {
     return {
+      homeScreen: null,
       startScreen: null,
+      roundsScreen: null,
+      rulesScreen: null,
       gameScreen: null,
       endScreen: null,
+      homeStartButton: null,
+      homeHowButton: null,
+      howToModal: null,
+      howToCloseButton: null,
       startButton: null,
       backButton: null,
+      roundsNextButton: null,
+      roundsBackButton: null,
+      rulesStartButton: null,
+      rulesBackButton: null,
       rollButton: null,
       restartButton: null,
+      returnHomeButton: null,
       roundOptions: [],
       modeOptions: [],
       modePicker: null,
@@ -84,9 +97,16 @@
       modeDescription: null,
       modeWin: null,
       modeLose: null,
+      modeGoal: null,
+      modeRisk: null,
       tokenOptions: [],
       tokenPicker: null,
       selectedTokenName: null,
+      rulesModeName: null,
+      rulesLengthName: null,
+      rulesModeGoal: null,
+      rulesModeWin: null,
+      rulesModeLose: null,
       board: null,
       boardPanel: null,
       boardTooltip: null,
@@ -95,6 +115,9 @@
       moneyStat: null,
       environmentStat: null,
       trustStat: null,
+      moneyCondition: null,
+      environmentCondition: null,
+      trustCondition: null,
       yearCounter: null,
       turnCounter: null,
       diceResult: null,
