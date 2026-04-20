@@ -61,59 +61,48 @@
           <p class="eyebrow">AVAF Decision Board</p>
           <h2>Keep the Island in Balance</h2>
         </div>
-        <div class="header-pills">
-          <div class="turn-pill">
-            <span>Year</span>
-            <strong id="year-counter">1 / 10</strong>
-          </div>
-          <div class="turn-pill">
-            <span>Turn</span>
-            <strong id="turn-counter">0</strong>
-          </div>
-        </div>
       </header>
 
       <main class="game-layout">
-        <aside class="sidebar">
-          <section class="panel island-status-panel">
-            <h3>Island Status</h3>
-
-            <div class="status-section">
-              <p class="status-section-label">Stats</p>
-              <div class="stat-list">
-                <div class="stat-card money">
-                  <span>Money</span>
-                  <strong id="money-stat">100</strong>
-                </div>
-                <div class="stat-card environment">
-                  <span>Environment Health</span>
-                  <strong id="environment-stat">50</strong>
-                </div>
-                <div class="stat-card trust">
-                  <span>Community Trust</span>
-                  <strong id="trust-stat">50</strong>
-                </div>
-              </div>
+        <section class="panel gameplay-hud">
+          <div class="hud-group hud-stats">
+            <div class="hud-pill money">
+              <span>Money</span>
+              <strong id="money-stat">100</strong>
             </div>
-
-            <div class="status-divider" aria-hidden="true"></div>
-
-            <div class="status-section">
-              <p class="status-section-label">Turn Action</p>
-              <div class="dice-display">
-                <div>
-                  <span class="dice-label">Last Roll</span>
-                  <p class="dice-caption">Your latest move appears here after each roll.</p>
-                </div>
-                <div id="dice-result" class="dice-face dice-idle" aria-live="polite" aria-label="Last roll">-</div>
-              </div>
-              <button id="roll-button" class="primary-button">Roll Dice</button>
-              <p id="status-text" class="status-text">
-                Choose a path that supports people, nature, and long-term resilience.
-              </p>
+            <div class="hud-pill environment">
+              <span>Environment Health</span>
+              <strong id="environment-stat">50</strong>
             </div>
-          </section>
-        </aside>
+            <div class="hud-pill trust">
+              <span>Community Trust</span>
+              <strong id="trust-stat">50</strong>
+            </div>
+          </div>
+
+          <div class="hud-group hud-actions">
+            <div class="hud-pill meta">
+              <span>Year</span>
+              <strong id="year-counter">1 / 10</strong>
+            </div>
+            <div class="hud-pill meta">
+              <span>Turn</span>
+              <strong id="turn-counter">0</strong>
+            </div>
+            <div class="dice-display hud-dice">
+              <div>
+                <span class="dice-label">Last Roll</span>
+                <p class="dice-caption">Watch the board respond as each turn unfolds.</p>
+              </div>
+              <div id="dice-result" class="dice-face dice-idle" aria-live="polite" aria-label="Last roll">-</div>
+            </div>
+            <button id="roll-button" class="primary-button hud-roll-button">Roll Dice</button>
+          </div>
+        </section>
+
+        <p id="status-text" class="status-text hud-status-text">
+          Roll to move and face new challenges.
+        </p>
 
         <section class="board-panel">
           <div id="board" class="board" aria-label="Game board"></div>

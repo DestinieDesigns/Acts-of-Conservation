@@ -357,62 +357,65 @@ window.VOTF_BOOTED = true;
   }
 
   function getTileLayout(index) {
-    var cornerSize = 17;
-    var standardSide = 13.2;
+    var cornerSize = 16.5;
+    var gapSize = 0.5;
+    var sideTileSize = 12.8;
     var offset;
 
     if (index === 0) {
-      return { side: "top", corner: true, left: "0%", top: "0%", width: "17%", height: "17%" };
+      return { side: "top", corner: true, left: "0%", top: "0%", width: "16.5%", height: "16.5%" };
     }
     if (index >= 1 && index <= 5) {
+      offset = index - 1;
       return {
         side: "top",
         corner: false,
-        left: (cornerSize + ((index - 1) * standardSide)) + "%",
+        left: (cornerSize + gapSize + (offset * (sideTileSize + gapSize))) + "%",
         top: "0%",
-        width: standardSide + "%",
+        width: sideTileSize + "%",
         height: cornerSize + "%"
       };
     }
     if (index === 6) {
-      return { side: "right", corner: true, left: "83%", top: "0%", width: "17%", height: "17%" };
+      return { side: "right", corner: true, left: "83.5%", top: "0%", width: "16.5%", height: "16.5%" };
     }
     if (index >= 7 && index <= 11) {
+      offset = index - 7;
       return {
         side: "right",
         corner: false,
-        left: "83%",
-        top: (cornerSize + ((index - 7) * standardSide)) + "%",
+        left: "83.5%",
+        top: (cornerSize + gapSize + (offset * (sideTileSize + gapSize))) + "%",
         width: cornerSize + "%",
-        height: standardSide + "%"
+        height: sideTileSize + "%"
       };
     }
     if (index === 12) {
-      return { side: "bottom", corner: true, left: "83%", top: "83%", width: "17%", height: "17%" };
+      return { side: "bottom", corner: true, left: "83.5%", top: "83.5%", width: "16.5%", height: "16.5%" };
     }
     if (index >= 13 && index <= 17) {
-      offset = index - 12;
+      offset = index - 13;
       return {
         side: "bottom",
         corner: false,
-        left: (83 - (offset * standardSide)) + "%",
-        top: "83%",
-        width: standardSide + "%",
+        left: (83.5 - sideTileSize - (offset * (sideTileSize + gapSize))) + "%",
+        top: "83.5%",
+        width: sideTileSize + "%",
         height: cornerSize + "%"
       };
     }
     if (index === 18) {
-      return { side: "left", corner: true, left: "0%", top: "83%", width: "17%", height: "17%" };
+      return { side: "left", corner: true, left: "0%", top: "83.5%", width: "16.5%", height: "16.5%" };
     }
 
-    offset = index - 18;
+    offset = index - 19;
     return {
       side: "left",
       corner: false,
       left: "0%",
-      top: (83 - (offset * standardSide)) + "%",
+      top: (83.5 - sideTileSize - (offset * (sideTileSize + gapSize))) + "%",
       width: cornerSize + "%",
-      height: standardSide + "%"
+      height: sideTileSize + "%"
     };
   }
 
@@ -567,7 +570,7 @@ window.VOTF_BOOTED = true;
   function startGame() {
     resetStateForNewSession();
     showScreen("game");
-    updateStatus("Roll the die to begin. Each stop presents a local issue, and familiar places may bring different challenges over time.");
+    updateStatus("Roll to move and face new challenges.");
     setCenterMessage("Island Outlook", "Watch your token move across the island and make choices that shape its future.");
   }
 
