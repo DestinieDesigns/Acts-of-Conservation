@@ -4,7 +4,7 @@
   function renderEffectItem(label, value) {
     var className = value >= 0 ? "positive" : "negative";
     var sign = value >= 0 ? "+" : "";
-    return "<div class=\"effect-item\"><span>" + label + "</span><span class=\"effect-value " + className + "\">" + sign + value + "</span></div>";
+    return "<div class=\"effect-item\"><span class=\"effect-item-label\">" + label + "</span><span class=\"effect-value " + className + "\">" + sign + value + "</span></div>";
   }
 
   function getChoicePreview(choice) {
@@ -18,12 +18,36 @@
     return !!(window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse), (max-width: 760px)").matches);
   }
 
+  function buildScenarioTone(card) {
+    var title = (card.title || "").toLowerCase();
+    var description = (card.description || "").toLowerCase();
+
+    if (title.indexOf("storm") !== -1 || description.indexOf("damaged") !== -1 || description.indexOf("urgent") !== -1) {
+      return "Pressure is rising quickly, and delaying the choice could deepen the island's losses.";
+    }
+    if (title.indexOf("factory") !== -1 || title.indexOf("development") !== -1 || description.indexOf("developer") !== -1) {
+      return "The promise of growth is real, but so are the costs that people and ecosystems may carry later.";
+    }
+    if (title.indexOf("health") !== -1 || title.indexOf("clinic") !== -1 || description.indexOf("residents") !== -1) {
+      return "This decision shapes how supported people feel when the island's needs become personal and immediate.";
+    }
+    if (title.indexOf("grant") !== -1 || title.indexOf("loan") !== -1 || description.indexOf("budget") !== -1) {
+      return "Funding can stabilize the present, but the terms of support often shape tomorrow's trade-offs too.";
+    }
+    if (title.indexOf("tourism") !== -1 || description.indexOf("coastal") !== -1 || description.indexOf("ecosystem") !== -1) {
+      return "A short-term boost may feel attractive, but fragile places often absorb the strain first.";
+    }
+
+    return "People, ecosystems, and long-term stability are all affected by what happens next.";
+  }
+
   AOC.ui = {
     initElements: function (el) {
       el.startScreen = AOC.utils.byId("start-screen");
       el.gameScreen = AOC.utils.byId("game-screen");
       el.endScreen = AOC.utils.byId("end-screen");
       el.startButton = AOC.utils.byId("start-button");
+      el.backButton = AOC.utils.byId("back-button");
       el.rollButton = AOC.utils.byId("roll-button");
       el.restartButton = AOC.utils.byId("restart-button");
       el.roundOptions = document.querySelectorAll(".round-option");
@@ -52,6 +76,8 @@
       el.cardBox = AOC.utils.byId("card-box");
       el.cardTitle = AOC.utils.byId("card-title");
       el.cardDescription = AOC.utils.byId("card-description");
+      el.cardTone = AOC.utils.byId("card-tone");
+      el.cardFeedback = AOC.utils.byId("card-feedback");
       el.choiceA = AOC.utils.byId("choice-a");
       el.choiceB = AOC.utils.byId("choice-b");
       el.yearModal = AOC.utils.byId("year-modal");
@@ -62,23 +88,34 @@
       el.yearSummary = AOC.utils.byId("year-summary");
       el.yearStrongest = AOC.utils.byId("year-strongest");
       el.yearWeakest = AOC.utils.byId("year-weakest");
+      el.yearInvestments = AOC.utils.byId("year-investments");
+      el.yearLoans = AOC.utils.byId("year-loans");
       el.yearEventNote = AOC.utils.byId("year-event-note");
       el.yearReflection = AOC.utils.byId("year-reflection");
       el.continueYearButton = AOC.utils.byId("continue-year-button");
+      el.reviewInvestmentsButton = AOC.utils.byId("review-investments-button");
       el.loanModal = AOC.utils.byId("loan-modal");
       el.loanTitle = AOC.utils.byId("loan-title");
       el.loanDescription = AOC.utils.byId("loan-description");
       el.loanOptions = AOC.utils.byId("loan-options");
+      el.investmentModal = AOC.utils.byId("investment-modal");
+      el.investmentTitle = AOC.utils.byId("investment-title");
+      el.investmentDescription = AOC.utils.byId("investment-description");
+      el.investmentOptions = AOC.utils.byId("investment-options");
+      el.closeInvestmentModal = AOC.utils.byId("close-investment-modal");
       el.endingTitle = AOC.utils.byId("ending-title");
       el.endingVerdict = AOC.utils.byId("ending-verdict");
       el.strategySummary = AOC.utils.byId("strategy-summary");
       el.performanceSummary = AOC.utils.byId("performance-summary");
+      el.endMode = AOC.utils.byId("end-mode");
       el.educationSummary = AOC.utils.byId("education-summary");
       el.endYears = AOC.utils.byId("end-years");
       el.endTurns = AOC.utils.byId("end-turns");
       el.endStrongest = AOC.utils.byId("end-strongest");
       el.endWeakest = AOC.utils.byId("end-weakest");
       el.endToken = AOC.utils.byId("end-token");
+      el.endInvestments = AOC.utils.byId("end-investments");
+      el.endLoans = AOC.utils.byId("end-loans");
       el.endMoney = AOC.utils.byId("end-money");
       el.endEnvironment = AOC.utils.byId("end-environment");
       el.endTrust = AOC.utils.byId("end-trust");
@@ -96,6 +133,9 @@
       if (el.startButton) {
         el.startButton.onclick = callbacks.onStartGame;
       }
+      if (el.backButton) {
+        el.backButton.onclick = callbacks.onBack;
+      }
       if (el.rollButton) {
         el.rollButton.onclick = callbacks.onRoll;
       }
@@ -104,6 +144,12 @@
       }
       if (el.continueYearButton) {
         el.continueYearButton.onclick = callbacks.onContinueYear;
+      }
+      if (el.reviewInvestmentsButton) {
+        el.reviewInvestmentsButton.onclick = callbacks.onReviewInvestments;
+      }
+      if (el.closeInvestmentModal) {
+        el.closeInvestmentModal.onclick = callbacks.onCloseInvestments;
       }
       document.onclick = function (event) {
         if (!isTouchLayout()) {
@@ -174,6 +220,18 @@
 
     updateModeDetails: function (el, mode) {
       if (!mode) {
+        if (el.modeName) {
+          el.modeName.textContent = "Select a mode";
+        }
+        if (el.modeDescription) {
+          el.modeDescription.textContent = "Choose a play style to preview its focus and difficulty.";
+        }
+        if (el.modeWin) {
+          el.modeWin.textContent = "Your chosen mode will set the main objective for this run.";
+        }
+        if (el.modeLose) {
+          el.modeLose.textContent = "Your selections determine how the game can be won or lost.";
+        }
         return;
       }
       if (el.modeName) {
@@ -350,20 +408,21 @@
       var previewA = getChoicePreview(choiceA);
       var previewB = getChoicePreview(choiceB);
 
-      function bindChoice(button, choice, preview, className, optionLabel) {
-        button.className = className;
-        button.disabled = false;
-        button.innerHTML =
-          "<span class=\"decision-option-label\">" + optionLabel + "</span>" +
-          "<strong class=\"decision-option-title\">" + choice.label + "</strong>" +
-          "<div class=\"effect-list\">" +
-          renderEffectItem("Budget", preview.money) +
-          renderEffectItem("Environment Health", preview.environment) +
-          renderEffectItem("Community Trust", preview.trust) +
-          "</div>";
-        button.onclick = function () {
-          el.choiceA.disabled = true;
-          el.choiceB.disabled = true;
+        function bindChoice(button, choice, preview, className, optionLabel) {
+          button.className = className;
+          button.disabled = false;
+          button.innerHTML =
+            "<span class=\"decision-option-label\">" + optionLabel + "</span>" +
+            "<strong class=\"decision-option-title\">" + choice.label + "</strong>" +
+            "<p class=\"decision-option-copy\">A real trade-off with benefits and pressure points.</p>" +
+            "<div class=\"effect-list\">" +
+            renderEffectItem("Budget", preview.money) +
+            renderEffectItem("Environment", preview.environment) +
+            renderEffectItem("Trust", preview.trust) +
+            "</div>";
+          button.onclick = function () {
+            el.choiceA.disabled = true;
+            el.choiceB.disabled = true;
           onChoose(choice)();
         };
       }
@@ -371,6 +430,13 @@
       el.modalPlace.textContent = card.placeLabel;
       el.cardTitle.textContent = card.title;
       el.cardDescription.textContent = card.description;
+      if (el.cardTone) {
+        el.cardTone.textContent = buildScenarioTone(card);
+      }
+      if (el.cardFeedback) {
+        el.cardFeedback.className = "card-feedback hidden";
+        el.cardFeedback.innerHTML = "";
+      }
       bindChoice(el.choiceA, choiceA, previewA, "decision-button decision-button-positive", "Option A");
       bindChoice(el.choiceB, choiceB, previewB, "decision-button decision-button-risky", "Option B");
 
@@ -379,11 +445,16 @@
       if (el.cardBox) {
         el.cardBox.className = "modal-card decision-card";
         window.setTimeout(function () {
-          if (el.cardBox && !/hidden/.test(el.choiceModal.className)) {
-            el.cardBox.className = "modal-card decision-card ready";
-          }
-        }, 20);
-      }
+            if (el.cardBox && !/hidden/.test(el.choiceModal.className)) {
+              el.cardBox.className = "modal-card decision-card ready";
+            }
+          }, 20);
+        }
+      window.setTimeout(function () {
+        if (el.choiceA && !el.choiceA.disabled) {
+          el.choiceA.focus();
+        }
+      }, 90);
       el.rollButton.disabled = true;
     },
 
@@ -396,6 +467,16 @@
         el.choiceModal.className = "modal hidden";
         el.choiceModal.setAttribute("aria-hidden", "true");
       }
+      if (el.cardBox) {
+        el.cardBox.className = "modal-card decision-card";
+      }
+      if (el.cardFeedback) {
+        el.cardFeedback.className = "card-feedback hidden";
+        el.cardFeedback.innerHTML = "";
+      }
+      if (el.cardTone) {
+        el.cardTone.textContent = "People, ecosystems, and long-term stability are all affected by what happens next.";
+      }
       if (el.choiceA) {
         el.choiceA.onclick = null;
       }
@@ -404,22 +485,57 @@
       }
     },
 
+    resolveChoiceCard: async function (el, resolvedOption) {
+      var summary;
+
+      if (!el.cardBox || !el.cardFeedback) {
+        this.hideChoiceModal(el);
+        return;
+      }
+
+        summary =
+          "<p class=\"card-feedback-title\">Impact this turn</p>" +
+          "<p class=\"card-feedback-copy\">" + resolvedOption.feedback + "</p>" +
+          "<div class=\"card-feedback-deltas\">" +
+          "<span class=\"delta-chip " + (resolvedOption.money >= 0 ? "positive" : "negative") + "\">Budget " + AOC.utils.formatDelta(resolvedOption.money) + "</span>" +
+          "<span class=\"delta-chip " + (resolvedOption.environment >= 0 ? "positive" : "negative") + "\">Environment " + AOC.utils.formatDelta(resolvedOption.environment) + "</span>" +
+          "<span class=\"delta-chip " + (resolvedOption.trust >= 0 ? "positive" : "negative") + "\">Community Trust " + AOC.utils.formatDelta(resolvedOption.trust) + "</span>" +
+          "</div>";
+
+      el.cardFeedback.innerHTML = summary;
+      el.cardFeedback.className = "card-feedback";
+      el.cardBox.className = "modal-card decision-card resolved";
+      await AOC.utils.wait(460);
+      el.cardBox.className = "modal-card decision-card closing";
+      await AOC.utils.wait(180);
+      this.hideChoiceModal(el);
+    },
+
     showYearSummary: function (el, state, snapshot) {
       if (!el.yearModal) {
         state.awaitingYearSummary = false;
         return;
       }
-      el.yearTitle.textContent = state.loopsCompleted >= state.selectedRounds ? "Year " + state.year + " Complete" : "Year " + state.year;
+      el.yearTitle.textContent = state.turnsTaken >= state.selectedRounds ? "Year " + state.year + " Checkpoint" : "Year " + state.year;
       el.yearMoney.textContent = state.stats.money;
       el.yearEnvironment.textContent = state.stats.environment;
       el.yearTrust.textContent = state.stats.trust;
       el.yearSummary.textContent = snapshot.summary;
       el.yearStrongest.textContent = snapshot.strongest;
       el.yearWeakest.textContent = snapshot.weakest;
+      if (el.yearInvestments) {
+        el.yearInvestments.textContent = snapshot.investments || "None yet.";
+      }
+      if (el.yearLoans) {
+        el.yearLoans.textContent = snapshot.loans || "No active loans.";
+      }
       el.yearEventNote.textContent = snapshot.eventNote || "";
       el.yearReflection.textContent = snapshot.reflection;
       if (el.continueYearButton) {
-        el.continueYearButton.textContent = state.loopsCompleted >= state.selectedRounds ? "See final results" : "Continue to next year";
+        el.continueYearButton.textContent = state.turnsTaken >= state.selectedRounds ? "Continue to final decision" : "Continue to next year";
+      }
+      if (el.reviewInvestmentsButton) {
+        el.reviewInvestmentsButton.style.display = snapshot.canReviewInvestments ? "inline-flex" : "none";
       }
       el.yearModal.className = "modal";
       el.yearModal.setAttribute("aria-hidden", "false");
@@ -486,6 +602,64 @@
       }
     },
 
+    showInvestmentModal: function (el, investmentContext, onChoose) {
+      var i;
+      var button;
+      var investment;
+
+      if (!el.investmentModal) {
+        return;
+      }
+
+      el.investmentTitle.textContent = investmentContext.title;
+      el.investmentDescription.textContent = investmentContext.description;
+      el.investmentOptions.innerHTML = "";
+
+      for (i = 0; i < investmentContext.choices.length; i += 1) {
+        investment = investmentContext.choices[i];
+        button = document.createElement("button");
+        button.type = "button";
+        button.className = "decision-button " + (investment.annualEffects.money >= 0 ? "decision-button-positive" : "decision-button-risky");
+        button.disabled = !!investment.disabled;
+        button.innerHTML =
+          "<span class=\"decision-option-label\">" + investment.category + "</span>" +
+          "<strong class=\"decision-option-title\">" + AOC.rules.buildInvestmentChoiceLabel(investment) + "</strong>" +
+          "<p class=\"decision-option-copy\">Cost: " + investment.cost + ". " + investment.description + "</p>" +
+          "<div class=\"effect-list\">" +
+          renderEffectItem("Yearly Budget", investment.annualEffects.money) +
+          renderEffectItem("Yearly Environment", investment.annualEffects.environment) +
+          renderEffectItem("Yearly Trust", investment.annualEffects.trust) +
+          "</div>";
+        button.onclick = function (selectedInvestment) {
+          return function () {
+            var buttons;
+            var j;
+            buttons = el.investmentOptions.querySelectorAll("button");
+            for (j = 0; j < buttons.length; j += 1) {
+              buttons[j].disabled = true;
+            }
+            onChoose(selectedInvestment)();
+          };
+        }(investment);
+        el.investmentOptions.appendChild(button);
+      }
+
+      el.investmentModal.className = "modal card-modal";
+      el.investmentModal.setAttribute("aria-hidden", "false");
+      el.rollButton.disabled = true;
+    },
+
+    hideInvestmentModal: function (el) {
+      if (!el.investmentModal) {
+        return;
+      }
+      el.investmentModal.className = "modal hidden";
+      el.investmentModal.setAttribute("aria-hidden", "true");
+      if (el.investmentOptions) {
+        el.investmentOptions.innerHTML = "";
+      }
+    },
+
     showStatFeedback: function (el, changes) {
       var stats = [
         { label: "Budget", value: changes.money, tone: "money" },
@@ -539,8 +713,8 @@
       if (el.centerTrustMini) {
         el.centerTrustMini.textContent = state.stats.trust;
       }
-      el.yearCounter.textContent = state.year + " / " + state.selectedRounds;
-      el.turnCounter.textContent = state.turnsTaken;
+      el.yearCounter.textContent = state.year;
+      el.turnCounter.textContent = state.turnsTaken + " / " + (state.selectedRounds || "-");
       el.diceResult.textContent = state.lastRoll === null ? "-" : state.lastRoll;
       el.diceResult.className = state.lastRoll === null ? "dice-face dice-idle" : "dice-face";
       el.diceResult.setAttribute("data-roll", state.lastRoll === null ? "0" : String(state.lastRoll));
@@ -549,7 +723,14 @@
         el.selectedTokenName.textContent = state.selectedToken ? state.selectedToken.name : "None yet";
       }
       if (el.startButton) {
-        el.startButton.disabled = !state.selectedToken;
+        el.startButton.disabled = !(state.selectedMode && state.selectedRounds);
+      }
+      if (el.roundOptions && el.roundOptions.length) {
+        for (var roundIndex = 0; roundIndex < el.roundOptions.length; roundIndex += 1) {
+          var selectedLength = parseInt(el.roundOptions[roundIndex].getAttribute("data-rounds"), 10) === state.selectedRounds;
+          el.roundOptions[roundIndex].className = "round-option" + (selectedLength ? " selected" : "");
+          el.roundOptions[roundIndex].setAttribute("aria-checked", selectedLength ? "true" : "false");
+        }
       }
       if (el.modeOptions && el.modeOptions.length) {
         for (var modeIndex = 0; modeIndex < el.modeOptions.length; modeIndex += 1) {
@@ -571,7 +752,7 @@
         el.financeAlert.textContent = budgetWarning.text;
         el.financeAlert.className = "finance-alert finance-" + budgetWarning.level;
       }
-      el.rollButton.disabled = !!(state.awaitingChoice || state.awaitingYearSummary || state.awaitingLoanDecision || state.gameOver || state.isAnimating);
+      el.rollButton.disabled = !!(state.awaitingChoice || state.awaitingYearSummary || state.awaitingLoanDecision || state.awaitingInvestmentDecision || state.gameOver || state.isAnimating);
       this.renderToken(el, state);
     },
 

@@ -2,6 +2,19 @@
   var AOC = window.AOC = window.AOC || {};
 
   AOC.rules = {
+    getModeId: function (mode) {
+      return mode && mode.id ? mode.id : "classic";
+    },
+
+    getModeStartingStats: function (mode) {
+      var base = (mode && mode.startingStats) || AOC.config.startingStats;
+      return {
+        money: base.money,
+        environment: AOC.utils.clampMeter(base.environment),
+        trust: AOC.utils.clampMeter(base.trust)
+      };
+    },
+
     applyStatEffects: function (stats, effects) {
       stats.money += effects.money || 0;
       stats.environment = AOC.utils.clampMeter(stats.environment + (effects.environment || 0));
@@ -104,6 +117,77 @@
       };
     },
 
+    pickInvestmentOffer: function (state, excludeIds) {
+      var pool = [];
+      var i;
+      var investment;
+      var excludeLookup = {};
+
+      excludeIds = excludeIds || [];
+      for (i = 0; i < excludeIds.length; i += 1) {
+        excludeLookup[excludeIds[i]] = true;
+      }
+
+      for (i = 0; i < AOC.data.investments.length; i += 1) {
+        investment = AOC.data.investments[i];
+        if (!excludeLookup[investment.id]) {
+          pool.push(investment);
+        }
+      }
+
+      if (!pool.length) {
+        return null;
+      }
+
+      return pool[Math.floor(Math.random() * pool.length)];
+    },
+
+    summarizeInvestments: function (investments) {
+      var names = [];
+      var i;
+
+      if (!investments || !investments.length) {
+        return "None yet.";
+      }
+
+      for (i = 0; i < investments.length; i += 1) {
+        names.push(investments[i].name);
+      }
+
+      return names.join(", ");
+    },
+
+    summarizeLoan: function (loan) {
+      if (!loan) {
+        return "No active loans.";
+      }
+
+      return loan.name + " with " + loan.remainingYears + " year" + (loan.remainingYears === 1 ? "" : "s") + " of repayments remaining.";
+    },
+
+    applyAnnualInvestmentEffects: function (state) {
+      var notes = [];
+      var i;
+      var investment;
+      var note;
+
+      for (i = 0; i < state.activeInvestments.length; i += 1) {
+        investment = state.activeInvestments[i];
+        this.applyStatEffects(state.stats, investment.annualEffects);
+        note = {
+          type: "investment",
+          title: investment.name,
+          description: investment.description,
+          money: investment.annualEffects.money,
+          environment: investment.annualEffects.environment,
+          trust: investment.annualEffects.trust
+        };
+        notes.push(note);
+      }
+
+      return notes;
+    },
+
     applyAnnualLoanEffects: function (state) {
       var note;
 
@@ -187,6 +271,10 @@
       return "Your decision " + parts.join(", ") + ".";
     },
 
+    buildEducationNote: function (state, option) {
+      return "";
+    },
+
     describeDelta: function (value, label) {
       if (value > 0) {
         return "improved " + label;
@@ -242,6 +330,86 @@
       };
     },
 
+    buildInvestmentChoiceLabel: function (investment) {
+      return "Fund " + investment.name;
+    },
+
+    getModeFailureEnding: function (state) {
+      var modeId = this.getModeId(state.selectedMode);
+
+      if (state.stats.money <= 0) {
+        return "Financial Collapse";
+      }
+      if (state.stats.environment <= 0) {
+        return "Environmental Decline";
+      }
+      if (state.stats.trust <= 0) {
+        return "Community Breakdown";
+      }
+
+      if (modeId === "classic") {
+        if (state.stats.environment < 40) {
+          return "Environmental Decline";
+        }
+        if (state.stats.trust < 40) {
+          return "Community Breakdown";
+        }
+      }
+
+      if (modeId === "conservation" && state.stats.trust < 30) {
+        return "Community Breakdown";
+      }
+
+      return null;
+    },
+
+    getModeFinalEnding: function (state) {
+      var modeId = this.getModeId(state.selectedMode);
+      var stats = state.stats;
+
+      if (modeId === "classic") {
+        if (stats.money > 0 && stats.environment >= 40 && stats.trust >= 40) {
+          return "Thriving Future";
+        }
+        return this.getFinalEnding(stats);
+      }
+
+      if (modeId === "wealth") {
+        if (stats.money >= 180 && stats.environment > 10 && stats.trust > 10) {
+          return "Thriving Future";
+        }
+        if (stats.environment <= 10) {
+          return "Environmental Decline";
+        }
+        if (stats.trust <= 10) {
+          return "Community Breakdown";
+        }
+        return stats.money >= 110 ? "Fragile Progress" : "Financial Collapse";
+      }
+
+      if (modeId === "conservation") {
+        if (stats.environment >= 78 && stats.money > 0 && stats.trust >= 35) {
+          return "Thriving Future";
+        }
+        if (stats.trust < 30) {
+          return "Community Breakdown";
+        }
+        if (stats.money <= 0) {
+          return "Financial Collapse";
+        }
+        return stats.environment >= 55 ? "Fragile Progress" : "Environmental Decline";
+      }
+
+      if (modeId === "survival") {
+        if (stats.money >= 55 && stats.environment >= 45 && stats.trust >= 45) {
+          return "Thriving Future";
+        }
+        return "Fragile Progress";
+      }
+
+      return this.getFinalEnding(stats);
+    },
+
     getFinalEnding: function (stats) {
       var minValue = Math.min(stats.money, stats.environment, stats.trust);
       var maxValue = Math.max(stats.money, stats.environment, stats.trust);
@@ -262,7 +430,7 @@
       return "Fragile Progress";
     },
 
-    getOutcomeVerdict: function (endingType) {
+    getOutcomeVerdict: function (mode, endingType) {
       if (endingType === "Thriving Future") {
         return {
           label: "Win",

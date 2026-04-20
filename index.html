@@ -9,63 +9,47 @@
 <body>
   <div class="app-shell">
     <section id="start-screen" class="screen start-screen active">
-      <div class="start-card">
-        <p class="eyebrow">Single-Player Eco Strategy</p>
-        <p class="build-stamp">Version 2.0.3</p>
-        <h1>Acts of Conservation</h1>
+      <div class="start-card setup-card">
+        <p class="eyebrow">Acts of Conservation</p>
+        <p class="build-stamp">Version</p>
+        <h1>Start New Game</h1>
         <p class="lead">
-          A game that teaches how our choices impact both nature and the communities around it.
+          Choose a mode and length before you begin guiding the island.
         </p>
 
-        <div class="round-picker">
-          <p class="picker-label">Choose your game length</p>
-          <div class="round-options" role="radiogroup" aria-label="Round selection">
-            <button class="round-option selected" data-rounds="10" type="button">10 Years</button>
-            <button class="round-option" data-rounds="15" type="button">15 Years</button>
-            <button class="round-option" data-rounds="20" type="button">20 Years</button>
-          </div>
-        </div>
-
-        <div class="mode-picker-block">
+        <div class="mode-picker-block setup-block">
           <div class="mode-picker-heading">
             <div>
-              <p class="picker-label">Choose your game mode</p>
-              <p class="token-picker-note">Each mode changes the island's priorities, difficulty, and ending rules.</p>
+              <p class="picker-label">Select Mode</p>
+              <p class="token-picker-note">Only one mode can be selected at a time.</p>
             </div>
           </div>
           <div id="mode-picker" class="mode-picker" role="radiogroup" aria-label="Game mode selection"></div>
           <div class="mode-detail-card">
             <p class="status-kicker">Mode Overview</p>
-            <h3 id="mode-name">Balanced Future</h3>
-            <p id="mode-description">Balance reserves, nature, and public trust across the full planning horizon.</p>
+            <h3 id="mode-name">Select a mode</h3>
+            <p id="mode-description">Choose a play style to preview its focus and difficulty.</p>
             <div class="mode-detail-grid">
               <div>
-                <span>Win Condition</span>
-                <strong id="mode-win">Survive all years with budget above 0 and both environment and trust above 40.</strong>
+                <span>Goal</span>
+                <strong id="mode-win">Your chosen mode will set the main objective for this run.</strong>
               </div>
               <div>
-                <span>Lose Condition</span>
-                <strong id="mode-lose">Lose if budget collapses or if environment/trust fall too low to sustain the island.</strong>
+                <span>Risk</span>
+                <strong id="mode-lose">Your selections determine how the game can be won or lost.</strong>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="start-highlights">
-          <span>24 lively eco-inspired places</span>
-          <span>2 tradeoff-driven choices on every stop</span>
-          <span>Hover to explore each location</span>
-        </div>
-
-        <div class="token-picker-block">
-          <div class="token-picker-heading">
-            <div>
-              <p class="picker-label">Choose your token</p>
-              <p class="token-picker-note">Pick a marker before you start your island journey.</p>
-            </div>
-            <p class="selected-token-label">Selected: <strong id="selected-token-name">None yet</strong></p>
+        <div class="round-picker setup-block">
+          <p class="picker-label">Select Length</p>
+          <p class="token-picker-note">Only one game length can be selected.</p>
+          <div class="round-options" role="radiogroup" aria-label="Game length selection">
+            <button class="round-option" data-rounds="10" type="button">Short<br><span>10 Turns</span></button>
+            <button class="round-option" data-rounds="20" type="button">Medium<br><span>20 Turns</span></button>
+            <button class="round-option" data-rounds="30" type="button">Long<br><span>30 Turns</span></button>
           </div>
-          <div id="token-picker" class="token-picker" role="radiogroup" aria-label="Token selection"></div>
         </div>
 
         <div class="start-guide">
@@ -87,7 +71,10 @@
           </section>
         </div>
 
-        <button id="start-button" class="primary-button" disabled>Start the Board</button>
+        <div class="setup-actions">
+          <button id="back-button" class="secondary-button" type="button">Back</button>
+          <button id="start-button" class="primary-button" disabled>Start Game</button>
+        </div>
       </div>
     </section>
 
@@ -164,6 +151,10 @@
 
         <div class="end-stats">
           <div>
+            <span>Mode Played</span>
+            <strong id="end-mode">-</strong>
+          </div>
+          <div>
             <span>Available Budget</span>
             <strong id="end-money">0</strong>
           </div>
@@ -200,6 +191,11 @@
           </div>
         </div>
 
+        <div class="end-planning-summary">
+          <p><strong>Investments:</strong> <span id="end-investments">None activated.</span></p>
+          <p><strong>Debt:</strong> <span id="end-loans">No active debt.</span></p>
+        </div>
+
         <p class="reflection-line">Small choices create long-term impact.</p>
         <button id="restart-button" class="primary-button">Play Again</button>
       </div>
@@ -213,6 +209,8 @@
         <h3 id="card-title">Issue Title</h3>
       </div>
       <p id="card-description" class="card-description"></p>
+      <p id="card-tone" class="card-tone">People, ecosystems, and long-term stability are all affected by what happens next.</p>
+      <div id="card-feedback" class="card-feedback hidden" aria-live="polite"></div>
       <div class="card-choices">
         <button id="choice-a" class="decision-button decision-button-positive" type="button"></button>
         <button id="choice-b" class="decision-button decision-button-risky" type="button"></button>
@@ -243,9 +241,16 @@
         <p><strong>Strongest:</strong> <span id="year-strongest">-</span></p>
         <p><strong>Weakest:</strong> <span id="year-weakest">-</span></p>
       </div>
+      <div class="year-insights year-planning-notes">
+        <p><strong>Active Investments:</strong> <span id="year-investments">None yet.</span></p>
+        <p><strong>Debt Outlook:</strong> <span id="year-loans">No active loans.</span></p>
+      </div>
       <p id="year-event-note" class="education-copy"></p>
       <p id="year-reflection" class="education-copy"></p>
-      <button id="continue-year-button" class="primary-button">Continue to next year</button>
+      <div class="year-actions">
+        <button id="review-investments-button" class="secondary-button" type="button">Review investments</button>
+        <button id="continue-year-button" class="primary-button">Continue to next year</button>
+      </div>
     </div>
   </div>
 
@@ -258,6 +263,16 @@
     </div>
   </div>
 
+  <div id="investment-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card loan-card investment-card">
+      <p class="eyebrow">Investment Planning</p>
+      <h3 id="investment-title">Choose a long-term project</h3>
+      <p id="investment-description" class="lead">Each investment applies yearly effects, so today's funding decision shapes future years too.</p>
+      <div id="investment-options" class="card-choices"></div>
+      <button id="close-investment-modal" class="secondary-button" type="button">Maybe later</button>
+    </div>
+  </div>
+
   <div id="stat-feedback" class="stat-feedback-layer" aria-live="polite" aria-atomic="false"></div>
 
   <script src="js/data/game-content.js?v=2026-04-20-6"></script>
@@ -267,7 +282,7 @@
   <script src="js/app.js?v=2026-04-20-6"></script>
   <script>
     (function () {
-      var GAME_VERSION = "2.0.3";
+      window.GAME_VERSION = "2.1.0";
 
       function setVersionStatus(text) {
         var stamp = document.querySelector(".build-stamp");
@@ -276,15 +291,15 @@
         }
       }
 
-      setVersionStatus("Version " + GAME_VERSION);
+      setVersionStatus("Version " + window.GAME_VERSION);
 
       window.setTimeout(function () {
         if (window.VOTF_BOOTED) {
-          setVersionStatus("Version " + GAME_VERSION);
+          setVersionStatus("Version " + window.GAME_VERSION);
           return;
         }
 
-        setVersionStatus("Version " + GAME_VERSION);
+        setVersionStatus("Version " + window.GAME_VERSION);
         var retryScript = document.createElement("script");
         retryScript.src = "js/app.js?v=2026-04-20-6-retry";
         document.body.appendChild(retryScript);

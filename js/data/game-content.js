@@ -58,17 +58,11 @@
       name: investment.name,
       category: investment.category,
       description: investment.description,
-      option: {
-        id: investment.id + "-invest",
-        label: "Fund " + investment.name,
-        outcomes: [
-          createOutcome(
-            investment.effects.money,
-            investment.effects.environment,
-            investment.effects.trust,
-            investment.description
-          )
-        ]
+      cost: investment.cost,
+      annualEffects: {
+        money: investment.annualEffects.money,
+        environment: investment.annualEffects.environment,
+        trust: investment.annualEffects.trust
       }
     };
   }
@@ -334,28 +328,140 @@
 
   data.investments = [
     {
-      id: "community-green-bank",
-      name: "Community Green Bank",
-      category: "finance",
-      cost: 24,
-      effects: { money: -24, environment: 7, trust: 9 },
-      description: "A reusable financing pool for local resilience and restoration projects."
+      id: "renewable-energy-grid",
+      name: "Renewable Energy Grid",
+      category: "infrastructure",
+      cost: 30,
+      annualEffects: { money: 8, environment: 10, trust: 4 },
+      description: "A cleaner power network reduces long-term operating costs, but it requires heavy upfront funding."
     },
     {
-      id: "reef-restoration-fund",
-      name: "Reef Restoration Fund",
+      id: "solar-expansion",
+      name: "Solar Expansion",
+      category: "energy",
+      cost: 22,
+      annualEffects: { money: 4, environment: 8, trust: 3 },
+      description: "Distributed solar lowers fuel dependence, though the early installation budget is substantial."
+    },
+    {
+      id: "wind-farm",
+      name: "Wind Farm",
+      category: "energy",
+      cost: 26,
+      annualEffects: { money: 6, environment: 9, trust: -2 },
+      description: "Wind power improves resilience and revenue, but some residents object to the footprint and visual change."
+    },
+    {
+      id: "reforestation-project",
+      name: "Reforestation Project",
       category: "environment",
-      cost: 20,
-      effects: { money: -20, environment: 14, trust: 5 },
-      description: "Long-term coral and shoreline recovery support for coastal resilience."
+      cost: 18,
+      annualEffects: { money: -2, environment: 10, trust: 4 },
+      description: "Replanting forests supports watershed health and habitat, even if the budget returns are slow."
     },
     {
-      id: "youth-stewardship-fellowship",
-      name: "Youth Stewardship Fellowship",
-      category: "community",
+      id: "mangrove-restoration",
+      name: "Mangrove Restoration",
+      category: "coast",
+      cost: 20,
+      annualEffects: { money: 1, environment: 11, trust: 5 },
+      description: "Mangrove recovery protects coasts and fisheries, but it limits short-term development options."
+    },
+    {
+      id: "wildlife-protection",
+      name: "Wildlife Protection Program",
+      category: "environment",
+      cost: 17,
+      annualEffects: { money: -3, environment: 9, trust: 6 },
+      description: "Species protection improves ecosystem health and public confidence, but it adds recurring management costs."
+    },
+    {
+      id: "river-cleanup",
+      name: "River Cleanup Initiative",
+      category: "water",
+      cost: 19,
+      annualEffects: { money: -2, environment: 8, trust: 7 },
+      description: "Cleaner waterways improve health and habitat, though cleanup contracts continue to draw from reserves."
+    },
+    {
+      id: "tourism-expansion",
+      name: "Tourism Expansion",
+      category: "economy",
+      cost: 16,
+      annualEffects: { money: 10, environment: -6, trust: -2 },
+      description: "Visitor growth boosts annual revenue, but the added pressure increases environmental strain."
+    },
+    {
+      id: "luxury-resorts",
+      name: "Luxury Resorts",
+      category: "economy",
+      cost: 28,
+      annualEffects: { money: 14, environment: -10, trust: -6 },
+      description: "Resort investment brings high-end income, but it can increase inequality and ecological damage."
+    },
+    {
+      id: "fishing-industry-boost",
+      name: "Fishing Industry Boost",
+      category: "economy",
       cost: 18,
-      effects: { money: -18, environment: 6, trust: 13 },
-      description: "A future-facing local jobs program that builds trust and stewardship capacity."
+      annualEffects: { money: 9, environment: -7, trust: -1 },
+      description: "Harbor upgrades support jobs and trade, but can increase ecological pressure if not carefully managed."
+    },
+    {
+      id: "education-funding",
+      name: "Education Funding",
+      category: "community",
+      cost: 15,
+      annualEffects: { money: -4, environment: 2, trust: 9 },
+      description: "Investing in local education strengthens long-term trust and planning capacity, even though it reduces short-term reserves."
+    },
+    {
+      id: "healthcare-expansion",
+      name: "Healthcare Expansion",
+      category: "community",
+      cost: 21,
+      annualEffects: { money: -6, environment: 3, trust: 10 },
+      description: "Healthcare access builds stability and trust, but staffing and supplies create steady budget pressure."
+    },
+    {
+      id: "community-gardens",
+      name: "Community Gardens",
+      category: "community",
+      cost: 12,
+      annualEffects: { money: -1, environment: 5, trust: 8 },
+      description: "Shared gardens improve food access and neighborhood cohesion, though they require ongoing support."
+    },
+    {
+      id: "public-parks",
+      name: "Public Parks",
+      category: "community",
+      cost: 14,
+      annualEffects: { money: -3, environment: 5, trust: 8 },
+      description: "Public green space improves quality of life, but maintenance costs remain part of the yearly budget."
+    },
+    {
+      id: "climate-resilience-plan",
+      name: "Climate Resilience Plan",
+      category: "infrastructure",
+      cost: 24,
+      annualEffects: { money: 2, environment: 8, trust: 7 },
+      description: "Resilience planning reduces storm risk and improves confidence, though implementation is expensive."
+    },
+    {
+      id: "circular-economy-plan",
+      name: "Circular Economy Plan",
+      category: "economy",
+      cost: 23,
+      annualEffects: { money: 5, environment: 7, trust: 6 },
+      description: "Reuse and repair systems reduce waste and create jobs, but the transition costs time and funding."
+    },
+    {
+      id: "green-jobs-program",
+      name: "Green Jobs Program",
+      category: "community",
+      cost: 20,
+      annualEffects: { money: 3, environment: 6, trust: 9 },
+      description: "Training and hiring for restoration work builds local capacity, though it requires patient investment."
     }
   ];
 
@@ -370,26 +476,26 @@
 
   data.modes = [
     {
-      id: "balanced-future",
-      name: "Balanced Future",
-      description: "Balance reserves, nature, and public trust across the full planning horizon.",
+      id: "classic",
+      name: "Classic",
+      description: "Balanced gameplay focused on keeping budget, environment, and trust working together.",
       startingStats: { money: 100, environment: 50, trust: 50 },
-      winText: "Survive all years with budget above 0 and both environment and trust above 40.",
-      loseText: "Lose if budget collapses or if environment/trust fall too low to sustain the island.",
+      winText: "Reach the final turn with budget above 0 and both environment and trust in a healthy range.",
+      loseText: "Lose if one pillar collapses before the final turn.",
       modifiers: { difficulty: "steady", education: false, financialEventWeight: 1 }
     },
     {
-      id: "economic-growth",
-      name: "Economic Growth",
-      description: "Prioritize reserves and growth while preventing environmental or social collapse.",
+      id: "wealth",
+      name: "Wealth",
+      description: "Push for strong money growth while trying not to trigger social or environmental collapse.",
       startingStats: { money: 130, environment: 45, trust: 42 },
-      winText: "Finish with the strongest budget while keeping environment and trust above collapse levels.",
+      winText: "Finish with the strongest reserves while keeping the island from collapsing.",
       loseText: "Lose if budget reaches 0 or another pillar collapses completely.",
       modifiers: { difficulty: "growth", education: false, financialEventWeight: 1.15 }
     },
     {
-      id: "conservation-first",
-      name: "Conservation First",
+      id: "conservation",
+      name: "Conservation",
       description: "Protect ecosystems aggressively while surviving on tighter operating funds.",
       startingStats: { money: 85, environment: 65, trust: 48 },
       winText: "Finish with very strong environment health while keeping the island financially alive.",
@@ -397,40 +503,13 @@
       modifiers: { difficulty: "eco", education: false, financialEventWeight: 1 }
     },
     {
-      id: "community-care",
-      name: "Community Care",
-      description: "Focus on trust, access, and stability while keeping enough budget and habitat resilience.",
-      startingStats: { money: 95, environment: 48, trust: 65 },
-      winText: "Finish with very strong community trust while maintaining viable budget and environment.",
-      loseText: "Lose if budget collapses or environmental decline undermines the island.",
-      modifiers: { difficulty: "social", education: false, financialEventWeight: 1 }
-    },
-    {
-      id: "crisis-mode",
-      name: "Crisis Mode",
-      description: "Start with strained reserves and weaker systems, then survive without collapse.",
-      startingStats: { money: 55, environment: 35, trust: 35 },
-      winText: "Survive the full timeline without triggering any collapse ending.",
-      loseText: "Any collapse ends the run immediately.",
+      id: "survival",
+      name: "Survival",
+      description: "Hard mode. Start with lower resources and survive a more fragile island state.",
+      startingStats: { money: 60, environment: 35, trust: 35 },
+      winText: "Survive to the final turn without triggering any collapse.",
+      loseText: "Any major collapse ends the run immediately.",
       modifiers: { difficulty: "hard", education: false, financialEventWeight: 1.2 }
-    },
-    {
-      id: "sandbox-mode",
-      name: "Sandbox Mode",
-      description: "Experiment freely with island planning in an open-ended, low-pressure mode.",
-      startingStats: { money: 140, environment: 60, trust: 60 },
-      winText: "No fixed win condition. Explore strategies and systems at your own pace.",
-      loseText: "No fixed lose condition. The island still reacts to your planning choices.",
-      modifiers: { difficulty: "open", education: false, sandbox: true, financialEventWeight: 0.85 }
-    },
-    {
-      id: "education-mode",
-      name: "Education Mode",
-      description: "Play a balanced run with extra explanation about long-term trade-offs and consequences.",
-      startingStats: { money: 100, environment: 50, trust: 50 },
-      winText: "Survive all years while keeping the island balanced and learning from each decision.",
-      loseText: "Lose if budget, environment, or trust collapse beyond recovery.",
-      modifiers: { difficulty: "steady", education: true, financialEventWeight: 1 }
     }
   ];
 

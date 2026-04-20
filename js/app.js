@@ -42,13 +42,58 @@ window.VOTF_BOOTED = true;
   }
 
   function startGame() {
-    if (!state.selectedToken || !state.selectedMode) {
+    if (!state.selectedMode || !state.selectedRounds) {
       return;
     }
     resetStateForNewSession();
+    applySelectedModeSetup();
+    seedInvestmentOffers(4);
     AOC.ui.showScreen(el, "game");
-    AOC.ui.updateStatus(el, "Roll to move and face new planning challenges.");
-    AOC.ui.setCenterMessage(el, "Island Outlook", "Watch your token move across the island and make choices that shape its future.");
+    AOC.ui.updateStatus(el, state.selectedMode.name + " is active. Roll to move and face new planning challenges.");
+    AOC.ui.setCenterMessage(el, state.selectedMode.name, state.selectedMode.description);
+  }
+
+  function resetSetupSelections() {
+    state.selectedMode = null;
+    state.selectedRounds = null;
+    AOC.ui.updateUI(el, state);
+  }
+
+  function applySelectedModeSetup() {
+    var startingStats = AOC.rules.getModeStartingStats(state.selectedMode);
+
+    state.stats.money = startingStats.money;
+    state.stats.environment = startingStats.environment;
+    state.stats.trust = startingStats.trust;
+  }
+
+  function collectUnavailableInvestmentIds() {
+    var ids = [];
+    var i;
+
+    for (i = 0; i < state.availableInvestments.length; i += 1) {
+      ids.push(state.availableInvestments[i].id);
+    }
+    for (i = 0; i < state.activeInvestments.length; i += 1) {
+      ids.push(state.activeInvestments[i].id);
+    }
+
+    return ids;
+  }
+
+  function seedInvestmentOffers(targetCount) {
+    var nextOffer;
+    var unavailableIds;
+
+    targetCount = targetCount || 4;
+    while (state.availableInvestments.length < targetCount) {
+      unavailableIds = collectUnavailableInvestmentIds();
+      nextOffer = AOC.rules.pickInvestmentOffer(state, unavailableIds);
+      if (!nextOffer) {
+        break;
+      }
+      state.availableInvestments.push(nextOffer);
+    }
   }
 
   async function handleRoll() {
@@ -89,10 +134,8 @@ window.VOTF_BOOTED = true;
 
     if (completedLoop) {
       state.loopsCompleted += 1;
-      if (state.loopsCompleted < state.selectedRounds) {
-        state.year += 1;
-        processNewYearBudgetCycle();
-      }
+      state.year += 1;
+      processNewYearBudgetCycle();
       state.awaitingYearSummary = true;
       state.isAnimating = false;
       state.pendingLanding = { plotIndex: state.position, scenarioIndex: scenarioIndex };
@@ -133,15 +176,27 @@ window.VOTF_BOOTED = true;
   function buildYearSummarySnapshot() {
     var snapshot = AOC.rules.buildYearSummaryContent(state.stats);
     snapshot.eventNote = state.yearFinancialLog.length ? AOC.rules.buildAnnualFinancialSummary(state.yearFinancialLog) : "";
+    snapshot.investments = AOC.rules.summarizeInvestments(state.activeInvestments);
+    snapshot.loans = AOC.rules.summarizeLoan(state.activeLoan);
+    snapshot.canReviewInvestments = !!(state.availableInvestments.length && !state.investmentPurchasedThisYear && state.turnsTaken < state.selectedRounds);
     return snapshot;
   }
 
   function processNewYearBudgetCycle() {
+    var investmentNotes;
+    var i;
     var loanNote;
     var eventNote;
 
     state.loanOfferedThisYear = false;
+    state.investmentPurchasedThisYear = false;
     state.yearFinancialLog = [];
+    seedInvestmentOffers(4);
+    investmentNotes = AOC.rules.applyAnnualInvestmentEffects(state);
+    for (i = 0; i < investmentNotes.length; i += 1) {
+      state.yearFinancialLog.push(investmentNotes[i]);
+      AOC.ui.showStatFeedback(el, investmentNotes[i]);
+    }
     loanNote = AOC.rules.applyAnnualLoanEffects(state);
     if (loanNote) {
       if (loanNote.resolved) {
@@ -157,6 +212,100 @@ window.VOTF_BOOTED = true;
       state.yearFinancialLog.push(eventNote);
       AOC.ui.showStatFeedback(el, eventNote);
     }
+  }
+
+  function buildInvestmentContext() {
+    var choices = [];
+    var i;
+    var investment;
+
+    for (i = 0; i < state.availableInvestments.length; i += 1) {
+      investment = state.availableInvestments[i];
+      choices.push({
+        id: investment.id,
+        name: investment.name,
+        category: investment.category,
+        cost: investment.cost,
+        description: investment.description,
+        annualEffects: investment.annualEffects,
+        disabled: state.stats.money < investment.cost
+      });
+    }
+
+    return {
+      title: "Choose a long-term investment",
+      description: "Investments cost budget now, then apply recurring yearly effects. Strong plans usually help one area while putting pressure on another.",
+      choices: choices
+    };
+  }
+
+  function createInvestmentChoiceHandler(investment) {
+    return function () {
+      handleInvestmentChoice(investment);
+    };
+  }
+
+  function reviewInvestments() {
+    if (!state.awaitingYearSummary || state.awaitingInvestmentDecision || !state.availableInvestments.length || state.investmentPurchasedThisYear) {
+      return;
+    }
+
+    state.awaitingInvestmentDecision = true;
+    AOC.ui.updateUI(el, state);
+    AOC.ui.showInvestmentModal(el, buildInvestmentContext(), createInvestmentChoiceHandler);
+  }
+
+  function closeInvestmentModal() {
+    state.awaitingInvestmentDecision = false;
+    AOC.ui.hideInvestmentModal(el);
+    AOC.ui.updateUI(el, state);
+  }
+
+  function handleInvestmentChoice(investment) {
+    var i;
+    var upfrontCost = {
+      money: -investment.cost,
+      environment: 0,
+      trust: 0
+    };
+
+    if (state.stats.money < investment.cost) {
+      closeInvestmentModal();
+      AOC.ui.updateStatus(el, "You do not have enough available budget to fund " + investment.name + " this year.");
+      return;
+    }
+
+    applyEffects(upfrontCost);
+    for (i = 0; i < state.availableInvestments.length; i += 1) {
+      if (state.availableInvestments[i].id === investment.id) {
+        state.availableInvestments.splice(i, 1);
+        break;
+      }
+    }
+
+    state.activeInvestments.push({
+      id: investment.id,
+      name: investment.name,
+      category: investment.category,
+      description: investment.description,
+      annualEffects: {
+        money: investment.annualEffects.money,
+        environment: investment.annualEffects.environment,
+        trust: investment.annualEffects.trust
+      }
+    });
+    state.investmentPurchasedThisYear = true;
+    state.awaitingInvestmentDecision = false;
+    AOC.ui.hideInvestmentModal(el);
+    AOC.ui.showStatFeedback(el, upfrontCost);
+    AOC.ui.updateStatus(el, investment.name + " funded. The island pays the upfront cost now and will feel recurring effects each year.");
+    AOC.ui.setCenterMessage(el, "Investment Added", investment.description);
+    AOC.ui.showYearSummary(el, state, buildYearSummarySnapshot());
+    AOC.ui.updateUI(el, state);
+    if (maybeOfferLoan()) {
+      return;
+    }
+    checkEndConditions();
   }
 
   function buildLoanContext() {
@@ -239,8 +388,9 @@ window.VOTF_BOOTED = true;
     checkEndConditions();
   }
 
-  function handleChoice(option) {
+  async function handleChoice(option) {
     var resolvedOption = AOC.rules.resolveChoiceOutcome(state, option);
+    var educationNote;
 
     applyEffects(resolvedOption);
     state.history.push({
@@ -255,7 +405,7 @@ window.VOTF_BOOTED = true;
       trust: resolvedOption.trust
     });
     state.awaitingChoice = false;
-    AOC.ui.hideChoiceModal(el);
+    state.isAnimating = true;
     AOC.ui.showStatFeedback(el, resolvedOption);
     AOC.ui.updateStatus(
       el,
@@ -264,7 +414,15 @@ window.VOTF_BOOTED = true;
       ", Environment " + AOC.utils.formatDelta(resolvedOption.environment) +
       ", Community Trust " + AOC.utils.formatDelta(resolvedOption.trust) + "."
     );
-    AOC.ui.setCenterMessage(el, "Decision Applied", AOC.rules.buildChoiceSummary(resolvedOption));
+    educationNote = AOC.rules.buildEducationNote(state, resolvedOption);
+    AOC.ui.setCenterMessage(
+      el,
+      "Decision Applied",
+      AOC.rules.buildChoiceSummary(resolvedOption) + (educationNote ? " " + educationNote : "")
+    );
+    AOC.ui.updateUI(el, state);
+    await AOC.ui.resolveChoiceCard(el, resolvedOption);
+    state.isAnimating = false;
     AOC.ui.updateUI(el, state);
     if (maybeOfferLoan()) {
       return;
@@ -278,12 +436,6 @@ window.VOTF_BOOTED = true;
     var scenarioObj;
 
     if (!state.awaitingYearSummary || !state.pendingLanding) {
-      return;
-    }
-
-    if (state.loopsCompleted >= state.selectedRounds) {
-      hideYearSummary();
-      endGame(AOC.rules.getFinalEnding(state.stats));
       return;
     }
 
@@ -306,35 +458,33 @@ window.VOTF_BOOTED = true;
   }
 
   function checkEndConditions() {
+    var modeFailure;
+
     if (state.stats.money < 10 && maybeOfferLoan()) {
       return;
     }
-    if (state.stats.money <= 0) {
-      endGame("Financial Collapse");
+
+    modeFailure = AOC.rules.getModeFailureEnding(state);
+    if (modeFailure) {
+      endGame(modeFailure);
       return;
     }
-    if (state.stats.environment <= 0) {
-      endGame("Environmental Decline");
-      return;
-    }
-    if (state.stats.trust <= 0) {
-      endGame("Community Breakdown");
-      return;
-    }
-    if (state.loopsCompleted >= state.selectedRounds) {
-      endGame(AOC.rules.getFinalEnding(state.stats));
+
+    if (state.turnsTaken >= state.selectedRounds) {
+      endGame(AOC.rules.getModeFinalEnding(state));
     }
   }
 
   function endGame(endingType) {
     var summary = AOC.rules.buildEndContent(state.stats, endingType);
-    var verdict = AOC.rules.getOutcomeVerdict(endingType);
+    var verdict = AOC.rules.getOutcomeVerdict(state.selectedMode, endingType);
     var ranking = AOC.rules.rankStats(state.stats);
     var performanceSummary = AOC.rules.buildPerformanceSummary(state, endingType);
     state.gameOver = true;
     AOC.ui.hideChoiceModal(el);
     hideYearSummary();
     AOC.ui.hideLoanModal(el);
+    AOC.ui.hideInvestmentModal(el);
     AOC.ui.hideBoardTooltip(el);
     AOC.ui.updateUI(el, state);
     el.endingVerdict.textContent = verdict.label;
@@ -343,6 +493,15 @@ window.VOTF_BOOTED = true;
     el.strategySummary.textContent = summary.strategy;
     el.performanceSummary.textContent = performanceSummary;
     el.educationSummary.textContent = summary.education;
+    if (el.endMode) {
+      el.endMode.textContent = state.selectedMode ? state.selectedMode.name : "Unknown";
+    }
+    if (el.endInvestments) {
+      el.endInvestments.textContent = AOC.rules.summarizeInvestments(state.activeInvestments).replace("None yet.", "None activated.");
+    }
+    if (el.endLoans) {
+      el.endLoans.textContent = AOC.rules.summarizeLoan(state.activeLoan);
+    }
     el.endYears.textContent = state.loopsCompleted;
     el.endTurns.textContent = state.turnsTaken;
     el.endStrongest.textContent = ranking.strongest.label;
@@ -372,6 +531,7 @@ window.VOTF_BOOTED = true;
     AOC.ui.hideChoiceModal(el);
     AOC.ui.hideYearSummary(el);
     AOC.ui.hideLoanModal(el);
+    AOC.ui.hideInvestmentModal(el);
     AOC.ui.hideBoardTooltip(el);
     AOC.ui.updateUI(el, state);
   }
@@ -383,21 +543,16 @@ window.VOTF_BOOTED = true;
       onSelectMode: selectMode,
       onSelectToken: selectToken,
       onStartGame: startGame,
+      onBack: resetSetupSelections,
       onRoll: handleRoll,
       onRestart: resetGame,
-      onContinueYear: continueAfterYearSummary
+      onContinueYear: continueAfterYearSummary,
+      onReviewInvestments: reviewInvestments,
+      onCloseInvestments: closeInvestmentModal
     });
-    if (AOC.data.modes.length) {
-      state.selectedMode = AOC.data.modes[0];
-    }
     AOC.ui.renderModePicker(el, state.selectedMode ? state.selectedMode.id : "", function (modeId) {
       return function () {
         selectMode(modeId);
-      };
-    });
-    AOC.ui.renderTokenPicker(el, state.selectedToken ? state.selectedToken.id : "", function (tokenId) {
-      return function () {
-        selectToken(tokenId);
       };
     });
     AOC.ui.renderBoard(el);
