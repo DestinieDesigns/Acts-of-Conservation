@@ -1,10 +1,46 @@
 (function () {
   var AOC = window.AOC = window.AOC || {};
 
+  function getEffectTone(label) {
+    var normalized = (label || "").toLowerCase();
+    if (normalized.indexOf("budget") !== -1 || normalized.indexOf("money") !== -1) {
+      return "money";
+    }
+    if (normalized.indexOf("debt") !== -1) {
+      return "money";
+    }
+    if (normalized.indexOf("environment") !== -1) {
+      return "environment";
+    }
+    return "trust";
+  }
+
+  function getEffectIcon(tone) {
+    if (tone === "money") {
+      return "\uD83D\uDCB0";
+    }
+    if (tone === "environment") {
+      return "\uD83C\uDF3F";
+    }
+    return "\uD83D\uDC65";
+  }
+
   function renderEffectItem(label, value) {
     var className = value >= 0 ? "positive" : "negative";
     var sign = value >= 0 ? "+" : "";
-    return "<div class=\"effect-item\"><span class=\"effect-item-label\">" + label + "</span><span class=\"effect-value " + className + "\">" + sign + value + "</span></div>";
+    var tone = getEffectTone(label);
+    return "<div class=\"effect-item " + tone + "\"><span class=\"effect-item-label\">" + getEffectIcon(tone) + " " + label + "</span><span class=\"effect-value " + className + " " + tone + "\">" + sign + value + "</span></div>";
+  }
+
+  function renderPreviewItems(items) {
+    var html = "";
+    var i;
+
+    for (i = 0; i < items.length; i += 1) {
+      html += renderEffectItem(items[i].label, items[i].value);
+    }
+
+    return html;
   }
 
   function getChoicePreview(choice) {
@@ -51,10 +87,27 @@
       el.endScreen = AOC.utils.byId("end-screen");
       el.homeStartButton = AOC.utils.byId("home-start-button");
       el.homeHowButton = AOC.utils.byId("home-how-button");
+      el.homeSettingsButton = AOC.utils.byId("home-settings-button");
+      el.simpleModeToggle = AOC.utils.byId("simple-mode-toggle");
       el.howToModal = AOC.utils.byId("how-to-modal");
       el.howToCloseButton = AOC.utils.byId("how-to-close-button");
+      el.settingsModal = AOC.utils.byId("settings-modal");
+      el.settingsCloseButton = AOC.utils.byId("settings-close-button");
+      el.settingsThemeLight = AOC.utils.byId("theme-light-button");
+      el.settingsThemeDark = AOC.utils.byId("theme-dark-button");
+      el.voiceEnabledToggle = AOC.utils.byId("voice-enabled-toggle");
+      el.voiceCardsToggle = AOC.utils.byId("voice-cards-toggle");
+      el.voiceWarningsToggle = AOC.utils.byId("voice-warnings-toggle");
+      el.voiceEndingsToggle = AOC.utils.byId("voice-endings-toggle");
+      el.voiceRateSlider = AOC.utils.byId("voice-rate-slider");
+      el.voiceRateValue = AOC.utils.byId("voice-rate-value");
+      el.voiceVoiceSelect = AOC.utils.byId("voice-voice-select");
+      el.settingsSimpleModeToggle = AOC.utils.byId("settings-simple-mode-toggle");
       el.startButton = AOC.utils.byId("start-button");
       el.backButton = AOC.utils.byId("back-button");
+      el.characterScreen = AOC.utils.byId("character-screen");
+      el.characterNextButton = AOC.utils.byId("character-next-button");
+      el.characterBackButton = AOC.utils.byId("character-back-button");
       el.roundsNextButton = AOC.utils.byId("rounds-next-button");
       el.roundsBackButton = AOC.utils.byId("rounds-back-button");
       el.rulesStartButton = AOC.utils.byId("rules-start-button");
@@ -70,11 +123,20 @@
       el.modeLose = AOC.utils.byId("mode-lose");
       el.modeGoal = AOC.utils.byId("mode-goal");
       el.modeRisk = AOC.utils.byId("mode-risk");
+      el.characterPicker = AOC.utils.byId("character-picker");
+      el.characterName = AOC.utils.byId("character-name");
+      el.characterDescription = AOC.utils.byId("character-description");
+      el.characterBonus = AOC.utils.byId("character-bonus");
       el.rulesModeName = AOC.utils.byId("rules-mode-name");
+      el.rulesCharacterName = AOC.utils.byId("rules-character-name");
       el.rulesLengthName = AOC.utils.byId("rules-length-name");
       el.rulesModeGoal = AOC.utils.byId("rules-mode-goal");
       el.rulesModeWin = AOC.utils.byId("rules-mode-win");
       el.rulesModeLose = AOC.utils.byId("rules-mode-lose");
+      el.readyMoney = AOC.utils.byId("ready-money");
+      el.readyEnvironment = AOC.utils.byId("ready-environment");
+      el.readyTrust = AOC.utils.byId("ready-trust");
+      el.simpleModeBadge = AOC.utils.byId("simple-mode-badge");
       el.tokenPicker = AOC.utils.byId("token-picker");
       el.selectedTokenName = AOC.utils.byId("selected-token-name");
       el.board = AOC.utils.byId("board");
@@ -83,9 +145,11 @@
       el.tooltipName = AOC.utils.byId("tooltip-name");
       el.tooltipDescription = AOC.utils.byId("tooltip-description");
       el.moneyStat = AOC.utils.byId("money-stat");
+      el.debtStat = AOC.utils.byId("debt-stat");
       el.environmentStat = AOC.utils.byId("environment-stat");
       el.trustStat = AOC.utils.byId("trust-stat");
       el.moneyCondition = AOC.utils.byId("money-condition");
+      el.debtCondition = AOC.utils.byId("debt-condition");
       el.environmentCondition = AOC.utils.byId("environment-condition");
       el.trustCondition = AOC.utils.byId("trust-condition");
       el.yearCounter = AOC.utils.byId("year-counter");
@@ -105,6 +169,9 @@
       el.yearModal = AOC.utils.byId("year-modal");
       el.yearTitle = AOC.utils.byId("year-title");
       el.yearMoney = AOC.utils.byId("year-money");
+      el.yearDebt = AOC.utils.byId("year-debt");
+      el.yearInterest = AOC.utils.byId("year-interest");
+      el.yearFinancialState = AOC.utils.byId("year-financial-state");
       el.yearEnvironment = AOC.utils.byId("year-environment");
       el.yearTrust = AOC.utils.byId("year-trust");
       el.yearSummary = AOC.utils.byId("year-summary");
@@ -119,6 +186,7 @@
       el.loanModal = AOC.utils.byId("loan-modal");
       el.loanTitle = AOC.utils.byId("loan-title");
       el.loanDescription = AOC.utils.byId("loan-description");
+      el.loanSummary = AOC.utils.byId("loan-summary");
       el.loanOptions = AOC.utils.byId("loan-options");
       el.investmentModal = AOC.utils.byId("investment-modal");
       el.investmentTitle = AOC.utils.byId("investment-title");
@@ -158,8 +226,64 @@
       if (el.homeHowButton) {
         el.homeHowButton.onclick = callbacks.onOpenHowTo;
       }
+      if (el.homeSettingsButton) {
+        el.homeSettingsButton.onclick = callbacks.onOpenSettings;
+      }
+      if (el.simpleModeToggle) {
+        el.simpleModeToggle.onchange = function () {
+          callbacks.onToggleSimpleMode(this.checked);
+        };
+      }
       if (el.howToCloseButton) {
         el.howToCloseButton.onclick = callbacks.onCloseHowTo;
+      }
+      if (el.settingsCloseButton) {
+        el.settingsCloseButton.onclick = callbacks.onCloseSettings;
+      }
+      if (el.settingsThemeLight) {
+        el.settingsThemeLight.onclick = function () {
+          callbacks.onSetTheme("light");
+        };
+      }
+      if (el.settingsThemeDark) {
+        el.settingsThemeDark.onclick = function () {
+          callbacks.onSetTheme("dark");
+        };
+      }
+      if (el.voiceEnabledToggle) {
+        el.voiceEnabledToggle.onchange = function () {
+          callbacks.onUpdateVoiceSetting("enabled", this.checked);
+        };
+      }
+      if (el.voiceCardsToggle) {
+        el.voiceCardsToggle.onchange = function () {
+          callbacks.onUpdateVoiceSetting("readCards", this.checked);
+        };
+      }
+      if (el.voiceWarningsToggle) {
+        el.voiceWarningsToggle.onchange = function () {
+          callbacks.onUpdateVoiceSetting("readWarnings", this.checked);
+        };
+      }
+      if (el.voiceEndingsToggle) {
+        el.voiceEndingsToggle.onchange = function () {
+          callbacks.onUpdateVoiceSetting("readEndings", this.checked);
+        };
+      }
+      if (el.voiceRateSlider) {
+        el.voiceRateSlider.oninput = function () {
+          callbacks.onUpdateVoiceSetting("rate", parseFloat(this.value));
+        };
+      }
+      if (el.voiceVoiceSelect) {
+        el.voiceVoiceSelect.onchange = function () {
+          callbacks.onUpdateVoiceSetting("voiceName", this.value || null);
+        };
+      }
+      if (el.settingsSimpleModeToggle) {
+        el.settingsSimpleModeToggle.onchange = function () {
+          callbacks.onToggleSimpleMode(this.checked);
+        };
       }
       if (el.startButton) {
         el.startButton.onclick = callbacks.onContinueFromMode;
@@ -167,11 +291,17 @@
       if (el.backButton) {
         el.backButton.onclick = callbacks.onBackToHome;
       }
+      if (el.characterNextButton) {
+        el.characterNextButton.onclick = callbacks.onContinueFromCharacter;
+      }
+      if (el.characterBackButton) {
+        el.characterBackButton.onclick = callbacks.onBackToModeSelect;
+      }
       if (el.roundsNextButton) {
         el.roundsNextButton.onclick = callbacks.onContinueFromRounds;
       }
       if (el.roundsBackButton) {
-        el.roundsBackButton.onclick = callbacks.onBackToModeSelect;
+        el.roundsBackButton.onclick = callbacks.onBackToCharacterSelect;
       }
       if (el.rulesStartButton) {
         el.rulesStartButton.onclick = callbacks.onStartGame;
@@ -199,6 +329,9 @@
       }
       document.onclick = function (event) {
         if (!isTouchLayout()) {
+          return;
+        }
+        if (el.settingsModal && el.settingsModal.className.indexOf("hidden") === -1 && el.settingsModal.contains(event.target)) {
           return;
         }
         if (el.boardPanel && el.boardPanel.contains(event.target)) {
@@ -236,6 +369,36 @@
       el.tokenOptions = el.tokenPicker.querySelectorAll(".token-option");
     },
 
+    renderCharacterPicker: function (el, selectedCharacterId, onSelectCharacter) {
+      var i;
+      var character;
+      var button;
+
+      if (!el.characterPicker) {
+        return;
+      }
+
+      el.characterPicker.innerHTML = "";
+      for (i = 0; i < AOC.data.characters.length; i += 1) {
+        character = AOC.data.characters[i];
+        button = document.createElement("button");
+        button.type = "button";
+        button.className = "character-option" + (selectedCharacterId === character.id ? " selected" : "");
+        button.setAttribute("data-character-id", character.id);
+        button.setAttribute("role", "radio");
+        button.setAttribute("aria-checked", selectedCharacterId === character.id ? "true" : "false");
+        button.innerHTML =
+          "<span class=\"character-icon\" aria-hidden=\"true\">" + character.icon + "</span>" +
+          "<strong class=\"character-title\">" + character.name + "</strong>" +
+          "<span class=\"character-copy\">" + character.shortDescription + "</span>" +
+          "<span class=\"character-bonus-chip\">" + character.bonusText + "</span>";
+        button.onclick = onSelectCharacter(character.id);
+        el.characterPicker.appendChild(button);
+      }
+
+      el.characterOptions = el.characterPicker.querySelectorAll(".character-option");
+    },
+
     renderModePicker: function (el, selectedModeId, onSelectMode) {
       var i;
       var mode;
@@ -252,6 +415,7 @@
         button.type = "button";
         button.className = "mode-option" + (selectedModeId === mode.id ? " selected" : "");
         button.setAttribute("data-mode-id", mode.id);
+        button.setAttribute("data-mode-tone", mode.id);
         button.setAttribute("role", "radio");
         button.setAttribute("aria-checked", selectedModeId === mode.id ? "true" : "false");
         button.innerHTML =
@@ -306,19 +470,50 @@
       }
     },
 
+    updateCharacterDetails: function (el, character) {
+      if (!character) {
+        if (el.characterName) {
+          el.characterName.textContent = "Select a character";
+        }
+        if (el.characterDescription) {
+          el.characterDescription.textContent = "Choose a guide to preview their style and bonus.";
+        }
+        if (el.characterBonus) {
+          el.characterBonus.textContent = "Bonuses will appear here after selection.";
+        }
+        return;
+      }
+
+      if (el.characterName) {
+        el.characterName.textContent = character.icon + " " + character.name;
+      }
+      if (el.characterDescription) {
+        el.characterDescription.textContent = character.shortDescription;
+      }
+      if (el.characterBonus) {
+        el.characterBonus.textContent = character.bonusText;
+      }
+    },
+
     updateRulesSummary: function (el, state) {
       var lengthLabel = "-";
+      var previewStats;
 
-      if (state.selectedRounds === 10) {
-        lengthLabel = "Short - 10 turns";
+      if (state.selectedRounds === 5) {
+        lengthLabel = "Super Short - 5 Years";
+      } else if (state.selectedRounds === 10) {
+        lengthLabel = "Short - 10 Years";
       } else if (state.selectedRounds === 20) {
-        lengthLabel = "Medium - 20 turns";
+        lengthLabel = "Medium - 20 Years";
       } else if (state.selectedRounds === 30) {
-        lengthLabel = "Long - 30 turns";
+        lengthLabel = "Long - 30 Years";
       }
 
       if (el.rulesModeName) {
         el.rulesModeName.textContent = state.selectedMode ? state.selectedMode.name : "-";
+      }
+      if (el.rulesCharacterName) {
+        el.rulesCharacterName.textContent = state.selectedCharacter ? state.selectedCharacter.icon + " " + state.selectedCharacter.name : "-";
       }
       if (el.rulesLengthName) {
         el.rulesLengthName.textContent = lengthLabel;
@@ -331,6 +526,19 @@
       }
       if (el.rulesModeLose) {
         el.rulesModeLose.textContent = state.selectedMode ? state.selectedMode.loseConditionText : "Avoid a system collapse before the end.";
+      }
+      if (el.simpleModeBadge) {
+        el.simpleModeBadge.textContent = state.simpleMode ? "On" : "Off";
+      }
+      previewStats = AOC.rules.getStartingStatsPreview(state.selectedMode, state.selectedCharacter);
+      if (el.readyMoney) {
+        el.readyMoney.textContent = previewStats.money;
+      }
+      if (el.readyEnvironment) {
+        el.readyEnvironment.textContent = previewStats.environment;
+      }
+      if (el.readyTrust) {
+        el.readyTrust.textContent = previewStats.trust;
       }
     },
 
@@ -377,7 +585,7 @@
         "<p id=\"center-message-body\">Watch your token move across the island and make choices that shape its future.</p>" +
         "</section>" +
         "<section class=\"insert-card compact-card mini-stats-card\">" +
-        "<div class=\"mini-stat\"><span>Budget</span><strong id=\"center-money-mini\">100</strong></div>" +
+        "<div class=\"mini-stat\"><span>Budget</span><strong id=\"center-money-mini\">1000</strong></div>" +
         "<div class=\"mini-stat\"><span>Environment</span><strong id=\"center-environment-mini\">50</strong></div>" +
         "<div class=\"mini-stat\"><span>Trust</span><strong id=\"center-trust-mini\">50</strong></div>" +
         "</section>" +
@@ -494,14 +702,14 @@
       var previewA = getChoicePreview(choiceA);
       var previewB = getChoicePreview(choiceB);
 
-        function bindChoice(button, choice, preview, className, optionLabel) {
+        function bindChoice(button, choice, preview, className, optionLabel, helperText) {
           button.className = className;
           button.disabled = false;
           button.innerHTML =
             "<span class=\"decision-option-label\">" + optionLabel + "</span>" +
             "<strong class=\"decision-option-title\">" + choice.label + "</strong>" +
-            "<p class=\"decision-option-copy\">A real trade-off with benefits and pressure points.</p>" +
-            "<div class=\"effect-list\">" +
+            "<p class=\"decision-option-copy\">" + helperText + "</p>" +
+            "<div class=\"effect-list compact-effects\">" +
             renderEffectItem("Budget", preview.money) +
             renderEffectItem("Environment", preview.environment) +
             renderEffectItem("Trust", preview.trust) +
@@ -517,14 +725,14 @@
       el.cardTitle.textContent = card.title;
       el.cardDescription.textContent = card.description;
       if (el.cardTone) {
-        el.cardTone.textContent = buildScenarioTone(card);
+        el.cardTone.textContent = card.simpleTone || buildScenarioTone(card);
       }
       if (el.cardFeedback) {
         el.cardFeedback.className = "card-feedback hidden";
         el.cardFeedback.innerHTML = "";
       }
-      bindChoice(el.choiceA, choiceA, previewA, "decision-button decision-button-positive", "Option A");
-      bindChoice(el.choiceB, choiceB, previewB, "decision-button decision-button-risky", "Option B");
+      bindChoice(el.choiceA, choiceA, previewA, "decision-button decision-button-positive", "Option A", "A safer path with trade-offs to watch.");
+      bindChoice(el.choiceB, choiceB, previewB, "decision-button decision-button-risky", "Option B", "A riskier path that may bring pressure later.");
 
       el.choiceModal.className = "modal card-modal";
       el.choiceModal.setAttribute("aria-hidden", "false");
@@ -534,13 +742,13 @@
             if (el.cardBox && !/hidden/.test(el.choiceModal.className)) {
               el.cardBox.className = "modal-card decision-card ready";
             }
-          }, 20);
+          }, 40);
         }
       window.setTimeout(function () {
         if (el.choiceA && !el.choiceA.disabled) {
           el.choiceA.focus();
         }
-      }, 90);
+      }, 140);
       el.rollButton.disabled = true;
     },
 
@@ -591,9 +799,9 @@
       el.cardFeedback.innerHTML = summary;
       el.cardFeedback.className = "card-feedback";
       el.cardBox.className = "modal-card decision-card resolved";
-      await AOC.utils.wait(460);
+      await AOC.utils.wait(1600);
       el.cardBox.className = "modal-card decision-card closing";
-      await AOC.utils.wait(180);
+      await AOC.utils.wait(220);
       this.hideChoiceModal(el);
     },
 
@@ -602,8 +810,17 @@
         state.awaitingYearSummary = false;
         return;
       }
-      el.yearTitle.textContent = state.turnsTaken >= state.selectedRounds ? "Year " + state.year + " Checkpoint" : "Year " + state.year;
+      el.yearTitle.textContent = state.loopsCompleted >= state.selectedRounds ? "Year " + state.loopsCompleted + " Final Summary" : "Year " + state.loopsCompleted + " Summary";
       el.yearMoney.textContent = state.stats.money;
+      if (el.yearDebt) {
+        el.yearDebt.textContent = snapshot.debt || 0;
+      }
+      if (el.yearInterest) {
+        el.yearInterest.textContent = snapshot.interest || 0;
+      }
+      if (el.yearFinancialState) {
+        el.yearFinancialState.textContent = snapshot.financialState || snapshot.moneyCondition.label;
+      }
       el.yearEnvironment.textContent = state.stats.environment;
       el.yearTrust.textContent = state.stats.trust;
       el.yearSummary.textContent = snapshot.summary;
@@ -613,12 +830,12 @@
         el.yearInvestments.textContent = snapshot.investments || "None yet.";
       }
       if (el.yearLoans) {
-        el.yearLoans.textContent = snapshot.loans || "No active loans.";
+        el.yearLoans.textContent = snapshot.loans || "No debt owed.";
       }
       el.yearEventNote.textContent = snapshot.eventNote || "";
       el.yearReflection.textContent = snapshot.reflection;
       if (el.continueYearButton) {
-        el.continueYearButton.textContent = state.turnsTaken >= state.selectedRounds ? "Continue to final decision" : "Continue to next year";
+        el.continueYearButton.textContent = state.loopsCompleted >= state.selectedRounds ? "See final results" : "Continue to next year";
       }
       if (el.reviewInvestmentsButton) {
         el.reviewInvestmentsButton.style.display = snapshot.canReviewInvestments ? "inline-flex" : "none";
@@ -642,6 +859,15 @@
 
       el.loanTitle.textContent = loanContext.title;
       el.loanDescription.textContent = loanContext.description;
+      if (el.loanSummary) {
+        if (loanContext.summaryHtml) {
+          el.loanSummary.innerHTML = loanContext.summaryHtml;
+          el.loanSummary.className = "year-insights";
+        } else {
+          el.loanSummary.innerHTML = "";
+          el.loanSummary.className = "year-insights hidden";
+        }
+      }
       el.loanOptions.innerHTML = "";
 
       for (i = 0; i < loanContext.choices.length; i += 1) {
@@ -652,10 +878,13 @@
         button.innerHTML =
           "<span class=\"decision-option-label\">" + option.kicker + "</span>" +
           "<strong class=\"decision-option-title\">" + option.label + "</strong>" +
+          (option.description ? "<p class=\"decision-option-copy\">" + option.description + "</p>" : "") +
           "<div class=\"effect-list\">" +
-          renderEffectItem("Budget", option.preview.money) +
-          renderEffectItem("Environment Health", option.preview.environment) +
-          renderEffectItem("Community Trust", option.preview.trust) +
+          renderPreviewItems(option.previewItems || [
+            { label: "Budget", value: option.preview.money || 0 },
+            { label: "Debt", value: option.preview.debt || 0 },
+            { label: "Trust", value: option.preview.trust || 0 }
+          ]) +
           "</div>";
         button.onclick = function (selectedOption) {
           return function () {
@@ -682,6 +911,10 @@
       if (el.loanModal) {
         el.loanModal.className = "modal hidden";
         el.loanModal.setAttribute("aria-hidden", "true");
+      }
+      if (el.loanSummary) {
+        el.loanSummary.innerHTML = "";
+        el.loanSummary.className = "year-insights hidden";
       }
       if (el.loanOptions) {
         el.loanOptions.innerHTML = "";
@@ -766,18 +999,18 @@
         sign = item.value > 0 ? "+" : "";
         bubble = document.createElement("div");
         bubble.className = "stat-feedback-bubble " + item.tone + (item.value >= 0 ? " positive" : " negative");
-        bubble.textContent = item.label + " " + sign + item.value;
+        bubble.textContent = getEffectIcon(item.tone) + " " + item.label + " " + sign + item.value;
         el.statFeedback.appendChild(bubble);
 
         (function (node) {
           window.setTimeout(function () {
             node.className += " leaving";
-          }, 30);
+          }, 220);
           window.setTimeout(function () {
             if (node.parentNode) {
               node.parentNode.removeChild(node);
             }
-          }, 1700);
+          }, 1200);
         }(bubble));
       }
     },
@@ -787,15 +1020,24 @@
         return;
       }
 
+      document.body.setAttribute("data-theme", state.theme || "light");
       el.moneyStat.textContent = state.stats.money;
+      if (el.debtStat) {
+        el.debtStat.textContent = Math.round((state.debtOwed || 0) * 100) / 100;
+      }
       el.environmentStat.textContent = state.stats.environment;
       el.trustStat.textContent = state.stats.trust;
       var moneyCondition = AOC.rules.getMoneyCondition(state.stats.money);
+      var debtCondition = AOC.rules.getDebtPressure(state.debtOwed || 0);
       var environmentCondition = AOC.rules.getEnvironmentCondition(state.stats.environment);
       var trustCondition = AOC.rules.getTrustCondition(state.stats.trust);
       if (el.moneyCondition) {
         el.moneyCondition.textContent = moneyCondition.label;
         el.moneyCondition.title = moneyCondition.message;
+      }
+      if (el.debtCondition) {
+        el.debtCondition.textContent = debtCondition.label;
+        el.debtCondition.title = debtCondition.message;
       }
       if (el.environmentCondition) {
         el.environmentCondition.textContent = environmentCondition.label;
@@ -814,23 +1056,59 @@
       if (el.centerTrustMini) {
         el.centerTrustMini.textContent = state.stats.trust;
       }
-      el.yearCounter.textContent = state.year;
-      el.turnCounter.textContent = state.turnsTaken + " / " + (state.selectedRounds || "-");
+      el.yearCounter.textContent = (state.loopsCompleted || 0) + " / " + (state.selectedRounds || 0);
+      el.turnCounter.textContent = state.yearlyRollCount + " this year";
       el.diceResult.textContent = state.lastRoll === null ? "-" : state.lastRoll;
       el.diceResult.className = state.lastRoll === null ? "dice-face dice-idle" : "dice-face";
       el.diceResult.setAttribute("data-roll", state.lastRoll === null ? "0" : String(state.lastRoll));
       el.diceResult.setAttribute("aria-label", state.lastRoll === null ? "No roll yet" : "Last roll " + state.lastRoll);
       if (el.selectedTokenName) {
-        el.selectedTokenName.textContent = state.selectedToken ? state.selectedToken.name : "None yet";
+        el.selectedTokenName.textContent = state.selectedCharacter ? state.selectedCharacter.name : "None yet";
+      }
+      if (el.simpleModeToggle) {
+        el.simpleModeToggle.checked = !!state.simpleMode;
+      }
+      if (el.settingsSimpleModeToggle) {
+        el.settingsSimpleModeToggle.checked = !!state.simpleMode;
+      }
+      if (el.settingsThemeLight) {
+        el.settingsThemeLight.className = "settings-choice" + ((state.theme || "light") === "light" ? " selected" : "");
+      }
+      if (el.settingsThemeDark) {
+        el.settingsThemeDark.className = "settings-choice" + ((state.theme || "light") === "dark" ? " selected" : "");
+      }
+      if (el.voiceEnabledToggle) {
+        el.voiceEnabledToggle.checked = !!state.voiceSettings.enabled;
+      }
+      if (el.voiceCardsToggle) {
+        el.voiceCardsToggle.checked = !!state.voiceSettings.readCards;
+      }
+      if (el.voiceWarningsToggle) {
+        el.voiceWarningsToggle.checked = !!state.voiceSettings.readWarnings;
+      }
+      if (el.voiceEndingsToggle) {
+        el.voiceEndingsToggle.checked = !!state.voiceSettings.readEndings;
+      }
+      if (el.voiceRateSlider) {
+        el.voiceRateSlider.value = state.voiceSettings.rate;
+      }
+      if (el.voiceRateValue) {
+        el.voiceRateValue.textContent = state.voiceSettings.rate.toFixed(2).replace(/0$/, "") + "x";
+      }
+      if (el.voiceVoiceSelect) {
+        el.voiceVoiceSelect.disabled = !state.voiceSettings.enabled;
       }
       if (el.startButton) {
         el.startButton.disabled = !state.selectedMode;
+      }
+      if (el.characterNextButton) {
+        el.characterNextButton.disabled = !state.selectedCharacter;
       }
       if (el.roundsNextButton) {
         el.roundsNextButton.disabled = !state.selectedRounds;
       }
       if (el.rulesStartButton) {
-        el.rulesStartButton.disabled = !(state.selectedMode && state.selectedRounds);
+        el.rulesStartButton.disabled = !(state.selectedMode && state.selectedCharacter && state.selectedRounds);
       }
       this.updateRulesSummary(el, state);
       if (el.roundOptions && el.roundOptions.length) {
@@ -848,6 +1126,7 @@
         }
       }
       this.updateModeDetails(el, state.selectedMode);
+      this.updateCharacterDetails(el, state.selectedCharacter);
       if (el.tokenOptions && el.tokenOptions.length) {
         for (var i = 0; i < el.tokenOptions.length; i += 1) {
           var isSelected = el.tokenOptions[i].getAttribute("data-token-id") === (state.selectedToken ? state.selectedToken.id : "");
@@ -855,12 +1134,19 @@
           el.tokenOptions[i].setAttribute("aria-checked", isSelected ? "true" : "false");
         }
       }
+      if (el.characterOptions && el.characterOptions.length) {
+        for (var characterIndex = 0; characterIndex < el.characterOptions.length; characterIndex += 1) {
+          var isCharacterSelected = el.characterOptions[characterIndex].getAttribute("data-character-id") === (state.selectedCharacter ? state.selectedCharacter.id : "");
+          el.characterOptions[characterIndex].className = "character-option" + (isCharacterSelected ? " selected" : "");
+          el.characterOptions[characterIndex].setAttribute("aria-checked", isCharacterSelected ? "true" : "false");
+        }
+      }
       if (el.financeAlert) {
-        var budgetWarning = AOC.rules.buildBudgetWarning(state.stats.money, state.activeLoan);
+        var budgetWarning = AOC.rules.buildBudgetWarning(state.stats.money, state.debtOwed);
         el.financeAlert.textContent = budgetWarning.text;
         el.financeAlert.className = "finance-alert finance-" + budgetWarning.level;
       }
-      el.rollButton.disabled = !!(state.awaitingChoice || state.awaitingYearSummary || state.awaitingLoanDecision || state.awaitingInvestmentDecision || state.gameOver || state.isAnimating);
+      el.rollButton.disabled = !!(state.awaitingChoice || state.awaitingYearSummary || state.awaitingLoanDecision || state.awaitingPromiseDecision || state.awaitingShortcutDecision || state.awaitingDebtDecision || state.awaitingInvestmentDecision || state.gameOver || state.isAnimating);
       this.renderToken(el, state);
     },
 
@@ -880,9 +1166,94 @@
       el.howToModal.setAttribute("aria-hidden", "true");
     },
 
+    showSettingsModal: function (el) {
+      if (!el.settingsModal) {
+        return;
+      }
+      el.settingsModal.className = "modal";
+      el.settingsModal.setAttribute("aria-hidden", "false");
+    },
+
+    hideSettingsModal: function (el) {
+      if (!el.settingsModal) {
+        return;
+      }
+      el.settingsModal.className = "modal hidden";
+      el.settingsModal.setAttribute("aria-hidden", "true");
+    },
+
+    populateVoiceOptions: function (el, voices, selectedVoiceName) {
+      var i;
+      var option;
+
+      if (!el.voiceVoiceSelect) {
+        return;
+      }
+
+      el.voiceVoiceSelect.innerHTML = "<option value=\"\">Default voice</option>";
+      for (i = 0; i < voices.length; i += 1) {
+        option = document.createElement("option");
+        option.value = voices[i].name;
+        option.textContent = voices[i].name;
+        if (selectedVoiceName && selectedVoiceName === voices[i].name) {
+          option.selected = true;
+        }
+        el.voiceVoiceSelect.appendChild(option);
+      }
+    },
+
+    speakText: function (state, text) {
+      var utterance;
+      var voices;
+      var i;
+
+      if (!state.voiceSettings.enabled || !text || !("speechSynthesis" in window)) {
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = state.voiceSettings.lang;
+      utterance.rate = state.voiceSettings.rate;
+      utterance.pitch = state.voiceSettings.pitch;
+      voices = window.speechSynthesis.getVoices();
+
+      if (state.voiceSettings.voiceName) {
+        for (i = 0; i < voices.length; i += 1) {
+          if (voices[i].name === state.voiceSettings.voiceName) {
+            utterance.voice = voices[i];
+            break;
+          }
+        }
+      }
+
+      window.speechSynthesis.speak(utterance);
+    },
+
+    narrateCard: function (state, card) {
+      if (!state.voiceSettings.readCards) {
+        return;
+      }
+      this.speakText(state, card.title + ". " + card.description);
+    },
+
+    narrateWarning: function (state, text) {
+      if (!state.voiceSettings.readWarnings) {
+        return;
+      }
+      this.speakText(state, text);
+    },
+
+    narrateEnding: function (state, text) {
+      if (!state.voiceSettings.readEndings) {
+        return;
+      }
+      this.speakText(state, text);
+    },
+
     animateDiceDisplay: async function (el, finalValue) {
-      var duration = 820;
-      var interval = 90;
+      var duration = 800;
+      var interval = 80;
       var elapsed = 0;
       var rollingValue;
 
@@ -965,13 +1336,17 @@
         el.startScreen.className = "screen start-screen" + (screen === "modeSelect" ? " active" : "");
         el.startScreen.setAttribute("aria-hidden", screen === "modeSelect" ? "false" : "true");
       }
+      if (el.characterScreen) {
+        el.characterScreen.className = "screen character-screen" + (screen === "characterSelect" ? " active" : "");
+        el.characterScreen.setAttribute("aria-hidden", screen === "characterSelect" ? "false" : "true");
+      }
       if (el.roundsScreen) {
         el.roundsScreen.className = "screen rounds-screen" + (screen === "roundSelect" ? " active" : "");
         el.roundsScreen.setAttribute("aria-hidden", screen === "roundSelect" ? "false" : "true");
       }
       if (el.rulesScreen) {
-        el.rulesScreen.className = "screen rules-screen" + (screen === "rules" ? " active" : "");
-        el.rulesScreen.setAttribute("aria-hidden", screen === "rules" ? "false" : "true");
+        el.rulesScreen.className = "screen rules-screen" + (screen === "ready" ? " active" : "");
+        el.rulesScreen.setAttribute("aria-hidden", screen === "ready" ? "false" : "true");
       }
       if (el.gameScreen) {
         el.gameScreen.className = "screen game-screen" + (screen === "playing" ? " active" : "");

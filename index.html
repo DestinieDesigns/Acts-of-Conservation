@@ -4,46 +4,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Acts of Conservation</title>
-  <link rel="stylesheet" href="styles.css?v=2026-04-20-8">
+  <link rel="stylesheet" href="styles.css?v=2026-04-20-15">
 </head>
 <body>
   <div class="app-shell">
     <section id="home-screen" class="screen home-screen active" aria-hidden="false">
       <div class="home-card">
         <p class="eyebrow">Acts of Conservation</p>
-        <p class="build-stamp">Version</p>
+        <p class="build-stamp text-muted">Version</p>
         <h1>Acts of Conservation</h1>
-        <p class="home-subtitle">Build. Balance. Survive.</p>
-        <p class="lead home-lead">
+        <p class="home-subtitle text-primary">Build. Balance. Survive.</p>
+        <p class="lead home-lead text-secondary">
           Manage a living island through trade-offs that shape its future. Every turn asks how budget, ecosystems, and people should be balanced.
         </p>
         <div class="home-actions">
           <button id="home-start-button" class="primary-button" type="button">Start Game</button>
           <button id="home-how-button" class="secondary-button" type="button">How To Play</button>
+          <button id="home-settings-button" class="secondary-button" type="button">Settings</button>
         </div>
+        <label class="simple-mode-toggle">
+          <input id="simple-mode-toggle" type="checkbox">
+          <span class="text-primary">Simple Mode</span>
+          <small class="text-muted">Gentler wording, lighter penalties, and extra hints for younger players.</small>
+        </label>
       </div>
     </section>
 
     <section id="start-screen" class="screen start-screen" aria-hidden="true">
       <div class="start-card setup-card">
         <p class="eyebrow">Acts of Conservation</p>
-        <p class="build-stamp">Version</p>
-        <p class="step-indicator">Step 1 of 3</p>
-        <h1>Select a Game Mode</h1>
-        <p class="lead">
+        <p class="build-stamp text-muted">Version</p>
+        <p class="step-indicator text-muted">Step 1 of 4</p>
+        <h1>Choose Mode</h1>
+        <p class="lead text-secondary">
           Pick the planning philosophy you want this run to follow.
         </p>
 
         <div class="mode-picker-block setup-block">
           <div class="mode-picker-heading">
             <div>
-              <p class="picker-label">Select Mode</p>
-              <p class="token-picker-note">Only one mode can be selected at a time.</p>
+              <p class="picker-label text-primary">Select Mode</p>
+              <p class="token-picker-note text-muted">Only one mode can be selected at a time.</p>
             </div>
           </div>
           <div id="mode-picker" class="mode-picker" role="radiogroup" aria-label="Game mode selection"></div>
           <div class="mode-detail-card">
-            <p class="status-kicker">Mode Overview</p>
+            <p class="status-kicker text-muted">Mode Overview</p>
             <h3 id="mode-name">Select a mode</h3>
             <p id="mode-description">Choose a play style to preview its focus and difficulty.</p>
             <div class="mode-detail-grid">
@@ -74,23 +80,62 @@
       </div>
     </section>
 
+    <section id="character-screen" class="screen character-screen" aria-hidden="true">
+      <div class="start-card setup-card">
+        <p class="eyebrow">Acts of Conservation</p>
+        <p class="build-stamp text-muted">Version</p>
+        <p class="step-indicator text-muted">Step 2 of 4</p>
+        <h1>Choose Character</h1>
+        <p class="lead text-secondary">
+          Pick a guide for your island. Each one gives a small starting bonus.
+        </p>
+
+        <div class="mode-picker-block setup-block">
+          <div class="mode-picker-heading">
+            <div>
+              <p class="picker-label text-primary">Select Character</p>
+              <p class="token-picker-note text-muted">Only one character can be selected.</p>
+            </div>
+          </div>
+          <div id="character-picker" class="character-picker" role="radiogroup" aria-label="Character selection"></div>
+          <div class="mode-detail-card">
+            <p class="status-kicker text-muted">Character Bonus</p>
+            <h3 id="character-name">Select a character</h3>
+            <p id="character-description">Choose a guide to preview their style and bonus.</p>
+            <div class="mode-detail-grid single-grid">
+              <div>
+                <span>Starting Bonus</span>
+                <strong id="character-bonus">Bonuses will appear here after selection.</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="setup-actions">
+          <button id="character-back-button" class="secondary-button" type="button">Back</button>
+          <button id="character-next-button" class="primary-button" disabled>Next</button>
+        </div>
+      </div>
+    </section>
+
     <section id="rounds-screen" class="screen rounds-screen" aria-hidden="true">
       <div class="start-card setup-card rounds-card">
         <p class="eyebrow">Acts of Conservation</p>
-        <p class="build-stamp">Version</p>
-        <p class="step-indicator">Step 2 of 3</p>
-        <h1>Choose the Game Length</h1>
-        <p class="lead">
+        <p class="build-stamp text-muted">Version</p>
+        <p class="step-indicator text-muted">Step 3 of 4</p>
+        <h1>Game Length</h1>
+        <p class="lead text-secondary">
           Decide how long you want this island planning run to last.
         </p>
 
         <div class="round-picker setup-block">
-          <p class="picker-label">Select Length</p>
-          <p class="token-picker-note">Only one game length can be selected.</p>
+          <p class="picker-label text-primary">Select Length</p>
+          <p class="token-picker-note text-muted">Only one game length can be selected.</p>
           <div class="round-options" role="radiogroup" aria-label="Game length selection">
-            <button class="round-option" data-rounds="10" type="button" role="radio" aria-checked="false">Short<br><span>10 Turns</span></button>
-            <button class="round-option" data-rounds="20" type="button" role="radio" aria-checked="false">Medium<br><span>20 Turns</span></button>
-            <button class="round-option" data-rounds="30" type="button" role="radio" aria-checked="false">Long<br><span>30 Turns</span></button>
+            <button class="round-option" data-rounds="5" type="button" role="radio" aria-checked="false">Super Short<br><span>5 Years</span></button>
+            <button class="round-option" data-rounds="10" type="button" role="radio" aria-checked="false">Short<br><span>10 Years</span></button>
+            <button class="round-option" data-rounds="20" type="button" role="radio" aria-checked="false">Medium<br><span>20 Years</span></button>
+            <button class="round-option" data-rounds="30" type="button" role="radio" aria-checked="false">Long<br><span>30 Years</span></button>
           </div>
         </div>
 
@@ -104,10 +149,10 @@
     <section id="rules-screen" class="screen rules-screen" aria-hidden="true">
       <div class="start-card rules-card">
         <p class="eyebrow">Acts of Conservation</p>
-        <p class="build-stamp">Version</p>
-        <p class="step-indicator">Step 3 of 3</p>
+        <p class="build-stamp text-muted">Version</p>
+        <p class="step-indicator text-muted">Step 4 of 4</p>
         <h1>Ready to Play</h1>
-        <p class="lead">
+        <p class="lead text-secondary">
           Review your choices, then start the island planning run when you feel ready.
         </p>
 
@@ -117,12 +162,38 @@
             <strong id="rules-mode-name">Classic</strong>
           </section>
           <section class="rules-summary-card">
-            <span class="summary-label">Length</span>
-            <strong id="rules-length-name">Short - 10 turns</strong>
+            <span class="summary-label">Character</span>
+            <strong id="rules-character-name">Boy</strong>
+          </section>
+          <section class="rules-summary-card">
+            <span class="summary-label">Years</span>
+            <strong id="rules-length-name">Short - 10 Years</strong>
+          </section>
+          <section class="rules-summary-card">
+            <span class="summary-label">Simple Mode</span>
+            <strong id="simple-mode-badge">Off</strong>
           </section>
         </div>
 
         <div class="rules-layout">
+          <section class="rules-info-card">
+            <h3>Starting Stats</h3>
+            <div class="ready-stat-grid">
+              <div class="ready-stat money">
+              <span class="text-primary">Available Budget</span>
+              <strong id="ready-money">1000</strong>
+            </div>
+            <div class="ready-stat environment">
+              <span class="text-primary">Environment</span>
+              <strong id="ready-environment">25</strong>
+            </div>
+            <div class="ready-stat trust">
+              <span class="text-primary">Trust</span>
+              <strong id="ready-trust">25</strong>
+            </div>
+          </div>
+          </section>
+
           <section class="rules-info-card">
             <h3>How the Game Works</h3>
             <ul class="rules-list">
@@ -145,7 +216,7 @@
 
         <section class="rules-reminder">
           <h3>Reminder</h3>
-          <p>Short-term gains can create long-term consequences. Balance matters unless your chosen mode deliberately pushes you toward a riskier path.</p>
+          <p>Every choice has a trade-off. Fast gains can hurt nature or trust later, even when they feel helpful right now.</p>
         </section>
 
         <div class="setup-actions">
@@ -158,7 +229,7 @@
     <section id="game-screen" class="screen game-screen" aria-hidden="true">
       <header class="game-header">
         <div>
-          <p class="eyebrow">AVAF Decision Board</p>
+          <p class="eyebrow text-muted">AVAF Decision Board</p>
           <h2>Keep the Island in Balance</h2>
         </div>
       </header>
@@ -167,17 +238,22 @@
         <section class="panel gameplay-hud">
           <div class="hud-group hud-stats">
             <div class="hud-pill money">
-              <span>Available Budget</span>
-              <strong id="money-stat">100</strong>
+              <span class="text-primary">Available Budget</span>
+              <strong id="money-stat">1000</strong>
               <small id="money-condition" class="hud-condition">Stable Reserves</small>
             </div>
+            <div class="hud-pill debt">
+              <span class="text-primary">Debt Owed</span>
+              <strong id="debt-stat">0</strong>
+              <small id="debt-condition" class="hud-condition">No Debt</small>
+            </div>
             <div class="hud-pill environment">
-              <span>Environment</span>
+              <span class="text-primary">Environment</span>
               <strong id="environment-stat">50</strong>
               <small id="environment-condition" class="hud-condition">Stable</small>
             </div>
             <div class="hud-pill trust">
-              <span>Community Trust</span>
+              <span class="text-primary">Community Trust</span>
               <strong id="trust-stat">50</strong>
               <small id="trust-condition" class="hud-condition">Stable Trust</small>
             </div>
@@ -185,17 +261,17 @@
 
           <div class="hud-group hud-actions">
             <div class="hud-pill meta">
-              <span>Year</span>
-              <strong id="year-counter">1 / 10</strong>
+              <span class="text-primary">Year</span>
+              <strong id="year-counter">0 / 10</strong>
             </div>
             <div class="hud-pill meta">
-              <span>Turn</span>
-              <strong id="turn-counter">0</strong>
+              <span class="text-primary">Turn</span>
+              <strong id="turn-counter">0 this year</strong>
             </div>
             <div class="dice-display hud-dice">
               <div>
-                <span class="dice-label">Last Roll</span>
-                <p class="dice-caption">Watch the board respond as each turn unfolds.</p>
+                <span class="dice-label text-muted">Last Roll</span>
+                <p class="dice-caption text-secondary">Watch the board respond as each turn unfolds.</p>
               </div>
               <div id="dice-result" class="dice-face dice-idle" aria-live="polite" aria-label="Last roll">-</div>
             </div>
@@ -222,7 +298,7 @@
 
     <section id="end-screen" class="screen end-screen" aria-hidden="true">
       <div class="end-card">
-        <p class="eyebrow">Final Reflection</p>
+        <p class="eyebrow text-muted">Final Reflection</p>
         <p id="ending-verdict" class="ending-verdict verdict-mixed">Mixed Outcome</p>
         <h2 id="ending-title">Thriving Future</h2>
         <p id="strategy-summary" class="lead"></p>
@@ -254,7 +330,7 @@
             <strong id="end-years">0</strong>
           </div>
           <div>
-            <span>Turns Taken</span>
+            <span>Total Rolls</span>
             <strong id="end-turns">0</strong>
           </div>
           <div>
@@ -287,7 +363,7 @@
 
   <div id="how-to-modal" class="modal hidden" aria-hidden="true">
     <div class="modal-card info-card">
-      <p class="eyebrow">How To Play</p>
+      <p class="eyebrow text-muted">How To Play</p>
       <h3>Guide the island one turn at a time.</h3>
       <p class="lead">Roll the dice, move your token, and respond to the issue at each stop. Every choice changes Available Budget, Environment, and Community Trust together.</p>
       <p class="education-copy">A full loop around the board counts as one year. Year summaries review your progress, while the final reflection shows what your priorities created over time.</p>
@@ -295,10 +371,72 @@
     </div>
   </div>
 
+  <div id="settings-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card info-card settings-card">
+      <div class="settings-header">
+        <div>
+          <p class="eyebrow text-muted">Settings</p>
+          <h3>Make the game easier to read and hear.</h3>
+        </div>
+        <button id="settings-close-button" class="secondary-button settings-close-button" type="button">Done</button>
+      </div>
+
+      <section class="settings-section">
+        <h4>Display</h4>
+        <div class="settings-choice-row" role="radiogroup" aria-label="Theme selection">
+          <button id="theme-light-button" class="settings-choice" type="button">Light Mode</button>
+          <button id="theme-dark-button" class="settings-choice" type="button">Dark Mode</button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h4>Voice Narration</h4>
+        <label class="settings-toggle">
+          <input id="voice-enabled-toggle" type="checkbox">
+          <span>Voice On</span>
+        </label>
+        <div class="settings-grid">
+          <label class="settings-toggle">
+            <input id="voice-cards-toggle" type="checkbox">
+            <span>Read Cards</span>
+          </label>
+          <label class="settings-toggle">
+            <input id="voice-warnings-toggle" type="checkbox">
+            <span>Read Warnings</span>
+          </label>
+          <label class="settings-toggle">
+            <input id="voice-endings-toggle" type="checkbox">
+            <span>Read Endings</span>
+          </label>
+        </div>
+        <label class="settings-range">
+          <span>Speech Rate</span>
+          <input id="voice-rate-slider" type="range" min="0.75" max="1.15" step="0.05" value="0.95">
+          <strong id="voice-rate-value">0.95x</strong>
+        </label>
+        <label class="settings-select">
+          <span>Voice</span>
+          <select id="voice-voice-select">
+            <option value="">Default voice</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="settings-section">
+        <h4>Accessibility</h4>
+        <label class="settings-toggle">
+          <input id="settings-simple-mode-toggle" type="checkbox">
+          <span>Simple Mode</span>
+        </label>
+        <p class="settings-note">Uses shorter wording, gentler feedback, and lighter penalties for younger players.</p>
+      </section>
+    </div>
+  </div>
+
   <div id="choice-modal" class="modal card-modal hidden" aria-hidden="true">
     <div id="card-box" class="modal-card decision-card">
       <div class="decision-card-header">
-        <p class="eyebrow" id="modal-place">Place Name</p>
+      <p class="eyebrow text-muted" id="modal-place">Place Name</p>
         <h3 id="card-title">Issue Title</h3>
       </div>
       <p id="card-description" class="card-description"></p>
@@ -313,12 +451,20 @@
 
   <div id="year-modal" class="modal hidden" aria-hidden="true">
     <div class="modal-card year-card">
-      <p class="eyebrow">Year Summary</p>
+      <p class="eyebrow text-muted">Year Summary</p>
       <h3 id="year-title">Year 2</h3>
       <div class="year-stats">
         <div>
           <span>Available Budget</span>
           <strong id="year-money">0</strong>
+        </div>
+        <div>
+          <span>Debt Owed</span>
+          <strong id="year-debt">0</strong>
+        </div>
+        <div>
+          <span>Interest This Year</span>
+          <strong id="year-interest">0</strong>
         </div>
         <div>
           <span>Environment</span>
@@ -333,10 +479,11 @@
       <div class="year-insights">
         <p><strong>Strongest:</strong> <span id="year-strongest">-</span></p>
         <p><strong>Weakest:</strong> <span id="year-weakest">-</span></p>
+        <p><strong>Financial State:</strong> <span id="year-financial-state">Stable Reserves</span></p>
       </div>
       <div class="year-insights year-planning-notes">
         <p><strong>Active Investments:</strong> <span id="year-investments">None yet.</span></p>
-        <p><strong>Debt Outlook:</strong> <span id="year-loans">No active loans.</span></p>
+        <p><strong>Debt Outlook:</strong> <span id="year-loans">No debt owed.</span></p>
       </div>
       <p id="year-event-note" class="education-copy"></p>
       <p id="year-reflection" class="education-copy"></p>
@@ -349,9 +496,10 @@
 
   <div id="loan-modal" class="modal hidden" aria-hidden="true">
     <div class="modal-card loan-card">
-      <p class="eyebrow">Financial Planning Decision</p>
+      <p class="eyebrow text-muted">Future Pressure Decision</p>
       <h3 id="loan-title">Low Reserves</h3>
       <p id="loan-description" class="lead"></p>
+      <div id="loan-summary" class="year-insights hidden"></div>
       <div id="loan-options" class="card-choices"></div>
     </div>
   </div>
@@ -368,14 +516,14 @@
 
   <div id="stat-feedback" class="stat-feedback-layer" aria-live="polite" aria-atomic="false"></div>
 
-  <script src="js/data/game-content.js?v=2026-04-20-8"></script>
-  <script src="js/core/game-state.js?v=2026-04-20-8"></script>
-  <script src="js/core/game-rules.js?v=2026-04-20-8"></script>
-  <script src="js/ui/game-ui.js?v=2026-04-20-8"></script>
-  <script src="js/app.js?v=2026-04-20-8"></script>
+  <script src="js/data/game-content.js?v=2026-04-20-15"></script>
+  <script src="js/core/game-state.js?v=2026-04-20-15"></script>
+  <script src="js/core/game-rules.js?v=2026-04-20-15"></script>
+  <script src="js/ui/game-ui.js?v=2026-04-20-15"></script>
+  <script src="js/app.js?v=2026-04-20-15"></script>
   <script>
     (function () {
-      window.GAME_VERSION = "2.0.3";
+      window.GAME_VERSION = "2.0.8";
 
       function setVersionStatus(text) {
         var stamps = document.querySelectorAll(".build-stamp");
@@ -395,7 +543,7 @@
 
         setVersionStatus("Version " + window.GAME_VERSION);
         var retryScript = document.createElement("script");
-        retryScript.src = "js/app.js?v=2026-04-20-8-retry";
+        retryScript.src = "js/app.js?v=2026-04-20-15-retry";
         document.body.appendChild(retryScript);
       }, 60);
     })();

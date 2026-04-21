@@ -3,6 +3,7 @@ window.VOTF_BOOTED = true;
 (function () {
   var state = AOC.createInitialState();
   var el = AOC.createElementRegistry();
+  var lastNarratedWarning = "";
 
   function selectRounds(rounds) {
     state.selectedRounds = rounds;
@@ -19,14 +20,21 @@ window.VOTF_BOOTED = true;
       }
     }
     AOC.ui.updateUI(el, state);
+    if (state.selectedMode) {
+      AOC.ui.narrateWarning(
+        state,
+        state.selectedMode.name + ". " + state.selectedMode.shortDescription + ". Goal: " + state.selectedMode.goal
+      );
+    }
   }
 
-  function selectToken(tokenId) {
+  function selectCharacter(characterId) {
     var i;
 
-    for (i = 0; i < AOC.data.tokens.length; i += 1) {
-      if (AOC.data.tokens[i].id === tokenId) {
-        state.selectedToken = AOC.data.tokens[i];
+    for (i = 0; i < AOC.data.characters.length; i += 1) {
+      if (AOC.data.characters[i].id === characterId) {
+        state.selectedCharacter = AOC.data.characters[i];
+        state.selectedToken = AOC.data.characters[i];
         break;
       }
     }
@@ -46,13 +54,69 @@ window.VOTF_BOOTED = true;
     AOC.ui.hideHowToModal(el);
   }
 
+  function openSettings() {
+    AOC.ui.showSettingsModal(el);
+  }
+
+  function closeSettings() {
+    AOC.ui.hideSettingsModal(el);
+  }
+
+  function setTheme(theme) {
+    state.theme = theme === "dark" ? "dark" : "light";
+    AOC.ui.updateUI(el, state);
+  }
+
+  function updateVoiceSetting(key, value) {
+    state.voiceSettings[key] = value;
+    AOC.ui.updateUI(el, state);
+  }
+
+  function syncVoiceOptions() {
+    if (!("speechSynthesis" in window)) {
+      return;
+    }
+    AOC.ui.populateVoiceOptions(el, window.speechSynthesis.getVoices(), state.voiceSettings.voiceName);
+  }
+
+  function maybeNarrateWarnings() {
+    var budgetWarning = AOC.rules.buildBudgetWarning(state.stats.money, state.debtOwed);
+    var environmentCondition = AOC.rules.getEnvironmentCondition(state.stats.environment);
+    var trustCondition = AOC.rules.getTrustCondition(state.stats.trust);
+    var warning = "";
+
+    if (budgetWarning.level === "crash" || budgetWarning.level === "debt" || budgetWarning.level === "critical") {
+      warning = budgetWarning.text;
+    } else if (environmentCondition.tone === "danger" || environmentCondition.tone === "collapse") {
+      warning = state.simpleMode ? "Nature is getting hurt." : environmentCondition.message;
+    } else if (trustCondition.tone === "danger" || trustCondition.tone === "collapse") {
+      warning = state.simpleMode ? "People are starting to feel upset." : trustCondition.message;
+    }
+
+    if (warning && warning !== lastNarratedWarning) {
+      lastNarratedWarning = warning;
+      AOC.ui.narrateWarning(state, warning);
+    }
+    if (!warning) {
+      lastNarratedWarning = "";
+    }
+  }
+
   function goToModeSelect() {
     closeHowTo();
+    closeSettings();
     goToScreen("modeSelect");
   }
 
   function continueFromMode() {
     if (!state.selectedMode) {
+      return;
+    }
+    goToScreen("characterSelect");
+  }
+
+  function continueFromCharacter() {
+    if (!state.selectedCharacter) {
       return;
     }
     goToScreen("roundSelect");
@@ -62,16 +126,17 @@ window.VOTF_BOOTED = true;
     if (!state.selectedRounds) {
       return;
     }
-    goToScreen("rules");
+    goToScreen("ready");
   }
 
   function startGame() {
-    if (!state.selectedMode || !state.selectedRounds) {
+    if (!state.selectedMode || !state.selectedCharacter || !state.selectedRounds) {
       return;
     }
     resetStateForNewSession();
     applySelectedModeSetup();
     seedInvestmentOffers(4);
+    closeSettings();
     goToScreen("playing");
     AOC.ui.updateStatus(el, state.selectedMode.name + " is active. Roll to move and face new planning challenges.");
     AOC.ui.setCenterMessage(el, state.selectedMode.name, state.selectedMode.description);
@@ -79,23 +144,40 @@ window.VOTF_BOOTED = true;
 
   function resetSetupSelections() {
     state.selectedMode = null;
+    state.selectedCharacter = null;
+    state.selectedToken = null;
     state.selectedRounds = null;
+    AOC.ui.updateUI(el, state);
+  }
+
+  function toggleSimpleMode(enabled) {
+    state.simpleMode = !!enabled;
     AOC.ui.updateUI(el, state);
   }
 
   function returnHome() {
     closeHowTo();
+    closeSettings();
     resetSetupSelections();
     resetStateForNewSession();
     goToScreen("home");
   }
 
   function applySelectedModeSetup() {
-    var startingStats = AOC.rules.getModeStartingStats(state.selectedMode);
+    var startingStats = AOC.rules.getStartingStatsPreview(state.selectedMode, state.selectedCharacter);
 
     state.stats.money = startingStats.money;
     state.stats.environment = startingStats.environment;
     state.stats.trust = startingStats.trust;
+    state.activePromises = [];
+    state.activeShortcuts = [];
+    state.debtOwed = 0;
+    state.interestThisYear = 0;
+    state.debtAtYearStart = 0;
+    state.promiseBudgetPaidThisYear = 0;
+    state.promiseTrustPenaltyThisYear = 0;
+    state.shortcutDamageThisYear = 0;
+    state.yearlyRollCount = 0;
   }
 
   function collectUnavailableInvestmentIds() {
@@ -127,6 +209,12 @@ window.VOTF_BOOTED = true;
     }
   }
 
+  function markSupportOffersHandledThisTurn() {
+    state.loanOfferTurn = state.turnsTaken;
+    state.promiseOfferTurn = state.turnsTaken;
+    state.shortcutOfferTurn = state.turnsTaken;
+  }
+
   async function handleRoll() {
     var roll;
     var rawPosition;
@@ -136,7 +224,7 @@ window.VOTF_BOOTED = true;
     var completedLoop;
     var startingPosition;
 
-    if (state.awaitingChoice || state.awaitingYearSummary || state.awaitingLoanDecision || state.gameOver || state.isAnimating) {
+    if (state.awaitingChoice || state.awaitingYearSummary || state.awaitingLoanDecision || state.awaitingPromiseDecision || state.awaitingShortcutDecision || state.awaitingDebtDecision || state.gameOver || state.isAnimating) {
       return;
     }
 
@@ -146,6 +234,7 @@ window.VOTF_BOOTED = true;
     roll = Math.floor(Math.random() * 6) + 1;
     startingPosition = state.position;
     state.turnsTaken += 1;
+    state.yearlyRollCount += 1;
     state.lastRoll = roll;
     AOC.ui.updateUI(el, state);
     await AOC.ui.animateDiceDisplay(el, roll);
@@ -165,7 +254,7 @@ window.VOTF_BOOTED = true;
 
     if (completedLoop) {
       state.loopsCompleted += 1;
-      state.year += 1;
+      state.year = state.loopsCompleted;
       processNewYearBudgetCycle();
       state.awaitingYearSummary = true;
       state.isAnimating = false;
@@ -197,7 +286,13 @@ window.VOTF_BOOTED = true;
   }
 
   function showCard(plot, scenarioObj) {
-    AOC.ui.showCard(el, AOC.rules.buildDecisionCard(plot, scenarioObj), createChoiceHandler);
+    var card = AOC.rules.buildDecisionCard(plot, scenarioObj);
+    if (state.simpleMode) {
+      card.simpleTone = "Think about what helps money, nature, and people the most.";
+      card.description = AOC.rules.getSimpleScenarioText(card.description);
+    }
+    AOC.ui.showCard(el, card, createChoiceHandler);
+    AOC.ui.narrateCard(state, card);
   }
 
   function applyEffects(effects) {
@@ -208,18 +303,23 @@ window.VOTF_BOOTED = true;
     var snapshot = AOC.rules.buildYearSummaryContent(state.stats);
     snapshot.eventNote = state.yearFinancialLog.length ? AOC.rules.buildAnnualFinancialSummary(state.yearFinancialLog) : "";
     snapshot.investments = AOC.rules.summarizeInvestments(state.activeInvestments);
-    snapshot.loans = AOC.rules.summarizeLoan(state.activeLoan);
-    snapshot.canReviewInvestments = !!(state.availableInvestments.length && !state.investmentPurchasedThisYear && state.turnsTaken < state.selectedRounds);
+    snapshot.loans = AOC.rules.summarizeLoan(state);
+    snapshot.debt = Math.round((state.debtOwed || 0) * 100) / 100;
+    snapshot.interest = Math.round((state.interestThisYear || 0) * 100) / 100;
+    snapshot.financialState = AOC.rules.getMoneyCondition(state.stats.money).label;
+    snapshot.canReviewInvestments = !!(state.availableInvestments.length && !state.investmentPurchasedThisYear && state.loopsCompleted < state.selectedRounds);
     return snapshot;
   }
 
   function processNewYearBudgetCycle() {
     var investmentNotes;
+    var promiseNotes;
+    var shortcutNotes;
     var i;
-    var loanNote;
+    var interest;
+    var debtPressureNote;
     var eventNote;
 
-    state.loanOfferedThisYear = false;
     state.investmentPurchasedThisYear = false;
     state.yearFinancialLog = [];
     seedInvestmentOffers(4);
@@ -228,13 +328,31 @@ window.VOTF_BOOTED = true;
       state.yearFinancialLog.push(investmentNotes[i]);
       AOC.ui.showStatFeedback(el, investmentNotes[i]);
     }
-    loanNote = AOC.rules.applyAnnualLoanEffects(state);
-    if (loanNote) {
-      if (loanNote.resolved) {
-        loanNote.description += " " + loanNote.resolution;
-      }
-      state.yearFinancialLog.push(loanNote);
-      AOC.ui.showStatFeedback(el, loanNote);
+    interest = AOC.rules.applyYearEndInterest(state);
+    if (interest > 0) {
+      state.yearFinancialLog.push({
+        type: "interest",
+        title: "Interest This Year",
+        description: "Unpaid debt gained interest based on how many turns you took this year.",
+        money: 0,
+        environment: 0,
+        trust: 0
+      });
+    }
+    promiseNotes = AOC.rules.resolveYearEndPromises(state);
+    for (i = 0; i < promiseNotes.length; i += 1) {
+      state.yearFinancialLog.push(promiseNotes[i]);
+      AOC.ui.showStatFeedback(el, promiseNotes[i]);
+    }
+    shortcutNotes = AOC.rules.resolveYearEndShortcuts(state);
+    for (i = 0; i < shortcutNotes.length; i += 1) {
+      state.yearFinancialLog.push(shortcutNotes[i]);
+      AOC.ui.showStatFeedback(el, shortcutNotes[i]);
+    }
+    debtPressureNote = AOC.rules.applyDebtPressureEffects(state);
+    if (debtPressureNote) {
+      state.yearFinancialLog.push(debtPressureNote);
+      AOC.ui.showStatFeedback(el, debtPressureNote);
     }
 
     eventNote = AOC.rules.resolveFinancialEvent(state);
@@ -243,6 +361,11 @@ window.VOTF_BOOTED = true;
       state.yearFinancialLog.push(eventNote);
       AOC.ui.showStatFeedback(el, eventNote);
     }
+    state.pendingDebtSummary = AOC.rules.buildDebtSummary(state);
+    if (!state.pendingDebtSummary.hasConsequences) {
+      state.pendingDebtSummary = null;
+    }
+    state.yearlyRollCount = 0;
   }
 
   function buildInvestmentContext() {
@@ -333,6 +456,7 @@ window.VOTF_BOOTED = true;
     AOC.ui.setCenterMessage(el, "Investment Added", investment.description);
     AOC.ui.showYearSummary(el, state, buildYearSummarySnapshot());
     AOC.ui.updateUI(el, state);
+    maybeNarrateWarnings();
     if (maybeOfferLoan()) {
       return;
     }
@@ -341,33 +465,28 @@ window.VOTF_BOOTED = true;
 
   function buildLoanContext() {
     return {
-      title: "Budget Stress: Financing Decision",
-      description: "Available reserves are dangerously low. You can accept outside financing to stabilize operations, but loans will reduce flexibility and trust over time.",
-      choices: [
-        {
-          id: "small-loan",
-          kicker: "Bridge Loan",
-          label: "Accept Small Loan",
-          tone: "positive",
-          preview: AOC.data.loanOffers[0].upfront,
-          loan: AOC.data.loanOffers[0]
-        },
-        {
-          id: "large-loan",
-          kicker: "Emergency Debt",
-          label: "Take Large Loan",
-          tone: "risky",
-          preview: AOC.data.loanOffers[1].upfront,
-          loan: AOC.data.loanOffers[1]
-        },
-        {
-          id: "refuse-loan",
-          kicker: "Stay Exposed",
-          label: "Refuse Loan",
-          tone: "risky",
-          preview: { money: 0, environment: 0, trust: 0 }
-        }
-      ]
+      title: "Budget Running Low",
+      description: state.simpleMode ?
+        "Your budget is getting low. You can borrow money now, but if you do not pay it back, it grows." :
+        "Your available budget is running low. You can borrow funds now, but unpaid debt will grow with interest each year.",
+      choices: AOC.data.loanOffers.map(function (loan, index) {
+        return {
+          id: loan.id,
+          kicker: index === 0 ? "Small Step" : index === 1 ? "Stronger Support" : "Emergency Boost",
+          label: loan.name + " (+" + loan.amount + ")",
+          tone: loan.tone,
+          description: loan.description,
+          preview: { money: loan.amount, debt: loan.amount, trust: 0 },
+          loan: loan
+        };
+      }).concat([{
+        id: "decline-loan",
+        kicker: "No Borrowing",
+        label: "Decline Loan",
+        tone: "risky",
+        description: "Keep your current budget and avoid new debt for now.",
+        preview: { money: 0, debt: 0, trust: 0 }
+      }])
     };
   }
 
@@ -377,17 +496,183 @@ window.VOTF_BOOTED = true;
     };
   }
 
-  function maybeOfferLoan() {
-    if (state.stats.money >= 20) {
-      state.loanOfferedThisYear = false;
+  function buildPromiseContext() {
+    return {
+      title: "Trust Is Slipping",
+      description: state.simpleMode ?
+        "People are starting to feel upset. You can make a promise now to lift trust, but keeping that promise will cost budget later." :
+        "Community trust is getting low. You can make public promises now to raise confidence, but unfulfilled promises will cost budget later or hurt trust even more.",
+      choices: AOC.data.promiseOffers.map(function (promise, index) {
+        return {
+          id: promise.id,
+          kicker: index === 0 ? "Small Promise" : index === 1 ? "Bigger Promise" : "Major Promise",
+          label: promise.name + " (+" + promise.trustGain + " Trust)",
+          tone: promise.tone,
+          description: promise.description,
+          previewItems: [
+            { label: "Trust Now", value: promise.trustGain },
+            { label: "Later Budget", value: -promise.fulfillmentCost },
+            { label: "Broken Trust", value: promise.penalty }
+          ],
+          promise: promise
+        };
+      }).concat([{
+        id: "decline-promise",
+        kicker: "No Promise",
+        label: "Stay Cautious",
+        tone: "risky",
+        description: "Keep trust where it is now and avoid adding future obligations.",
+        previewItems: [
+          { label: "Trust Now", value: 0 },
+          { label: "Later Budget", value: 0 },
+          { label: "Broken Trust", value: 0 }
+        ]
+      }])
+    };
+  }
+
+  function createPromiseChoiceHandler(choice) {
+    return function () {
+      handlePromiseDecision(choice);
+    };
+  }
+
+  function maybeOfferPromise() {
+    if (!AOC.rules.shouldOfferPromise(state.stats.trust) || state.awaitingLoanDecision || state.awaitingPromiseDecision || state.awaitingShortcutDecision || state.awaitingDebtDecision) {
+      return false;
     }
-    if (state.stats.money >= 10 || state.activeLoan || state.awaitingLoanDecision || state.loanOfferedThisYear) {
+    if (state.promiseOfferTurn === state.turnsTaken && !state.awaitingYearSummary) {
+      return false;
+    }
+    state.awaitingPromiseDecision = true;
+    markSupportOffersHandledThisTurn();
+    AOC.ui.updateUI(el, state);
+    AOC.ui.showLoanModal(el, buildPromiseContext(), createPromiseChoiceHandler);
+    AOC.ui.narrateWarning(state, "Trust is low. Promise options are available.");
+    return true;
+  }
+
+  function handlePromiseDecision(choice) {
+    state.awaitingPromiseDecision = false;
+    AOC.ui.hideLoanModal(el);
+
+    if (choice.promise) {
+      AOC.ui.showStatFeedback(el, AOC.rules.takePromise(state, choice.promise));
+      AOC.ui.updateStatus(el, choice.promise.name + " made. Trust rises now, but keeping that promise will cost budget later.");
+      AOC.ui.setCenterMessage(el, "Promise Made", state.simpleMode ? "You made a promise to help people feel better now. It will cost money later to keep it." : "Promises can calm the present, but delayed commitments still have to be funded if you want trust to last.");
+    } else {
+      AOC.ui.updateStatus(el, "You chose not to make a new promise. Trust stays low, but no extra obligation was added.");
+      AOC.ui.setCenterMessage(el, "No New Promise", "Holding back avoids future pressure, but it does not rebuild trust on its own.");
+    }
+
+    AOC.ui.updateUI(el, state);
+    maybeNarrateWarnings();
+    if (maybeOfferBudgetTradeoff()) {
+      return;
+    }
+    checkEndConditions();
+  }
+
+  function buildShortcutContext() {
+    return {
+      title: "Environmental Shortcut",
+      description: state.simpleMode ?
+        "You can get more budget now by taking a shortcut that hurts nature later." :
+        "You can take an environmental shortcut to gain budget now, but the ecological damage will land at year end.",
+      choices: AOC.data.shortcutOffers.map(function (shortcut, index) {
+        return {
+          id: shortcut.id,
+          kicker: index === 0 ? "Minor Shortcut" : index === 1 ? "Bigger Shortcut" : "Heavy Shortcut",
+          label: shortcut.name + " (+" + shortcut.moneyGain + " Budget)",
+          tone: shortcut.tone,
+          description: shortcut.description,
+          previewItems: [
+            { label: "Budget Now", value: shortcut.moneyGain },
+            { label: "Later Environment", value: shortcut.delayedEnvironmentLoss }
+          ],
+          shortcut: shortcut
+        };
+      }).concat([{
+        id: "decline-shortcut",
+        kicker: "Protect Nature",
+        label: "Decline Shortcut",
+        tone: "positive",
+        description: "Keep the island's ecosystems safer, even if budget pressure stays higher now.",
+        previewItems: [
+          { label: "Budget Now", value: 0 },
+          { label: "Later Environment", value: 0 }
+        ]
+      }])
+    };
+  }
+
+  function createShortcutChoiceHandler(choice) {
+    return function () {
+      handleShortcutDecision(choice);
+    };
+  }
+
+  function maybeOfferShortcut(resolvedOption) {
+    if (!AOC.rules.shouldOfferShortcut(state.stats.money, resolvedOption) || state.awaitingLoanDecision || state.awaitingPromiseDecision || state.awaitingShortcutDecision || state.awaitingDebtDecision) {
+      return false;
+    }
+    if (state.shortcutOfferTurn === state.turnsTaken && !state.awaitingYearSummary) {
+      return false;
+    }
+    state.awaitingShortcutDecision = true;
+    markSupportOffersHandledThisTurn();
+    AOC.ui.updateUI(el, state);
+    AOC.ui.showLoanModal(el, buildShortcutContext(), createShortcutChoiceHandler);
+    AOC.ui.narrateWarning(state, "Environmental shortcut options are available.");
+    return true;
+  }
+
+  function maybeOfferBudgetTradeoff(resolvedOption) {
+    if (state.debtOwed >= 300 && maybeOfferShortcut(resolvedOption)) {
+      return true;
+    }
+    if (maybeOfferLoan()) {
+      return true;
+    }
+    if (maybeOfferShortcut(resolvedOption)) {
+      return true;
+    }
+    return false;
+  }
+
+  function handleShortcutDecision(choice) {
+    state.awaitingShortcutDecision = false;
+    AOC.ui.hideLoanModal(el);
+
+    if (choice.shortcut) {
+      AOC.ui.showStatFeedback(el, AOC.rules.takeShortcut(state, choice.shortcut));
+      AOC.ui.updateStatus(el, choice.shortcut.name + " taken. Available Budget rises now, but year-end environmental damage is now locked in.");
+      AOC.ui.setCenterMessage(el, "Shortcut Taken", state.simpleMode ? "You got money now, but nature will be hurt later." : "Shortcuts can protect the current budget, but they push environmental costs into the future.");
+    } else {
+      AOC.ui.updateStatus(el, "You declined the environmental shortcut and kept future ecological damage off the board.");
+      AOC.ui.setCenterMessage(el, "Shortcut Declined", "Protecting the island now may leave finances tighter, but it avoids delayed damage later.");
+    }
+
+    AOC.ui.updateUI(el, state);
+    maybeNarrateWarnings();
+    if (maybeOfferPromise()) {
+      return;
+    }
+    checkEndConditions();
+  }
+
+  function maybeOfferLoan() {
+    if (!AOC.rules.shouldOfferLoan(state.stats.money) || state.awaitingLoanDecision || state.awaitingPromiseDecision || state.awaitingShortcutDecision || state.awaitingDebtDecision) {
+      return false;
+    }
+    if (state.loanOfferTurn === state.turnsTaken && !state.awaitingYearSummary) {
       return false;
     }
     state.awaitingLoanDecision = true;
-    state.loanOfferedThisYear = true;
+    markSupportOffersHandledThisTurn();
     AOC.ui.updateUI(el, state);
     AOC.ui.showLoanModal(el, buildLoanContext(), createLoanChoiceHandler);
+    AOC.ui.narrateWarning(state, "Budget running low. Loan options are available.");
     return true;
   }
 
@@ -396,27 +681,205 @@ window.VOTF_BOOTED = true;
     AOC.ui.hideLoanModal(el);
 
     if (choice.loan) {
-      applyEffects(choice.loan.upfront);
-      state.activeLoan = {
-        id: choice.loan.id,
-        name: choice.loan.name,
-        annualEffects: {
-          money: choice.loan.annual.money,
-          environment: choice.loan.annual.environment,
-          trust: choice.loan.annual.trust
-        },
-        remainingYears: choice.loan.years
-      };
-      AOC.ui.showStatFeedback(el, choice.loan.upfront);
-      AOC.ui.updateStatus(el, choice.loan.name + " accepted. You gained immediate operating funds, but annual repayment pressure will follow.");
-      AOC.ui.setCenterMessage(el, "Debt Added", "Outside funding can stabilize the present, but debt service can weaken long-term flexibility and trust.");
+      AOC.ui.showStatFeedback(el, AOC.rules.takeLoan(state, choice.loan.amount));
+      AOC.ui.updateStatus(el, choice.loan.name + " accepted. Available Budget increased now, and Debt Owed increased by the same amount.");
+      AOC.ui.setCenterMessage(el, "Debt Added", state.simpleMode ? "You borrowed money. If you do not pay it back, it grows." : "Loans can stabilize the present, but interest turns short-term relief into longer-term pressure.");
     } else {
-      AOC.ui.updateStatus(el, "You refused outside financing and kept the budget exposed. Low reserves now raise the risk of collapse.");
-      AOC.ui.setCenterMessage(el, "Loan Refused", "Avoiding debt preserves independence, but running on very low reserves leaves future repairs and services at risk.");
+      AOC.ui.updateStatus(el, "You declined new borrowing. Your budget stays low, but you avoided taking on more debt.");
+      AOC.ui.setCenterMessage(el, "Loan Declined", "Skipping a loan preserves independence now, but low reserves still make the next year riskier.");
     }
 
     AOC.ui.updateUI(el, state);
+    maybeNarrateWarnings();
+    if (maybeOfferPromise()) {
+      return;
+    }
+    if (maybeOfferBudgetTradeoff()) {
+      return;
+    }
     checkEndConditions();
+  }
+
+  function buildDebtRepaymentContext() {
+    var summary = state.pendingDebtSummary || AOC.rules.buildDebtSummary(state);
+    var partialChoices = [25, 50, 100];
+    var choices = [];
+    var summaryHtml;
+    var i;
+    summaryHtml =
+      "<p><strong>Debt Owed at Start:</strong> " + summary.debtAtStart + "</p>" +
+      "<p><strong>Interest This Year:</strong> " + summary.interest + "</p>" +
+      "<p><strong>Promise Cost Paid:</strong> " + summary.promiseBudgetPaid + "</p>" +
+      "<p><strong>Promise Trust Penalty:</strong> " + summary.promiseTrustPenalty + "</p>" +
+      "<p><strong>Shortcut Damage:</strong> " + summary.shortcutDamage + "</p>" +
+      "<p><strong>Total Debt Owed Now:</strong> " + summary.totalDebt + "</p>" +
+      "<p><strong>Available Budget:</strong> " + summary.availableBudget + "</p>" +
+      "<p><strong>Debt Pressure:</strong> " + summary.pressure.label + "</p>";
+
+    if (state.debtOwed > 0) {
+      choices.push({
+        id: "pay-full",
+        kicker: "Clear It",
+        label: "Pay Full",
+        tone: state.stats.money >= state.debtOwed ? "positive" : "risky",
+        description: "Pay the entire debt now if you can afford it.",
+        previewItems: [
+          { label: "Budget", value: -Math.min(state.debtOwed, state.stats.money) },
+          { label: "Debt", value: -state.debtOwed }
+        ],
+        paymentType: "full"
+      });
+
+      for (i = 0; i < partialChoices.length; i += 1) {
+        if (state.stats.money <= 0) {
+          break;
+        }
+        choices.push({
+          id: "pay-" + partialChoices[i],
+          kicker: "Pay Part",
+          label: "Pay " + partialChoices[i],
+          tone: "positive",
+          description: "Reduce debt now and carry the rest into next year.",
+          previewItems: [
+            { label: "Budget", value: -Math.min(partialChoices[i], state.stats.money, state.debtOwed) },
+            { label: "Debt", value: -Math.min(partialChoices[i], state.stats.money, state.debtOwed) }
+          ],
+          paymentType: "partial",
+          amount: partialChoices[i]
+        });
+      }
+
+      if (state.stats.money > 0) {
+        choices.push({
+          id: "pay-max",
+          kicker: "Pay Part",
+          label: "Pay Max Affordable",
+          tone: "positive",
+          description: "Put the largest affordable amount toward debt right now.",
+          previewItems: [
+            { label: "Budget", value: -Math.min(state.stats.money, state.debtOwed) },
+            { label: "Debt", value: -Math.min(state.stats.money, state.debtOwed) }
+          ],
+          paymentType: "max"
+        });
+      }
+
+      choices.push({
+        id: "skip-payment",
+        kicker: "Wait",
+        label: "Skip Payment",
+        tone: "risky",
+        description: "Keep your budget for now and carry all debt into the next year.",
+        previewItems: [
+          { label: "Budget", value: 0 },
+          { label: "Debt", value: 0 }
+        ],
+        paymentType: "skip"
+      });
+    } else {
+      choices.push({
+        id: "acknowledge-year-end",
+        kicker: "Continue",
+        label: "Continue",
+        tone: "positive",
+        description: "Carry these consequences forward and keep playing.",
+        previewItems: [
+          { label: "Budget", value: 0 },
+          { label: "Debt", value: 0 },
+          { label: "Trust", value: 0 }
+        ],
+        paymentType: "acknowledge"
+      });
+    }
+
+    return {
+      title: "Year-End Consequences",
+      description: summary.message,
+      summaryHtml: summaryHtml,
+      choices: choices
+    };
+  }
+
+  function createDebtChoiceHandler(choice) {
+    return function () {
+      handleDebtDecision(choice);
+    };
+  }
+
+  function maybeShowDebtSummary() {
+    if (!state.pendingDebtSummary || state.awaitingDebtDecision) {
+      return false;
+    }
+    state.awaitingDebtDecision = true;
+    AOC.ui.updateUI(el, state);
+    AOC.ui.showLoanModal(el, buildDebtRepaymentContext(), createDebtChoiceHandler);
+    AOC.ui.narrateWarning(state, "Year-end consequences summary. Delayed costs from this year are now being reviewed.");
+    return true;
+  }
+
+  function handleDebtDecision(choice) {
+    var paid = 0;
+
+    state.awaitingDebtDecision = false;
+    AOC.ui.hideLoanModal(el);
+
+    if (choice.paymentType === "acknowledge") {
+      AOC.ui.updateStatus(el, "You reviewed the delayed effects from this year and moved into the next one.");
+    } else if (choice.paymentType === "full") {
+      paid = AOC.rules.payDebt(state, state.debtOwed);
+      AOC.ui.updateStatus(el, "You paid your full debt if affordable. Paying now lowers future interest pressure.");
+    } else if (choice.paymentType === "partial") {
+      paid = AOC.rules.payDebt(state, choice.amount);
+      AOC.ui.updateStatus(el, "You made a partial debt payment. Some debt remains and will keep growing if ignored.");
+    } else if (choice.paymentType === "max") {
+      paid = AOC.rules.payDebt(state, Math.min(state.stats.money, state.debtOwed));
+      AOC.ui.updateStatus(el, "You paid the maximum you could afford this year.");
+    } else {
+      AOC.ui.updateStatus(el, "You skipped payment this year. Debt stays and future interest will continue to build.");
+    }
+
+    if (paid > 0) {
+      AOC.ui.showStatFeedback(el, { money: -paid, environment: 0, trust: 0 });
+    }
+
+    state.pendingDebtSummary = null;
+    state.interestThisYear = 0;
+    state.debtAtYearStart = 0;
+    state.promiseBudgetPaidThisYear = 0;
+    state.promiseTrustPenaltyThisYear = 0;
+    state.shortcutDamageThisYear = 0;
+    AOC.ui.updateUI(el, state);
+    maybeNarrateWarnings();
+    resumePendingLandingAfterYear();
+  }
+
+  function resumePendingLandingAfterYear() {
+    var pending;
+    var plot;
+    var scenarioObj;
+
+    if (state.loopsCompleted >= state.selectedRounds) {
+      endGame(AOC.rules.getModeFinalEnding(state));
+      return;
+    }
+
+    if (!state.pendingLanding) {
+      return;
+    }
+
+    pending = state.pendingLanding;
+    state.pendingLanding = null;
+    plot = AOC.data.plots[pending.plotIndex];
+    scenarioObj = plot.scenarios[pending.scenarioIndex];
+    if (maybeOfferPromise()) {
+      return;
+    }
+    if (maybeOfferBudgetTradeoff()) {
+      return;
+    }
+    state.awaitingChoice = true;
+    AOC.ui.updateUI(el, state);
+    showCard(plot, scenarioObj);
   }
 
   async function handleChoice(option) {
@@ -426,7 +889,7 @@ window.VOTF_BOOTED = true;
     applyEffects(resolvedOption);
     state.history.push({
       turn: state.turnsTaken,
-      year: state.year,
+      year: state.loopsCompleted,
       position: state.position,
       choiceId: resolvedOption.choiceId,
       choiceLabel: resolvedOption.label,
@@ -452,10 +915,14 @@ window.VOTF_BOOTED = true;
       AOC.rules.buildChoiceSummary(resolvedOption) + (educationNote ? " " + educationNote : "")
     );
     AOC.ui.updateUI(el, state);
+    maybeNarrateWarnings();
     await AOC.ui.resolveChoiceCard(el, resolvedOption);
     state.isAnimating = false;
     AOC.ui.updateUI(el, state);
-    if (maybeOfferLoan()) {
+    if (maybeOfferPromise()) {
+      return;
+    }
+    if (maybeOfferBudgetTradeoff(resolvedOption)) {
       return;
     }
     checkEndConditions();
@@ -471,10 +938,23 @@ window.VOTF_BOOTED = true;
     }
 
     pending = state.pendingLanding;
+    if (maybeShowDebtSummary()) {
+      AOC.ui.hideYearSummary(el);
+      state.awaitingYearSummary = false;
+      return;
+    }
+    if (state.loopsCompleted >= state.selectedRounds) {
+      hideYearSummary();
+      endGame(AOC.rules.getModeFinalEnding(state));
+      return;
+    }
     hideYearSummary();
     plot = AOC.data.plots[pending.plotIndex];
     scenarioObj = plot.scenarios[pending.scenarioIndex];
-    if (maybeOfferLoan()) {
+    if (maybeOfferPromise()) {
+      return;
+    }
+    if (maybeOfferBudgetTradeoff()) {
       return;
     }
     state.awaitingChoice = true;
@@ -482,10 +962,12 @@ window.VOTF_BOOTED = true;
     showCard(plot, scenarioObj);
   }
 
-  function hideYearSummary() {
+  function hideYearSummary(preservePendingLanding) {
     AOC.ui.hideYearSummary(el);
     state.awaitingYearSummary = false;
-    state.pendingLanding = null;
+    if (!preservePendingLanding) {
+      state.pendingLanding = null;
+    }
   }
 
   function checkEndConditions() {
@@ -497,11 +979,15 @@ window.VOTF_BOOTED = true;
       return;
     }
 
-    if (state.stats.money < 10 && maybeOfferLoan()) {
+    if (maybeOfferPromise()) {
       return;
     }
 
-    if (state.turnsTaken >= state.selectedRounds) {
+    if (maybeOfferBudgetTradeoff()) {
+      return;
+    }
+
+    if (state.loopsCompleted >= state.selectedRounds) {
       endGame(AOC.rules.getModeFinalEnding(state));
     }
   }
@@ -531,7 +1017,7 @@ window.VOTF_BOOTED = true;
       el.endInvestments.textContent = AOC.rules.summarizeInvestments(state.activeInvestments).replace("None yet.", "None activated.");
     }
     if (el.endLoans) {
-      el.endLoans.textContent = AOC.rules.summarizeLoan(state.activeLoan);
+      el.endLoans.textContent = AOC.rules.summarizeLoan(state);
     }
     el.endYears.textContent = state.loopsCompleted;
     el.endTurns.textContent = state.turnsTaken;
@@ -542,23 +1028,41 @@ window.VOTF_BOOTED = true;
     el.endEnvironment.textContent = state.stats.environment;
     el.endTrust.textContent = state.stats.trust;
     el.reflectionLine.textContent = summary.reflection;
+    AOC.ui.narrateEnding(state, summary.strategy + " " + summary.education);
     goToScreen("gameOver");
   }
 
   function resetGame() {
     resetStateForNewSession();
-    goToScreen("rules");
+    goToScreen("ready");
   }
 
   function resetStateForNewSession() {
     var currentScreen = state.currentScreen;
+    var simpleMode = state.simpleMode;
+    var theme = state.theme;
+    var voiceSettings = {
+      enabled: state.voiceSettings.enabled,
+      readCards: state.voiceSettings.readCards,
+      readWarnings: state.voiceSettings.readWarnings,
+      readEndings: state.voiceSettings.readEndings,
+      rate: state.voiceSettings.rate,
+      pitch: state.voiceSettings.pitch,
+      lang: state.voiceSettings.lang,
+      voiceName: state.voiceSettings.voiceName
+    };
     var selectedRounds = state.selectedRounds;
     var selectedMode = state.selectedMode;
+    var selectedCharacter = state.selectedCharacter;
     var selectedToken = state.selectedToken;
 
     state = AOC.createInitialState();
+    state.simpleMode = simpleMode;
+    state.theme = theme;
+    state.voiceSettings = voiceSettings;
     state.selectedRounds = selectedRounds;
     state.selectedMode = selectedMode;
+    state.selectedCharacter = selectedCharacter;
     state.selectedToken = selectedToken;
     state.currentScreen = currentScreen || "home";
     AOC.ui.hideChoiceModal(el);
@@ -566,6 +1070,7 @@ window.VOTF_BOOTED = true;
     AOC.ui.hideLoanModal(el);
     AOC.ui.hideInvestmentModal(el);
     AOC.ui.hideHowToModal(el);
+    AOC.ui.hideSettingsModal(el);
     AOC.ui.hideBoardTooltip(el);
     AOC.ui.updateUI(el, state);
   }
@@ -576,10 +1081,17 @@ window.VOTF_BOOTED = true;
       onGoToModeSelect: goToModeSelect,
       onOpenHowTo: openHowTo,
       onCloseHowTo: closeHowTo,
+      onOpenSettings: openSettings,
+      onCloseSettings: closeSettings,
       onSelectMode: selectMode,
       onSelectRounds: selectRounds,
-      onSelectToken: selectToken,
+      onToggleSimpleMode: toggleSimpleMode,
+      onSetTheme: setTheme,
+      onUpdateVoiceSetting: updateVoiceSetting,
+      onSelectToken: selectCharacter,
+      onSelectCharacter: selectCharacter,
       onContinueFromMode: continueFromMode,
+      onContinueFromCharacter: continueFromCharacter,
       onContinueFromRounds: continueFromRounds,
       onStartGame: startGame,
       onBackToHome: function () {
@@ -589,13 +1101,21 @@ window.VOTF_BOOTED = true;
       onBackToModeSelect: function () {
         goToScreen("modeSelect");
       },
+      onBackToCharacterSelect: function () {
+        goToScreen("characterSelect");
+      },
       onBackToRounds: function () {
         goToScreen("roundSelect");
       },
       onRoll: handleRoll,
       onRestart: resetGame,
       onReturnHome: returnHome,
-      onContinueYear: continueAfterYearSummary,
+      onContinueYear: function () {
+        if (state.awaitingDebtDecision) {
+          return;
+        }
+        continueAfterYearSummary();
+      },
       onReviewInvestments: reviewInvestments,
       onCloseInvestments: closeInvestmentModal
     });
@@ -604,8 +1124,17 @@ window.VOTF_BOOTED = true;
         selectMode(modeId);
       };
     });
+    AOC.ui.renderCharacterPicker(el, state.selectedCharacter ? state.selectedCharacter.id : "", function (characterId) {
+      return function () {
+        selectCharacter(characterId);
+      };
+    });
     AOC.ui.renderBoard(el);
     AOC.ui.updateUI(el, state);
+    syncVoiceOptions();
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.onvoiceschanged = syncVoiceOptions;
+    }
     goToScreen("home");
   }
 

@@ -15,6 +15,17 @@
       };
     },
 
+    getStartingStatsPreview: function (mode, character) {
+      var base = this.getModeStartingStats(mode);
+      var bonus = character && character.bonuses ? character.bonuses : { money: 0, environment: 0, trust: 0 };
+
+      return {
+        money: base.money + (bonus.money || 0),
+        environment: base.environment + (bonus.environment || 0),
+        trust: base.trust + (bonus.trust || 0)
+      };
+    },
+
     getModeModifiers: function (mode) {
       return (mode && mode.modifiers) || {};
     },
@@ -83,15 +94,34 @@
       var outcome = choice.outcomes[outcomeIndex];
       var modifiers = this.getModeModifiers(state.selectedMode);
       var adjusted = this.applyModeMultipliers(outcome, modifiers);
+      var simpleAdjusted = state.simpleMode ? this.applySimpleModeEffects(adjusted) : adjusted;
 
       return {
         choiceId: choice.id,
         label: choice.label,
         outcomeIndex: outcomeIndex,
-        money: adjusted.money,
-        environment: adjusted.environment,
-        trust: adjusted.trust,
+        money: simpleAdjusted.money,
+        environment: simpleAdjusted.environment,
+        trust: simpleAdjusted.trust,
         feedback: outcome.feedback
+      };
+    },
+
+    applySimpleModeEffects: function (effects) {
+      function soften(value) {
+        if (value > 0) {
+          return Math.max(1, Math.round(value * 0.8));
+        }
+        if (value < 0) {
+          return Math.min(-1, Math.round(value * 0.6));
+        }
+        return 0;
+      }
+
+      return {
+        money: soften(effects.money || 0),
+        environment: soften(effects.environment || 0),
+        trust: soften(effects.trust || 0)
       };
     },
 
@@ -106,6 +136,17 @@
         placeLabel: plot.tileName + " - " + plot.locationDescription,
         choices: [scenarioObj.optionA, scenarioObj.optionB]
       };
+    },
+
+    getSimpleScenarioText: function (text) {
+      return text
+        .replace(/environmental/gi, "nature")
+        .replace(/community trust/gi, "people's trust")
+        .replace(/infrastructure/gi, "shared systems")
+        .replace(/ecosystem/gi, "nature")
+        .replace(/resilience/gi, "strength")
+        .replace(/pollution/gi, "harm")
+        .replace(/development/gi, "building");
     },
 
     pickFinancialEvent: function (state) {
@@ -213,12 +254,12 @@
       return names.join(", ");
     },
 
-    summarizeLoan: function (loan) {
-      if (!loan) {
-        return "No active loans.";
+    summarizeLoan: function (state) {
+      if (!state.debtOwed || state.debtOwed <= 0) {
+        return "No debt owed.";
       }
 
-      return loan.name + " with " + loan.remainingYears + " year" + (loan.remainingYears === 1 ? "" : "s") + " of repayments remaining.";
+      return "Debt Owed: " + Math.round(state.debtOwed) + ". " + this.getDebtPressure(state.debtOwed).label + ".";
     },
 
     applyAnnualInvestmentEffects: function (state) {
@@ -244,31 +285,226 @@
       return notes;
     },
 
-    applyAnnualLoanEffects: function (state) {
-      var note;
+    getLoanInterestRate: function () {
+      return 0.005;
+    },
 
-      if (!state.activeLoan) {
+    getLoanTriggerThreshold: function () {
+      return 250;
+    },
+
+    shouldOfferLoan: function (money) {
+      return money <= this.getLoanTriggerThreshold();
+    },
+
+    getPromiseTriggerThreshold: function () {
+      return 30;
+    },
+
+    shouldOfferPromise: function (trust) {
+      return trust <= this.getPromiseTriggerThreshold();
+    },
+
+    shouldOfferShortcut: function (money, resolvedOption) {
+      var riskyDecision = !!(resolvedOption && resolvedOption.money > 0 && resolvedOption.environment < 0);
+      return money <= this.getLoanTriggerThreshold() || riskyDecision;
+    },
+
+    takeLoan: function (state, amount) {
+      state.debtOwed += amount;
+      state.stats.money += amount;
+      return {
+        type: "loan",
+        title: "Loan Accepted",
+        description: "You gained " + amount + " in available budget and added the same amount to Debt Owed.",
+        money: amount,
+        environment: 0,
+        trust: 0
+      };
+    },
+
+    takePromise: function (state, promise) {
+      state.activePromises.push({
+        id: promise.id,
+        name: promise.name,
+        trustGain: promise.trustGain,
+        fulfillmentCost: promise.fulfillmentCost,
+        penalty: promise.penalty
+      });
+      state.stats.trust += promise.trustGain;
+      return {
+        type: "promise",
+        title: "Promise Made",
+        description: "You gained " + promise.trustGain + " trust now, but you will need " + promise.fulfillmentCost + " in budget later to keep this promise.",
+        money: 0,
+        environment: 0,
+        trust: promise.trustGain
+      };
+    },
+
+    takeShortcut: function (state, shortcut) {
+      state.activeShortcuts.push({
+        id: shortcut.id,
+        name: shortcut.name,
+        moneyGain: shortcut.moneyGain,
+        delayedEnvironmentLoss: shortcut.delayedEnvironmentLoss
+      });
+      state.stats.money += shortcut.moneyGain;
+      return {
+        type: "shortcut",
+        title: "Shortcut Taken",
+        description: "You gained " + shortcut.moneyGain + " in budget now, but environmental damage will land at year end.",
+        money: shortcut.moneyGain,
+        environment: 0,
+        trust: 0
+      };
+    },
+
+    applyYearEndInterest: function (state) {
+      var interest;
+
+      if (state.debtOwed <= 0) {
+        state.interestThisYear = 0;
+        state.debtAtYearStart = 0;
+        return 0;
+      }
+
+      state.debtAtYearStart = state.debtOwed;
+      interest = state.debtOwed * (state.yearlyRollCount * this.getLoanInterestRate());
+      state.interestThisYear = Math.round(interest * 100) / 100;
+      state.debtOwed = Math.round((state.debtOwed + state.interestThisYear) * 100) / 100;
+      return state.interestThisYear;
+    },
+
+    payDebt: function (state, amount) {
+      var payment = Math.min(amount, state.stats.money, state.debtOwed);
+      payment = Math.max(payment, 0);
+      state.stats.money -= payment;
+      state.debtOwed = Math.round((state.debtOwed - payment) * 100) / 100;
+      return payment;
+    },
+
+    getDebtPressure: function (debt) {
+      if (debt >= 600) {
+        return { label: "Severe Debt Pressure", message: "Debt is now high enough to shape nearly every future planning choice.", tone: "danger", trustPenalty: -10 };
+      }
+      if (debt >= 300) {
+        return { label: "Debt Pressure", message: "Debt is putting visible pressure on future budgets and public confidence.", tone: "warning", trustPenalty: -5 };
+      }
+      if (debt >= 100) {
+        return { label: "Warning", message: "Debt is growing and will need attention before interest builds too far.", tone: "warning", trustPenalty: 0 };
+      }
+      if (debt > 0) {
+        return { label: "Manageable", message: "Debt is still manageable, but unpaid borrowing will keep growing.", tone: "secondary", trustPenalty: 0 };
+      }
+      return { label: "No Debt", message: "No debt is being carried into the next year.", tone: "positive", trustPenalty: 0 };
+    },
+
+    applyDebtPressureEffects: function (state) {
+      var pressure = this.getDebtPressure(state.debtOwed);
+
+      if (!pressure.trustPenalty) {
         return null;
       }
 
-      this.applyStatEffects(state.stats, state.activeLoan.annualEffects);
-      state.activeLoan.remainingYears -= 1;
-      note = {
-        type: "loan",
-        title: state.activeLoan.name + " Repayment Due",
-        description: "Debt service reduces available reserves and puts pressure on trust while the loan remains active.",
-        money: state.activeLoan.annualEffects.money,
-        environment: state.activeLoan.annualEffects.environment,
-        trust: state.activeLoan.annualEffects.trust
+      state.stats.trust += pressure.trustPenalty;
+      return {
+        type: "debt-pressure",
+        title: pressure.label,
+        description: "Debt that stays too high can weaken public confidence in the island's direction.",
+        money: 0,
+        environment: 0,
+        trust: pressure.trustPenalty
       };
+    },
 
-      if (state.activeLoan.remainingYears <= 0) {
-        note.resolved = true;
-        note.resolution = state.activeLoan.name + " fully repaid.";
-        state.activeLoan = null;
+    buildDebtSummary: function (state) {
+      var pressure = this.getDebtPressure(state.debtOwed);
+      var hasConsequences = !!(
+        state.debtOwed > 0 ||
+        state.interestThisYear > 0 ||
+        state.promiseBudgetPaidThisYear > 0 ||
+        state.promiseTrustPenaltyThisYear < 0 ||
+        state.shortcutDamageThisYear < 0
+      );
+      return {
+        debtAtStart: Math.round((state.debtAtYearStart || 0) * 100) / 100,
+        interest: Math.round((state.interestThisYear || 0) * 100) / 100,
+        totalDebt: Math.round((state.debtOwed || 0) * 100) / 100,
+        availableBudget: Math.round((state.stats.money || 0) * 100) / 100,
+        promiseBudgetPaid: Math.round((state.promiseBudgetPaidThisYear || 0) * 100) / 100,
+        promiseTrustPenalty: Math.round((state.promiseTrustPenaltyThisYear || 0) * 100) / 100,
+        shortcutDamage: Math.round((state.shortcutDamageThisYear || 0) * 100) / 100,
+        pressure: pressure,
+        hasConsequences: hasConsequences,
+        message: state.simpleMode ?
+          (hasConsequences ? "Your choices from earlier in the year are now catching up." : "Nothing extra carried into this year-end review.") :
+          (hasConsequences ? "This summary shows how delayed costs from borrowing, promises, and shortcuts shaped the year." : "No delayed consequences were carried into this year-end review.")
+      };
+    },
+
+    resolveYearEndPromises: function (state) {
+      var notes = [];
+      var i;
+      var promise;
+
+      state.promiseBudgetPaidThisYear = 0;
+      state.promiseTrustPenaltyThisYear = 0;
+
+      for (i = 0; i < state.activePromises.length; i += 1) {
+        promise = state.activePromises[i];
+        if (state.stats.money >= promise.fulfillmentCost) {
+          state.stats.money -= promise.fulfillmentCost;
+          state.promiseBudgetPaidThisYear += promise.fulfillmentCost;
+          notes.push({
+            type: "promise-kept",
+            title: promise.name + " Fulfilled",
+            description: "You spent budget to keep a public promise and protect trust.",
+            money: -promise.fulfillmentCost,
+            environment: 0,
+            trust: 0
+          });
+        } else {
+          state.stats.trust += promise.penalty;
+          state.promiseTrustPenaltyThisYear += promise.penalty;
+          notes.push({
+            type: "promise-broken",
+            title: promise.name + " Broken",
+            description: "You could not afford to follow through, so public trust dropped harder than it rose before.",
+            money: 0,
+            environment: 0,
+            trust: promise.penalty
+          });
+        }
       }
 
-      return note;
+      state.activePromises = [];
+      return notes;
+    },
+
+    resolveYearEndShortcuts: function (state) {
+      var notes = [];
+      var i;
+      var shortcut;
+
+      state.shortcutDamageThisYear = 0;
+
+      for (i = 0; i < state.activeShortcuts.length; i += 1) {
+        shortcut = state.activeShortcuts[i];
+        state.stats.environment += shortcut.delayedEnvironmentLoss;
+        state.shortcutDamageThisYear += shortcut.delayedEnvironmentLoss;
+        notes.push({
+          type: "shortcut-damage",
+          title: shortcut.name + " Cost",
+          description: "The environmental shortcut saved money earlier, but the damage appeared at year end.",
+          money: 0,
+          environment: shortcut.delayedEnvironmentLoss,
+          trust: 0
+        });
+      }
+
+      state.activeShortcuts = [];
+      return notes;
     },
 
     getBudgetWarningLevel: function (money) {
@@ -278,33 +514,39 @@
       if (money < 0) {
         return "debt";
       }
-      if (money < 10) {
+      if (money < 250) {
         return "critical";
       }
-      if (money < 40) {
-        return "caution";
+      if (money < 500) {
+        return "risky";
+      }
+      if (money < 800) {
+        return "balanced";
       }
       return "stable";
     },
 
-    buildBudgetWarning: function (money, activeLoan) {
+    buildBudgetWarning: function (money, debtOwed) {
       var level = this.getBudgetWarningLevel(money);
       var text = "";
+      var debtPressure = this.getDebtPressure(debtOwed || 0);
 
-      if (level === "caution") {
-        text = "Budget caution: reserves are getting tight. Delayed repairs or rising costs could disrupt your plan.";
+      if (level === "balanced") {
+        text = debtOwed > 0 ? "Your budget is still workable, but debt will keep growing if it is not paid down." : "Available budget is balanced, but careful planning still matters.";
+      } else if (level === "risky") {
+        text = "Your available budget is entering a risky range. Large costs will be harder to absorb.";
       } else if (level === "critical") {
-        text = "Budget critical: operating funds are nearly exhausted, and one more setback could trigger debt pressure.";
+        text = "Your available budget is critical. Loan options are now available, but borrowing adds pressure later.";
       } else if (level === "debt") {
-        text = "Debt state: the island is now operating below zero reserves. Loans may help in the short term, but debt pressure will shape future choices.";
+        text = "You are below zero budget now. Debt and interest will make later years harder to manage.";
       } else if (level === "crash") {
-        text = "Total financial collapse: debt pressure has overwhelmed the island's ability to keep functioning.";
+        text = "Available budget has collapsed below the safe limit. The island can no longer keep operating.";
       } else {
-        text = activeLoan ? "Operating funds are stable for now, but debt repayments still need attention." : "Operating funds are stable enough to support steady planning.";
+        text = debtOwed > 0 ? "Reserves are stable for now, but unpaid debt still needs attention." : "Operating funds are stable enough to support steady planning.";
       }
 
-      if (activeLoan) {
-        text += " Active loan repayments continue for " + activeLoan.remainingYears + " more year" + (activeLoan.remainingYears === 1 ? "" : "s") + ".";
+      if (debtOwed > 0) {
+        text += " Debt Owed is " + Math.round(debtOwed) + " and is currently " + debtPressure.label.toLowerCase() + ".";
       }
 
       return {
@@ -375,11 +617,14 @@
       if (level === "stable") {
         return { level: value, label: "Stable Reserves", message: "Operating funds are strong enough to support planning flexibility.", tone: "positive" };
       }
-      if (level === "caution") {
-        return { level: value, label: "Caution", message: "Reserves are thinning and future risk is increasing.", tone: "warning" };
+      if (level === "balanced") {
+        return { level: value, label: "Balanced Budget", message: "The budget is healthy, but it is no longer comfortably buffered.", tone: "positive" };
+      }
+      if (level === "risky") {
+        return { level: value, label: "Risky Budget", message: "The budget can still function, but risk is becoming visible.", tone: "warning" };
       }
       if (level === "critical") {
-        return { level: value, label: "Critical", message: "Budget pressure is high and reserves are almost exhausted.", tone: "danger" };
+        return { level: value, label: "Critical Budget", message: "Budget pressure is high and reserves are almost exhausted.", tone: "danger" };
       }
       if (level === "debt") {
         return { level: value, label: "Debt State", message: "The island is operating below zero and carrying growing pressure into future years.", tone: "danger" };
@@ -776,7 +1021,7 @@
       var tokenName = state.selectedToken ? state.selectedToken.name : "your token";
       var yearsCompleted = state.loopsCompleted;
       var base = "You completed " + yearsCompleted + " year" + (yearsCompleted === 1 ? "" : "s") +
-        " across " + state.turnsTaken + " turn" + (state.turnsTaken === 1 ? "" : "s") +
+        " across " + state.turnsTaken + " roll" + (state.turnsTaken === 1 ? "" : "s") +
         " while guiding the " + tokenName + " token around the island.";
 
       if (endingType === "Thriving Future") {

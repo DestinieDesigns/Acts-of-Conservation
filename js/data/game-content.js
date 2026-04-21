@@ -3,19 +3,23 @@
   var data = AOC.data = AOC.data || {};
 
   function scenario(issueTitle, scenarioText, aLabel, aMoney, aEnv, aTrust, aFeedback, bLabel, bMoney, bEnv, bTrust, bFeedback) {
+    function scaleMoney(value) {
+      return value * 10;
+    }
+
     return {
       issueTitle: issueTitle,
       scenario: scenarioText,
       optionA: {
         label: aLabel,
-        money: aMoney,
+        money: scaleMoney(aMoney),
         environment: aEnv,
         trust: aTrust,
         feedback: aFeedback
       },
       optionB: {
         label: bLabel,
-        money: bMoney,
+        money: scaleMoney(bMoney),
         environment: bEnv,
         trust: bTrust,
         feedback: bFeedback
@@ -465,19 +469,64 @@
     }
   ];
 
-  data.tokens = [
-    { id: "tree", name: "Tree", icon: "🌳" },
-    { id: "cat", name: "Cat", icon: "🐱" },
-    { id: "dog", name: "Dog", icon: "🐶" },
-    { id: "car", name: "Car", icon: "🚗" },
-    { id: "turtle", name: "Turtle", icon: "🐢" },
-    { id: "boat", name: "Boat", icon: "⛵" }
+  data.characters = [
+    {
+      id: "boy",
+      name: "Boy",
+      icon: "👦",
+      shortDescription: "Balanced and adaptable.",
+      bonusText: "+5 Money, +5 Environment, +5 Trust",
+      bonuses: { money: 5, environment: 5, trust: 5 }
+    },
+    {
+      id: "girl",
+      name: "Girl",
+      icon: "👧",
+      shortDescription: "Calm and community-minded.",
+      bonusText: "+10 Trust, +2 Money, +3 Environment",
+      bonuses: { money: 2, environment: 3, trust: 10 }
+    },
+    {
+      id: "cat",
+      name: "Cat",
+      icon: "🐱",
+      shortDescription: "Independent and clever.",
+      bonusText: "+8 Money, -2 Trust, +2 Environment",
+      bonuses: { money: 8, environment: 2, trust: -2 }
+    },
+    {
+      id: "dog",
+      name: "Dog",
+      icon: "🐶",
+      shortDescription: "Loyal and social.",
+      bonusText: "+12 Trust",
+      bonuses: { money: 0, environment: 0, trust: 12 }
+    },
+    {
+      id: "car",
+      name: "Car",
+      icon: "🚗",
+      shortDescription: "Fast growth, higher impact.",
+      bonusText: "+15 Money, -8 Environment, -3 Trust",
+      bonuses: { money: 15, environment: -8, trust: -3 }
+    },
+    {
+      id: "tree",
+      name: "Tree",
+      icon: "🌳",
+      shortDescription: "Stable and eco-focused.",
+      bonusText: "+15 Environment, -5 Money, +2 Trust",
+      bonuses: { money: -5, environment: 15, trust: 2 }
+    }
   ];
 
+  data.tokens = data.characters;
+
   data.gameLengths = [
-    { id: "short", name: "Short", turns: 10, description: "A compact run with quicker consequences." },
-    { id: "medium", name: "Medium", turns: 20, description: "A balanced session with room for recovery and risk." },
-    { id: "long", name: "Long", turns: 30, description: "A full planning arc with deeper trade-offs over time." }
+    { id: "super-short", name: "Super Short", years: 5, description: "A quick planning run with fast lessons." },
+    { id: "short", name: "Short", years: 10, description: "A compact run with quicker consequences." },
+    { id: "medium", name: "Medium", years: 20, description: "A balanced session with room for recovery and risk." },
+    { id: "long", name: "Long", years: 30, description: "A full planning arc with deeper trade-offs over time." }
   ];
 
   data.modes = [
@@ -488,10 +537,10 @@
       shortDescription: "Balanced gameplay across all systems.",
       description: "A balanced mode where money, environment, and trust must all be managed carefully.",
       goal: "Finish the game with all systems stable.",
-      winConditionText: "Finish all turns with money above 0 and both environment and trust above safe levels.",
+      winConditionText: "Finish all selected years with money above 0 and both environment and trust above safe levels.",
       loseConditionText: "Lose only if Money drops below -100, or Environment or Trust reach -100 or lower.",
       riskText: "Classic feels thoughtful and steady. It rewards balance and punishes overcommitting to a single pillar.",
-      startingStats: { money: 100, environment: 25, trust: 25 },
+      startingStats: { money: 1000, environment: 25, trust: 25 },
       modifiers: {
         difficulty: "steady",
         education: false,
@@ -513,10 +562,10 @@
       shortDescription: "Focus on economic growth.",
       description: "Build wealth aggressively while trying to prevent social and ecological breakdown.",
       goal: "End the game with high money.",
-      winConditionText: "Finish all turns with strong economic growth and no total collapse.",
+      winConditionText: "Finish all selected years with strong economic growth and no total collapse.",
       loseConditionText: "Lose only if Money drops below -100, or Environment or Trust reach -100 or lower.",
       riskText: "Wealth mode feels ambitious and tense. Strong reserves can still leave an island emotionally hollow if trust collapses.",
-      startingStats: { money: 120, environment: 0, trust: -10 },
+      startingStats: { money: 1200, environment: 0, trust: -10 },
       modifiers: {
         difficulty: "growth",
         education: false,
@@ -541,7 +590,7 @@
       winConditionText: "Finish with strong environment values while avoiding collapse.",
       loseConditionText: "Lose only if Environment reaches -100 or lower, or Money drops below -100.",
       riskText: "Conservation mode feels principled and pressurized. Ecological success may still leave the island financially strained if reserves fall too low.",
-      startingStats: { money: 80, environment: -25, trust: 10 },
+      startingStats: { money: 800, environment: -25, trust: 10 },
       modifiers: {
         difficulty: "eco",
         education: false,
@@ -566,7 +615,7 @@
       winConditionText: "Finish with strong community trust and no total collapse.",
       loseConditionText: "Lose only if Trust reaches -100 or lower, or Money or Environment collapse below -100.",
       riskText: "Community mode feels compassionate and relational. Supporting people matters, but goodwill alone cannot fund every repair or protect every habitat.",
-      startingStats: { money: 90, environment: 0, trust: 40 },
+      startingStats: { money: 900, environment: 0, trust: 40 },
       modifiers: {
         difficulty: "social",
         education: false,
@@ -587,11 +636,11 @@
       philosophy: "You are entering an island already in crisis. Survive.",
       shortDescription: "Hard mode with limited resources.",
       description: "Start under pressure and survive a harsher version of island planning.",
-      goal: "Survive all turns.",
+      goal: "Survive all selected years.",
       winConditionText: "Reach the end of the game without total collapse.",
       loseConditionText: "Lose if Money drops below -100, or Environment or Trust reach -100 or lower.",
       riskText: "Survival mode feels urgent from the first turn. There is little room for waste, and even good decisions can come at a painful cost.",
-      startingStats: { money: 50, environment: -50, trust: -25 },
+      startingStats: { money: 500, environment: -50, trust: -25 },
       modifiers: {
         difficulty: "hard",
         education: false,
@@ -616,7 +665,7 @@
       winConditionText: "None. Use the run to learn how the systems interact.",
       loseConditionText: "None. Natural collapse still appears in the ending for reflection, but it does not stop the run early.",
       riskText: "Sandbox mode feels open and exploratory. It is the best place to test bold ideas and observe their long-term consequences.",
-      startingStats: { money: 100, environment: 25, trust: 25 },
+      startingStats: { money: 1000, environment: 25, trust: 25 },
       modifiers: {
         difficulty: "open",
         education: false,
@@ -638,10 +687,10 @@
       shortDescription: "Learn through guided feedback.",
       description: "Play a balanced version of the game with added explanations after decisions.",
       goal: "Understand long-term planning and trade-offs.",
-      winConditionText: "Finish all turns while maintaining a functioning island.",
+      winConditionText: "Finish all selected years while maintaining a functioning island.",
       loseConditionText: "Lose if Money drops below -100, or Environment or Trust reach -100 or lower.",
       riskText: "Education mode feels reflective and instructive. It slows the pace just enough to make cause and effect clearer after each choice.",
-      startingStats: { money: 100, environment: -10, trust: -10 },
+      startingStats: { money: 1000, environment: -10, trust: -10 },
       modifiers: {
         difficulty: "steady",
         education: true,
@@ -960,18 +1009,80 @@
     {
       id: "small-loan",
       name: "Small Loan",
-      description: "Accept a modest bridge loan to steady operations while keeping debt pressure manageable.",
-      upfront: { money: 40, environment: 0, trust: 0 },
-      annual: { money: -12, environment: 0, trust: -3 },
-      years: 3
+      description: "Gain a small budget boost now and add the same amount to Debt Owed.",
+      amount: 100,
+      tone: "positive"
+    },
+    {
+      id: "medium-loan",
+      name: "Medium Loan",
+      description: "Gain a larger budget boost now, but your debt grows and will gain more interest later.",
+      amount: 250,
+      tone: "positive"
     },
     {
       id: "large-loan",
       name: "Large Loan",
-      description: "Take a larger emergency loan for immediate relief, but expect heavier annual repayment pressure.",
-      upfront: { money: 80, environment: 0, trust: -4 },
-      annual: { money: -22, environment: -2, trust: -6 },
-      years: 4
+      description: "Gain major emergency funding now, but it creates the heaviest long-term pressure.",
+      amount: 500,
+      tone: "risky"
+    }
+  ];
+
+  data.promiseOffers = [
+    {
+      id: "small-promise",
+      name: "Small Promise",
+      description: "Gain a little trust now, but you will need to spend budget later to keep that promise.",
+      trustGain: 10,
+      fulfillmentCost: 30,
+      penalty: -15,
+      tone: "positive"
+    },
+    {
+      id: "medium-promise",
+      name: "Medium Promise",
+      description: "Gain a stronger trust boost now, but the end-of-year cost is larger if you want to follow through.",
+      trustGain: 20,
+      fulfillmentCost: 60,
+      penalty: -30,
+      tone: "positive"
+    },
+    {
+      id: "large-promise",
+      name: "Large Promise",
+      description: "Gain major trust quickly, but breaking this promise later will hurt public confidence even more.",
+      trustGain: 35,
+      fulfillmentCost: 100,
+      penalty: -50,
+      tone: "risky"
+    }
+  ];
+
+  data.shortcutOffers = [
+    {
+      id: "small-shortcut",
+      name: "Small Shortcut",
+      description: "Gain budget now by cutting an environmental corner. The damage shows up at year end.",
+      moneyGain: 100,
+      delayedEnvironmentLoss: -10,
+      tone: "positive"
+    },
+    {
+      id: "medium-shortcut",
+      name: "Medium Shortcut",
+      description: "Gain more budget now, but the year-end environmental cost will be harder to absorb.",
+      moneyGain: 200,
+      delayedEnvironmentLoss: -22,
+      tone: "risky"
+    },
+    {
+      id: "large-shortcut",
+      name: "Large Shortcut",
+      description: "Take a major shortcut for fast funding now, but it causes the heaviest delayed environmental damage later.",
+      moneyGain: 350,
+      delayedEnvironmentLoss: -38,
+      tone: "risky"
     }
   ];
 

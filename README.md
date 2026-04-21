@@ -8,6 +8,8 @@ A browser-based single-player eco strategy board game built as a long-term produ
   Browser shell, screen markup, modals, and script load order.
 - `styles.css`
   Visual system, board layout, HUD, modals, and responsive behavior.
+- `UI_STYLE_MAP.md`
+  Reusable component style map, text hierarchy, surfaces, spacing, and interaction rules for future UI work.
 - `js/data/game-content.js`
   Board data, scenario/event data, investment data, outcome definitions, and board layout metadata.
 - `js/core/game-state.js`
@@ -32,3 +34,14 @@ A browser-based single-player eco strategy board game built as a long-term produ
 ## Design Intent
 
 This V1 refactor keeps the current gameplay working while separating content, rules, state, and rendering so the project can grow into a polished long-term game and portfolio piece.
+
+## UI System
+
+The current UI layer uses reusable theme tokens and utility classes in `styles.css`:
+
+- surface tokens: `--bg-main`, `--bg-elevated`, `--bg-soft`, `--border`
+- text tokens: `--text-primary`, `--text-secondary`, `--text-muted`
+- stat tokens: `--money-color`, `--environment-color`, `--trust-color`
+- utility classes: `.text-primary`, `.text-secondary`, `.text-muted`, `.bg-main`, `.bg-elevated`, `.bg-soft`, `.surface-card`, `.surface-soft`, `.touch-target`
+
+For new screens and components, use the guidance in `UI_STYLE_MAP.md` first so the interface stays consistent, readable, and mobile-friendly.

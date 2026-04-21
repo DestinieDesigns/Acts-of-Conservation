@@ -2376,3 +2376,2461 @@ h2 {
     line-height: 1.6;
   }
 }
+
+/* V2 mobile-first setup and simplified color language */
+:root {
+  --bg-deep: #0f172a;
+  --bg-mid: #1e293b;
+  --paper: #1e293b;
+  --paper-soft: #273449;
+  --foam: #334155;
+  --leaf: #4caf50;
+  --forest: #f1f5f9;
+  --water: #4a90e2;
+  --water-soft: #79aef0;
+  --sun: #f4c542;
+  --clay: #475569;
+  --money: #f4c542;
+  --env: #4caf50;
+  --trust: #4a90e2;
+  --text-dark: #f1f5f9;
+  --text-soft: #f1f5f9;
+  --shadow: 0 20px 55px rgba(2, 6, 23, 0.46);
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(244, 197, 66, 0.14), transparent 22%),
+    radial-gradient(circle at right 12% top 14%, rgba(74, 144, 226, 0.14), transparent 18%),
+    linear-gradient(160deg, #0f172a 0%, #162033 52%, #111827 100%);
+  color: var(--text-dark);
+}
+
+.eyebrow,
+.build-stamp,
+.step-indicator,
+.summary-label,
+.token-picker-note,
+.selected-token-label,
+.status-kicker,
+.mode-detail-grid span,
+.mini-stat span,
+.hud-pill span,
+.hud-condition,
+.dice-caption,
+.card-tone,
+.effect-item-label,
+.education-copy,
+.lead,
+.status-text,
+.performance-summary,
+.rules-list,
+.rules-mode-meta p,
+.rules-reminder p,
+.insert-card p {
+  color: rgba(241, 245, 249, 0.82);
+}
+
+.home-card,
+.start-card,
+.end-card,
+.modal-card,
+.panel,
+.board-panel,
+.rules-summary-card,
+.rules-info-card,
+.rules-reminder,
+.round-picker,
+.mode-picker-block,
+.mode-detail-card,
+.year-stats div,
+.year-insights,
+.end-stats div,
+.end-breakdown div,
+.end-planning-summary,
+.education-copy,
+.insert-card,
+.center-branding,
+.mini-stat,
+.effect-item {
+  background: rgba(30, 41, 59, 0.94);
+  border-color: rgba(241, 245, 249, 0.08);
+  color: var(--text-soft);
+}
+
+.home-card,
+.start-card,
+.end-card {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(30, 41, 59, 0.94));
+}
+
+.home-subtitle,
+.mode-option strong,
+.mode-detail-card h3,
+.rules-summary-card strong,
+.rules-info-card h3,
+.rules-reminder h3,
+.decision-option-title,
+.card-feedback-title,
+.status-card h4,
+.mini-stat strong,
+.insert-card h4,
+.board-center h3 {
+  color: var(--text-soft);
+}
+
+.primary-button {
+  background: linear-gradient(135deg, #f4c542, #f8d56a);
+  color: #0f172a;
+  box-shadow: 0 14px 28px rgba(244, 197, 66, 0.2);
+}
+
+.secondary-button {
+  background: rgba(51, 65, 85, 0.96);
+  color: var(--text-soft);
+  border-color: rgba(241, 245, 249, 0.12);
+}
+
+.mode-option,
+.round-option,
+.character-option {
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(241, 245, 249, 0.08);
+  color: var(--text-soft);
+}
+
+.mode-option.selected,
+.round-option.selected,
+.character-option.selected {
+  border-color: rgba(244, 197, 66, 0.48);
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.18), rgba(76, 175, 80, 0.14));
+  box-shadow: 0 14px 28px rgba(2, 6, 23, 0.3);
+}
+
+.round-option {
+  min-width: 170px;
+  min-height: 96px;
+  border-radius: 24px;
+  padding: 1rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.round-option span,
+.mode-option span,
+.character-copy {
+  color: rgba(241, 245, 249, 0.78);
+}
+
+.round-option.selected span {
+  color: rgba(241, 245, 249, 0.92);
+}
+
+.simple-mode-toggle {
+  display: grid;
+  gap: 0.18rem;
+  justify-items: start;
+  max-width: 26rem;
+  margin: 1.1rem auto 0;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(241, 245, 249, 0.08);
+}
+
+.simple-mode-toggle input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+}
+
+.simple-mode-toggle span {
+  font-weight: 800;
+  color: var(--text-soft);
+}
+
+.simple-mode-toggle small {
+  color: rgba(241, 245, 249, 0.74);
+  line-height: 1.45;
+}
+
+.character-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.character-option {
+  display: grid;
+  gap: 0.32rem;
+  text-align: left;
+  padding: 1rem;
+  border-radius: 20px;
+  min-height: 152px;
+}
+
+.character-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.character-title {
+  font-size: 1.08rem;
+  color: var(--text-soft);
+}
+
+.character-bonus-chip {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 0.18rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(244, 197, 66, 0.14);
+  color: #f8d56a;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.single-grid {
+  grid-template-columns: 1fr;
+}
+
+.ready-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.ready-stat {
+  padding: 0.85rem 0.7rem;
+  border-radius: 16px;
+  border: 1px solid rgba(241, 245, 249, 0.08);
+  background: rgba(15, 23, 42, 0.82);
+}
+
+.ready-stat span {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.ready-stat strong {
+  font-size: 1.15rem;
+}
+
+.money,
+.ready-stat.money,
+.effect-value.money,
+.delta-chip.money,
+.character-bonus-chip.money {
+  color: #f8d56a;
+}
+
+.environment,
+.ready-stat.environment,
+.effect-value.environment,
+.delta-chip.environment {
+  color: #7be47f;
+}
+
+.trust,
+.ready-stat.trust,
+.effect-value.trust,
+.delta-chip.trust {
+  color: #7fb5f0;
+}
+
+.hud-pill.money {
+  background: rgba(244, 197, 66, 0.15);
+}
+
+.hud-pill.environment {
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.hud-pill.trust {
+  background: rgba(74, 144, 226, 0.15);
+}
+
+.hud-pill.meta,
+.hud-dice {
+  background: rgba(51, 65, 85, 0.92);
+}
+
+.dice-face {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(51, 65, 85, 0.92));
+  color: #f8d56a;
+  border-color: rgba(244, 197, 66, 0.28);
+}
+
+.finance-stable {
+  background: rgba(74, 144, 226, 0.14);
+  color: #d7e8fb;
+}
+
+.finance-caution {
+  background: rgba(244, 197, 66, 0.14);
+  color: #fde9a4;
+}
+
+.finance-critical,
+.finance-debt,
+.finance-crash {
+  background: rgba(159, 71, 56, 0.22);
+  color: #ffd2ca;
+}
+
+.effect-value.positive {
+  color: inherit;
+  filter: brightness(1.1);
+}
+
+.effect-value.negative {
+  color: inherit;
+  filter: saturate(0.8) brightness(0.88);
+}
+
+.effect-list .effect-item:nth-child(1) .effect-value,
+.card-feedback-deltas .delta-chip:nth-child(1) {
+  color: #f8d56a;
+}
+
+.effect-list .effect-item:nth-child(2) .effect-value,
+.card-feedback-deltas .delta-chip:nth-child(2) {
+  color: #7be47f;
+}
+
+.effect-list .effect-item:nth-child(3) .effect-value,
+.card-feedback-deltas .delta-chip:nth-child(3) {
+  color: #7fb5f0;
+}
+
+.decision-button-positive,
+.decision-button-risky,
+.card-feedback {
+  background: rgba(30, 41, 59, 0.98);
+  border-color: rgba(241, 245, 249, 0.08);
+}
+
+.decision-button-positive::before {
+  background: linear-gradient(180deg, #4caf50, #7be47f);
+}
+
+.decision-button-risky::before {
+  background: linear-gradient(180deg, #f4c542, #dba62f);
+}
+
+.player-token {
+  background: linear-gradient(180deg, rgba(244, 197, 66, 0.98), rgba(248, 213, 106, 0.9));
+  color: #0f172a;
+  border-color: rgba(241, 245, 249, 0.92);
+}
+
+@media (max-width: 760px) {
+  .character-picker,
+  .ready-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .simple-mode-toggle {
+    margin-top: 0.95rem;
+  }
+}
+
+/* ===== V2.0.3 UI/UX accessibility refresh ===== */
+body[data-theme="light"] {
+  --ui-bg: #f8fafc;
+  --ui-card: #ffffff;
+  --ui-card-soft: #f8fafc;
+  --ui-text: #0f172a;
+  --ui-text-soft: #334155;
+  --ui-text-muted: #64748b;
+  --ui-border: #e2e8f0;
+  --ui-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  --ui-overlay: rgba(15, 23, 42, 0.44);
+  --bg-main: #f8fafc;
+  --bg-elevated: #ffffff;
+  --bg-soft: #f1f5f9;
+  --border: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --button-primary: #3b82f6;
+  --button-secondary: #ffffff;
+  --money-color: #e6b800;
+  --environment-color: #22c55e;
+  --trust-color: #3b82f6;
+  --font-ui: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 28px;
+  --text-3xl: 36px;
+  --text-4xl: 48px;
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+}
+
+body[data-theme="dark"] {
+  --ui-bg: #0f172a;
+  --ui-card: #1e293b;
+  --ui-card-soft: #273449;
+  --ui-text: #f1f5f9;
+  --ui-text-soft: #e2e8f0;
+  --ui-text-muted: #cbd5e1;
+  --ui-border: #334155;
+  --ui-shadow: 0 14px 36px rgba(2, 6, 23, 0.36);
+  --ui-overlay: rgba(2, 6, 23, 0.68);
+  --bg-main: #0f172a;
+  --bg-elevated: #1e293b;
+  --bg-soft: #273449;
+  --border: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #e2e8f0;
+  --text-muted: #cbd5e1;
+  --button-primary: #3b82f6;
+  --button-secondary: #273449;
+  --money-color: #e6b800;
+  --environment-color: #22c55e;
+  --trust-color: #3b82f6;
+  --font-ui: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 28px;
+  --text-3xl: 36px;
+  --text-4xl: 48px;
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+}
+
+body {
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+/* Design system utility layer */
+.bg-main {
+  background: var(--bg-main) !important;
+}
+
+.bg-elevated {
+  background: var(--bg-elevated) !important;
+}
+
+.bg-soft {
+  background: var(--bg-soft) !important;
+}
+
+.border-default {
+  border: 1px solid var(--border) !important;
+}
+
+.surface-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--ui-shadow);
+}
+
+.surface-soft {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.touch-target {
+  min-height: 48px;
+}
+
+.text-display {
+  font-size: clamp(var(--text-2xl), 6vw, var(--text-4xl));
+  line-height: var(--leading-tight);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.text-screen-title {
+  font-size: clamp(var(--text-xl), 4vw, var(--text-3xl));
+  line-height: var(--leading-tight);
+  font-weight: var(--font-weight-bold);
+}
+
+.text-section-title {
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+  font-weight: var(--font-weight-bold);
+}
+
+.text-card-title {
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+  font-weight: var(--font-weight-bold);
+}
+
+.text-body {
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  font-weight: var(--font-weight-regular);
+}
+
+.text-supporting {
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  font-weight: var(--font-weight-medium);
+}
+
+.text-label {
+  font-size: var(--text-xs);
+  line-height: var(--leading-snug);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+}
+
+.text-stat {
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.text-button {
+  font-size: var(--text-base);
+  line-height: var(--leading-snug);
+  font-weight: var(--font-weight-semibold);
+}
+
+.text-primary {
+  color: var(--text-primary) !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+.stat-money {
+  color: var(--money-color) !important;
+}
+
+.stat-environment {
+  color: var(--environment-color) !important;
+}
+
+.stat-trust {
+  color: var(--trust-color) !important;
+}
+
+.severity-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.severity-warning {
+  color: #b45309 !important;
+}
+
+.severity-danger {
+  color: #b91c1c !important;
+}
+
+.severity-positive {
+  color: #166534 !important;
+}
+
+.app-shell::before,
+.app-shell::after {
+  display: none;
+}
+
+.screen {
+  padding: var(--space-4);
+}
+
+.home-screen,
+.start-screen,
+.character-screen,
+.rounds-screen,
+.rules-screen,
+.end-screen {
+  align-items: center;
+  justify-content: center;
+}
+
+.character-screen.active {
+  display: flex;
+}
+
+.home-card,
+.start-card,
+.end-card,
+.modal-card,
+.panel,
+.board-panel,
+.rules-summary-card,
+.rules-info-card,
+.rules-reminder,
+.mode-detail-card,
+.round-picker,
+.mode-picker-block,
+.year-card,
+.loan-card,
+.investment-card {
+  background: var(--ui-card);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+  box-shadow: var(--ui-shadow);
+}
+
+.home-card,
+.start-card,
+.end-card {
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+}
+
+.eyebrow,
+.step-indicator,
+.summary-label,
+.decision-option-label,
+.status-kicker,
+.center-kicker,
+.dice-label {
+  color: var(--ui-text-muted);
+}
+
+.build-stamp,
+.lead,
+.education-copy,
+.token-picker-note,
+.selected-token-label,
+.decision-option-copy,
+.card-tone,
+.performance-summary,
+.center-purpose,
+.mode-option span,
+.mode-detail-card p,
+.mode-detail-grid strong,
+.rules-reminder p,
+.dice-caption {
+  color: var(--ui-text-soft);
+}
+
+h1,
+h2,
+h3,
+h4,
+.home-subtitle,
+.character-title,
+.mode-option strong,
+.decision-option-title,
+.rules-summary-card strong,
+.rules-info-card h3,
+.rules-reminder h3,
+.mode-detail-card h3,
+.ready-stat strong,
+.picker-label,
+.settings-section h4,
+.settings-header h3,
+.settings-toggle span,
+.settings-range span,
+.settings-select span,
+.secondary-button,
+.round-option,
+.build-stamp {
+  color: var(--ui-text);
+}
+
+.summary-label,
+.decision-option-label,
+.status-kicker,
+.center-kicker,
+.dice-label,
+.effect-item-label,
+.simple-mode-toggle small,
+.settings-note,
+.token-picker-note,
+.selected-token-label {
+  color: var(--ui-text-muted);
+}
+
+.primary-button,
+.secondary-button,
+.round-option,
+.settings-choice,
+.decision-button,
+.mode-option,
+.character-option {
+  min-height: 48px;
+  font-size: var(--text-base);
+  line-height: var(--leading-snug);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-pill);
+}
+
+.primary-button {
+  background: #e6b800;
+  color: #0f172a;
+  border: 1px solid rgba(230, 184, 0, 0.68);
+  box-shadow: 0 10px 24px rgba(230, 184, 0, 0.18);
+}
+
+.secondary-button {
+  background: var(--ui-card-soft);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+}
+
+.primary-button:hover,
+.primary-button:focus-visible,
+.secondary-button:hover,
+.secondary-button:focus-visible,
+.round-option:hover,
+.round-option:focus-visible,
+.settings-choice:hover,
+.settings-choice:focus-visible,
+.mode-option:hover,
+.mode-option:focus-visible,
+.character-option:hover,
+.character-option:focus-visible,
+.decision-button:hover,
+.decision-button:focus-visible {
+  transform: scale(1.02);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+.home-card,
+.start-card,
+.rules-card,
+.rounds-card {
+  width: min(720px, 100%);
+}
+
+.home-card h1,
+.start-card h1 {
+  font-size: clamp(var(--text-2xl), 6vw, var(--text-4xl));
+  line-height: var(--leading-tight);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.lead,
+.education-copy,
+.rules-list li,
+.rules-reminder p,
+.settings-note,
+.decision-option-copy,
+.card-description,
+.card-tone {
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+}
+
+.home-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.simple-mode-toggle,
+.settings-toggle,
+.settings-range,
+.settings-select {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ui-border);
+  background: var(--ui-card-soft);
+  color: var(--ui-text);
+}
+
+.simple-mode-toggle small,
+.settings-note {
+  color: var(--ui-text-muted);
+}
+
+.settings-card {
+  width: min(680px, 96vw);
+  border-radius: var(--radius-xl);
+}
+
+.settings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.settings-section + .settings-section {
+  margin-top: var(--space-4);
+}
+
+.settings-choice-row,
+.settings-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.settings-choice-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.settings-choice {
+  background: var(--ui-card-soft);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.settings-choice.selected {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.settings-select select,
+.settings-range input {
+  width: 100%;
+}
+
+.settings-select select {
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ui-border);
+  background: var(--ui-card);
+  color: var(--ui-text);
+  padding: var(--space-3) var(--space-4);
+}
+
+button,
+label,
+input,
+select,
+option {
+  color: inherit;
+}
+
+.primary-button {
+  color: #0f172a;
+}
+
+.setup-actions .primary-button {
+  color: #ffffff;
+}
+
+.mode-picker,
+.character-picker,
+.round-options {
+  grid-template-columns: 1fr;
+}
+
+.mode-option,
+.character-option,
+.round-option {
+  background: var(--ui-card-soft);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+  box-shadow: none;
+}
+
+.mode-option.selected,
+.character-option.selected,
+.round-option.selected {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.character-icon {
+  font-size: 2rem;
+}
+
+.character-bonus-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--ui-text);
+}
+
+.game-header {
+  display: none;
+}
+
+.gameplay-hud {
+  background: var(--ui-card);
+  border: 1px solid var(--ui-border);
+  padding: var(--space-3);
+  gap: var(--space-3);
+}
+
+.hud-pill {
+  background: var(--ui-card-soft);
+  border: 1px solid var(--ui-border);
+}
+
+.hud-pill.money strong,
+.ready-stat.money strong,
+.effect-value.money,
+.end-stats div:nth-child(2) strong {
+  color: #e6b800;
+}
+
+.hud-pill.environment strong,
+.ready-stat.environment strong,
+.effect-value.environment,
+.end-stats div:nth-child(3) strong {
+  color: #22c55e;
+}
+
+.hud-pill.trust strong,
+.ready-stat.trust strong,
+.effect-value.trust,
+.end-stats div:nth-child(4) strong {
+  color: #3b82f6;
+}
+
+.hud-pill.debt strong,
+#debt-stat,
+#year-debt {
+  color: #b45309;
+}
+
+#year-interest {
+  color: #b45309;
+}
+
+.finance-alert {
+  background: var(--ui-card-soft);
+  color: var(--ui-text);
+  border-color: var(--ui-border);
+}
+
+.finance-alert.finance-caution {
+  border-left: 4px solid #e6b800;
+}
+
+.finance-alert.finance-balanced {
+  border-left: 4px solid #3b82f6;
+}
+
+.finance-alert.finance-risky {
+  border-left: 4px solid #f59e0b;
+}
+
+.finance-alert.finance-critical,
+.finance-alert.finance-debt,
+.finance-alert.finance-collapse {
+  border-left: 4px solid #ef4444;
+}
+
+.loan-card .year-insights {
+  margin: 0 0 var(--space-4);
+}
+
+.modal {
+  background: var(--ui-overlay);
+  backdrop-filter: blur(6px);
+}
+
+.card-modal {
+  align-items: end;
+}
+
+.decision-card {
+  width: min(640px, 95vw);
+  max-width: 95vw;
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  transform: translateY(24px);
+  transition: transform 0.24s ease, opacity 0.24s ease, box-shadow 0.24s ease;
+}
+
+.decision-card.ready,
+.decision-card.resolved {
+  transform: translateY(0);
+}
+
+.decision-card.closing {
+  transform: translateY(16px);
+  opacity: 0;
+}
+
+.decision-card h3,
+#card-title {
+  font-size: clamp(var(--text-lg), 4vw, var(--text-xl));
+  line-height: var(--leading-tight);
+  color: var(--ui-text);
+}
+
+.card-description {
+  margin: 0 0 var(--space-3);
+  color: var(--ui-text);
+}
+
+.card-tone {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--ui-card-soft);
+  border: 1px solid var(--ui-border);
+}
+
+.card-choices {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.decision-button {
+  display: grid;
+  gap: var(--space-2);
+  align-items: start;
+  text-align: left;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--ui-card-soft);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+  box-shadow: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.decision-button::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+}
+
+.decision-button-positive::before {
+  background: #22c55e;
+}
+
+.decision-button-risky::before {
+  background: #f59e0b;
+}
+
+.decision-option-title {
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
+  font-weight: var(--font-weight-bold);
+  color: var(--ui-text);
+}
+
+.effect-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.effect-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--ui-card);
+  border: 1px solid var(--ui-border);
+}
+
+.effect-item-label {
+  font-size: var(--text-sm);
+  color: var(--ui-text-soft);
+}
+
+.effect-value {
+  font-weight: 800;
+}
+
+.card-feedback {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--ui-card-soft);
+  border: 1px solid var(--ui-border);
+}
+
+.card-feedback-title,
+.card-feedback-copy {
+  color: var(--ui-text);
+}
+
+.stat-feedback-layer {
+  top: auto;
+  right: 0.8rem;
+  left: 0.8rem;
+  bottom: 0.9rem;
+}
+
+.stat-feedback-bubble {
+  background: var(--ui-card);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+  box-shadow: var(--ui-shadow);
+}
+
+.stat-feedback-bubble.money {
+  border-left: 5px solid #e6b800;
+}
+
+.stat-feedback-bubble.environment {
+  border-left: 5px solid #22c55e;
+}
+
+.stat-feedback-bubble.trust {
+  border-left: 5px solid #3b82f6;
+}
+
+.stat-feedback-bubble.negative {
+  border-right: 5px solid #ef4444;
+}
+
+.board-panel {
+  padding: var(--space-3);
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.board-tooltip {
+  background: var(--ui-card);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+  box-shadow: var(--ui-shadow);
+}
+
+@media (min-width: 760px) {
+  .home-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mode-picker,
+  .character-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .card-choices,
+  .settings-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 759px) {
+  .screen {
+    padding: var(--space-3);
+  }
+
+  .home-card,
+  .start-card,
+  .end-card,
+  .decision-card,
+  .settings-card {
+    padding: var(--space-4);
+  }
+
+  .settings-choice-row,
+  .ready-stat-grid,
+  .rules-summary-grid,
+  .rules-layout,
+  .home-actions,
+  .setup-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .setup-actions {
+    display: grid;
+  }
+}
+
+/* Mode selection polish */
+.start-screen .setup-card {
+  gap: 1.15rem;
+}
+
+.start-screen .lead {
+  margin-bottom: 1rem;
+}
+
+.mode-picker-block {
+  padding: 1.2rem;
+  gap: 1rem;
+}
+
+.mode-picker-heading {
+  margin-bottom: 1rem;
+}
+
+.mode-picker {
+  gap: 0.9rem;
+}
+
+.mode-option {
+  position: relative;
+  padding: 1.1rem 1rem 1rem 1.1rem;
+  border-width: 1px;
+  border-left-width: 6px;
+  border-left-color: var(--ui-border);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.mode-option strong {
+  font-size: 1.02rem;
+  color: var(--ui-text);
+}
+
+.mode-option span {
+  color: var(--ui-text-soft);
+}
+
+.mode-option[data-mode-tone="classic"] {
+  border-left-color: #3b82f6;
+}
+
+.mode-option[data-mode-tone="wealth"] {
+  border-left-color: #e6b800;
+}
+
+.mode-option[data-mode-tone="conservation"] {
+  border-left-color: #22c55e;
+}
+
+.mode-option[data-mode-tone="community"] {
+  border-left-color: #3b82f6;
+}
+
+.mode-option[data-mode-tone="survival"] {
+  border-left-color: #ef4444;
+}
+
+.mode-option[data-mode-tone="sandbox"] {
+  border-left-color: #94a3b8;
+}
+
+.mode-option[data-mode-tone="education"] {
+  border-left-color: #8b5cf6;
+}
+
+.mode-option.selected {
+  background: #dbeafe;
+  border: 2px solid #3b82f6;
+  transform: scale(1.02);
+  box-shadow: 0 14px 28px rgba(59, 130, 246, 0.18);
+}
+
+body[data-theme="dark"] .mode-option.selected {
+  background: rgba(59, 130, 246, 0.22);
+}
+
+.mode-option.selected strong,
+.mode-option.selected span {
+  color: #0f172a;
+}
+
+body[data-theme="dark"] .mode-option.selected strong,
+body[data-theme="dark"] .mode-option.selected span {
+  color: #f8fbff;
+}
+
+.mode-detail-card {
+  margin-top: 1.1rem;
+  padding: 1.15rem;
+  background: #ffffff;
+  border: 1px solid #dbe4f0;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.mode-detail-card h3,
+.mode-detail-card p,
+.mode-detail-grid strong,
+.mode-detail-grid span {
+  color: #0f172a;
+}
+
+.mode-detail-grid {
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.mode-detail-grid div {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.95rem;
+}
+
+body[data-theme="dark"] .mode-detail-card {
+  background: #ffffff;
+  border-color: #dbe4f0;
+}
+
+body[data-theme="dark"] .lead,
+body[data-theme="dark"] .education-copy,
+body[data-theme="dark"] .character-copy,
+body[data-theme="dark"] #character-description,
+body[data-theme="dark"] #mode-description,
+body[data-theme="dark"] #rules-mode-goal,
+body[data-theme="dark"] #rules-mode-win,
+body[data-theme="dark"] #rules-mode-lose,
+body[data-theme="dark"] .mode-option span,
+body[data-theme="dark"] .mode-detail-card p,
+body[data-theme="dark"] .mode-detail-grid strong,
+body[data-theme="dark"] .decision-option-copy,
+body[data-theme="dark"] .card-tone,
+body[data-theme="dark"] .performance-summary,
+body[data-theme="dark"] .dice-caption {
+  color: #e2e8f0;
+}
+
+body[data-theme="dark"] .summary-label,
+body[data-theme="dark"] .decision-option-label,
+body[data-theme="dark"] .status-kicker,
+body[data-theme="dark"] .center-kicker,
+body[data-theme="dark"] .dice-label,
+body[data-theme="dark"] .effect-item-label,
+body[data-theme="dark"] .simple-mode-toggle small,
+body[data-theme="dark"] .settings-note,
+body[data-theme="dark"] .token-picker-note,
+body[data-theme="dark"] .selected-token-label,
+body[data-theme="dark"] .build-stamp,
+body[data-theme="dark"] .step-indicator,
+body[data-theme="dark"] .eyebrow {
+  color: #cbd5e1;
+}
+
+.setup-actions {
+  margin-top: 1.7rem;
+}
+
+.setup-actions .primary-button {
+  background: #3b82f6;
+  color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 12px 24px rgba(59, 130, 246, 0.22);
+}
+
+.setup-actions .secondary-button {
+  background: transparent;
+  color: var(--ui-text);
+  border: 1.5px solid var(--ui-border);
+  box-shadow: none;
+}
+
+.setup-actions .secondary-button:hover,
+.setup-actions .secondary-button:focus-visible {
+  background: var(--ui-card-soft);
+}
+
+@media (min-width: 760px) {
+  .mode-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Final text contrast overrides */
+.text-primary {
+  color: #0f172a !important;
+}
+
+.text-secondary {
+  color: #334155 !important;
+}
+
+.text-muted {
+  color: #64748b !important;
+}
+
+body[data-theme="light"] .eyebrow,
+body[data-theme="light"] .build-stamp,
+body[data-theme="light"] .step-indicator,
+body[data-theme="light"] .summary-label,
+body[data-theme="light"] .picker-label,
+body[data-theme="light"] .settings-section h4,
+body[data-theme="light"] .settings-header h3,
+body[data-theme="light"] .home-subtitle,
+body[data-theme="light"] .character-title,
+body[data-theme="light"] .mode-option strong,
+body[data-theme="light"] .decision-option-title,
+body[data-theme="light"] .rules-summary-card strong,
+body[data-theme="light"] .rules-info-card h3,
+body[data-theme="light"] .rules-reminder h3,
+body[data-theme="light"] .secondary-button,
+body[data-theme="light"] .round-option,
+body[data-theme="light"] .simple-mode-toggle span,
+body[data-theme="light"] .settings-toggle span,
+body[data-theme="light"] .settings-range span,
+body[data-theme="light"] .settings-select span,
+body[data-theme="light"] label,
+body[data-theme="light"] h1,
+body[data-theme="light"] h2,
+body[data-theme="light"] h3,
+body[data-theme="light"] h4 {
+  color: #0f172a !important;
+  font-weight: 600;
+}
+
+body[data-theme="light"] .lead,
+body[data-theme="light"] .education-copy,
+body[data-theme="light"] .character-copy,
+body[data-theme="light"] #character-description,
+body[data-theme="light"] #mode-description,
+body[data-theme="light"] #rules-mode-goal,
+body[data-theme="light"] #rules-mode-win,
+body[data-theme="light"] #rules-mode-lose,
+body[data-theme="light"] .mode-option span,
+body[data-theme="light"] .mode-detail-card p,
+body[data-theme="light"] .mode-detail-grid strong,
+body[data-theme="light"] .decision-option-copy,
+body[data-theme="light"] .card-description,
+body[data-theme="light"] .card-tone,
+body[data-theme="light"] .performance-summary,
+body[data-theme="light"] .token-picker-note,
+body[data-theme="light"] .selected-token-label {
+  color: #334155 !important;
+}
+
+body[data-theme="light"] .simple-mode-toggle small,
+body[data-theme="light"] .settings-note,
+body[data-theme="light"] .decision-option-label,
+body[data-theme="light"] .status-kicker,
+body[data-theme="light"] .center-kicker,
+body[data-theme="light"] .dice-label,
+body[data-theme="light"] .effect-item-label {
+  color: #64748b !important;
+}
+
+.simple-mode-toggle,
+.settings-toggle,
+.settings-range,
+.settings-select,
+.mode-option,
+.character-option,
+.rules-summary-card,
+.rules-info-card,
+.mode-detail-card,
+.round-option,
+.secondary-button {
+  opacity: 1 !important;
+}
+
+/* Full text hierarchy map */
+body[data-theme="light"] .text-primary,
+body[data-theme="light"] h1,
+body[data-theme="light"] h2,
+body[data-theme="light"] h3,
+body[data-theme="light"] h4,
+body[data-theme="light"] .home-subtitle,
+body[data-theme="light"] .picker-label,
+body[data-theme="light"] .mode-option strong,
+body[data-theme="light"] .character-title,
+body[data-theme="light"] .round-option,
+body[data-theme="light"] .round-option span,
+body[data-theme="light"] .rules-summary-card span,
+body[data-theme="light"] .rules-summary-card strong,
+body[data-theme="light"] .rules-info-card h3,
+body[data-theme="light"] .rules-reminder h3,
+body[data-theme="light"] .ready-stat span,
+body[data-theme="light"] .ready-stat strong,
+body[data-theme="light"] .hud-pill span,
+body[data-theme="light"] .hud-pill strong,
+body[data-theme="light"] .dice-face,
+body[data-theme="light"] .primary-button,
+body[data-theme="light"] .secondary-button,
+body[data-theme="light"] .settings-toggle span,
+body[data-theme="light"] .settings-range span,
+body[data-theme="light"] .settings-select span,
+body[data-theme="light"] .settings-choice,
+body[data-theme="light"] .hud-roll-button,
+body[data-theme="light"] .year-stats span,
+body[data-theme="light"] .year-stats strong,
+body[data-theme="light"] .year-insights strong,
+body[data-theme="light"] .end-stats span,
+body[data-theme="light"] .end-stats strong,
+body[data-theme="light"] .end-breakdown span,
+body[data-theme="light"] .end-breakdown strong,
+body[data-theme="light"] .end-planning-summary strong,
+body[data-theme="light"] .decision-option-title,
+body[data-theme="light"] #card-title,
+body[data-theme="light"] #loan-title,
+body[data-theme="light"] #investment-title,
+body[data-theme="light"] label {
+  color: #0f172a !important;
+}
+
+body[data-theme="light"] .text-secondary,
+body[data-theme="light"] .lead,
+body[data-theme="light"] .education-copy,
+body[data-theme="light"] .mode-option span,
+body[data-theme="light"] .character-copy,
+body[data-theme="light"] #character-description,
+body[data-theme="light"] #mode-description,
+body[data-theme="light"] #rules-mode-goal,
+body[data-theme="light"] #rules-mode-win,
+body[data-theme="light"] #rules-mode-lose,
+body[data-theme="light"] .rules-list li,
+body[data-theme="light"] .rules-reminder p,
+body[data-theme="light"] .rules-mode-meta p,
+body[data-theme="light"] .hud-condition,
+body[data-theme="light"] .hud-status-text,
+body[data-theme="light"] .finance-alert,
+body[data-theme="light"] .dice-caption,
+body[data-theme="light"] .card-description,
+body[data-theme="light"] .card-tone,
+body[data-theme="light"] .decision-option-copy,
+body[data-theme="light"] .effect-item-label,
+body[data-theme="light"] .year-summary,
+body[data-theme="light"] #year-summary,
+body[data-theme="light"] .year-insights p,
+body[data-theme="light"] .performance-summary,
+body[data-theme="light"] #strategy-summary,
+body[data-theme="light"] #education-summary,
+body[data-theme="light"] .settings-note,
+body[data-theme="light"] .token-picker-note,
+body[data-theme="light"] .selected-token-label,
+body[data-theme="light"] #tooltip-description,
+body[data-theme="light"] #loan-description,
+body[data-theme="light"] #investment-description {
+  color: #334155 !important;
+}
+
+body[data-theme="light"] .text-muted,
+body[data-theme="light"] .eyebrow,
+body[data-theme="light"] .build-stamp,
+body[data-theme="light"] .step-indicator,
+body[data-theme="light"] .summary-label,
+body[data-theme="light"] .status-kicker,
+body[data-theme="light"] .center-kicker,
+body[data-theme="light"] .decision-option-label,
+body[data-theme="light"] .dice-label,
+body[data-theme="light"] .simple-mode-toggle small,
+body[data-theme="light"] .settings-section .eyebrow,
+body[data-theme="light"] #modal-place {
+  color: #64748b !important;
+}
+
+body[data-theme="dark"] .text-primary,
+body[data-theme="dark"] h1,
+body[data-theme="dark"] h2,
+body[data-theme="dark"] h3,
+body[data-theme="dark"] h4,
+body[data-theme="dark"] .home-subtitle,
+body[data-theme="dark"] .picker-label,
+body[data-theme="dark"] .mode-option strong,
+body[data-theme="dark"] .character-title,
+body[data-theme="dark"] .round-option,
+body[data-theme="dark"] .round-option span,
+body[data-theme="dark"] .rules-summary-card span,
+body[data-theme="dark"] .rules-summary-card strong,
+body[data-theme="dark"] .rules-info-card h3,
+body[data-theme="dark"] .rules-reminder h3,
+body[data-theme="dark"] .ready-stat span,
+body[data-theme="dark"] .ready-stat strong,
+body[data-theme="dark"] .hud-pill span,
+body[data-theme="dark"] .hud-pill strong,
+body[data-theme="dark"] .dice-face,
+body[data-theme="dark"] .primary-button,
+body[data-theme="dark"] .secondary-button,
+body[data-theme="dark"] .settings-toggle span,
+body[data-theme="dark"] .settings-range span,
+body[data-theme="dark"] .settings-select span,
+body[data-theme="dark"] .settings-choice,
+body[data-theme="dark"] .hud-roll-button,
+body[data-theme="dark"] .year-stats span,
+body[data-theme="dark"] .year-stats strong,
+body[data-theme="dark"] .year-insights strong,
+body[data-theme="dark"] .end-stats span,
+body[data-theme="dark"] .end-stats strong,
+body[data-theme="dark"] .end-breakdown span,
+body[data-theme="dark"] .end-breakdown strong,
+body[data-theme="dark"] .end-planning-summary strong,
+body[data-theme="dark"] .decision-option-title,
+body[data-theme="dark"] #card-title,
+body[data-theme="dark"] #loan-title,
+body[data-theme="dark"] #investment-title,
+body[data-theme="dark"] label {
+  color: #f1f5f9 !important;
+}
+
+body[data-theme="dark"] .text-secondary,
+body[data-theme="dark"] .lead,
+body[data-theme="dark"] .education-copy,
+body[data-theme="dark"] .mode-option span,
+body[data-theme="dark"] .character-copy,
+body[data-theme="dark"] #character-description,
+body[data-theme="dark"] #mode-description,
+body[data-theme="dark"] #rules-mode-goal,
+body[data-theme="dark"] #rules-mode-win,
+body[data-theme="dark"] #rules-mode-lose,
+body[data-theme="dark"] .rules-list li,
+body[data-theme="dark"] .rules-reminder p,
+body[data-theme="dark"] .rules-mode-meta p,
+body[data-theme="dark"] .hud-condition,
+body[data-theme="dark"] .hud-status-text,
+body[data-theme="dark"] .finance-alert,
+body[data-theme="dark"] .dice-caption,
+body[data-theme="dark"] .card-description,
+body[data-theme="dark"] .card-tone,
+body[data-theme="dark"] .decision-option-copy,
+body[data-theme="dark"] .effect-item-label,
+body[data-theme="dark"] #year-summary,
+body[data-theme="dark"] .year-insights p,
+body[data-theme="dark"] .performance-summary,
+body[data-theme="dark"] #strategy-summary,
+body[data-theme="dark"] #education-summary,
+body[data-theme="dark"] .settings-note,
+body[data-theme="dark"] .token-picker-note,
+body[data-theme="dark"] .selected-token-label,
+body[data-theme="dark"] #tooltip-description,
+body[data-theme="dark"] #loan-description,
+body[data-theme="dark"] #investment-description {
+  color: #e2e8f0 !important;
+}
+
+.step-indicator,
+.eyebrow,
+.build-stamp,
+.summary-label,
+.status-kicker,
+.center-kicker,
+.decision-option-label,
+.dice-label {
+  font-size: var(--text-xs);
+  line-height: var(--leading-snug);
+  font-weight: var(--font-weight-semibold);
+}
+
+.picker-label,
+.settings-section h4,
+.settings-header h3,
+.rules-summary-card strong,
+.rules-info-card h3,
+.rules-reminder h3,
+.mode-detail-card h3,
+.character-title,
+.mode-option strong {
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+  font-weight: var(--font-weight-bold);
+}
+
+.hud-pill span,
+.ready-stat span,
+.end-stats span,
+.end-breakdown span,
+.year-stats span {
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  font-weight: var(--font-weight-semibold);
+}
+
+.hud-pill strong,
+.ready-stat strong,
+.year-stats strong,
+.end-stats strong,
+.end-breakdown strong,
+#money-stat,
+#environment-stat,
+#trust-stat,
+#year-counter,
+#turn-counter {
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.hud-condition,
+.hud-status-text,
+.finance-alert,
+.card-description,
+.card-tone,
+.decision-option-copy,
+.settings-note,
+.token-picker-note,
+.selected-token-label,
+.mode-option span,
+.character-copy,
+.lead,
+.education-copy {
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+}
+
+body[data-theme="dark"] .text-muted,
+body[data-theme="dark"] .eyebrow,
+body[data-theme="dark"] .build-stamp,
+body[data-theme="dark"] .step-indicator,
+body[data-theme="dark"] .summary-label,
+body[data-theme="dark"] .status-kicker,
+body[data-theme="dark"] .center-kicker,
+body[data-theme="dark"] .decision-option-label,
+body[data-theme="dark"] .dice-label,
+body[data-theme="dark"] .simple-mode-toggle small,
+body[data-theme="dark"] .settings-section .eyebrow,
+body[data-theme="dark"] #modal-place {
+  color: #cbd5e1 !important;
+}
+
+/* Board light-surface consistency */
+body[data-theme="light"] .board-panel,
+body[data-theme="light"] .board-center,
+body[data-theme="light"] .center-insert,
+body[data-theme="light"] .center-branding,
+body[data-theme="light"] .insert-card,
+body[data-theme="light"] .status-card,
+body[data-theme="light"] .mini-stats-card,
+body[data-theme="light"] .mini-stat {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+body[data-theme="light"] .board-center {
+  background: #f8fafc !important;
+}
+
+body[data-theme="light"] .center-branding,
+body[data-theme="light"] .insert-card,
+body[data-theme="light"] .mini-stat {
+  background: #f1f5f9 !important;
+}
+
+body[data-theme="light"] .board-center h3,
+body[data-theme="light"] .status-card h4,
+body[data-theme="light"] .insert-card h4,
+body[data-theme="light"] .mini-stat strong,
+body[data-theme="light"] #center-message-title,
+body[data-theme="light"] #center-money-mini,
+body[data-theme="light"] #center-environment-mini,
+body[data-theme="light"] #center-trust-mini {
+  color: #0f172a !important;
+}
+
+body[data-theme="light"] .board-center p,
+body[data-theme="light"] .insert-card p,
+body[data-theme="light"] .center-purpose,
+body[data-theme="light"] #center-message-body,
+body[data-theme="light"] .mini-stat span {
+  color: #334155 !important;
+}
+
+/* Gameplay HUD light-theme consistency */
+body[data-theme="light"] .gameplay-hud,
+body[data-theme="light"] .top-hud,
+body[data-theme="light"] .turn-bar,
+body[data-theme="light"] .last-roll-panel,
+body[data-theme="light"] .year-turn-panel,
+body[data-theme="light"] .hud-group,
+body[data-theme="light"] .hud-actions,
+body[data-theme="light"] .hud-dice,
+body[data-theme="light"] .dice-display {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+body[data-theme="light"] .gameplay-hud .hud-pill,
+body[data-theme="light"] .gameplay-hud .meta,
+body[data-theme="light"] .year-turn-panel .hud-pill,
+body[data-theme="light"] .last-roll-panel .hud-pill {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--text-primary) !important;
+}
+
+body[data-theme="light"] .gameplay-hud .label,
+body[data-theme="light"] .top-hud .label,
+body[data-theme="light"] .turn-bar .label,
+body[data-theme="light"] .last-roll-panel .label,
+body[data-theme="light"] .year-turn-panel .label,
+body[data-theme="light"] .hud-pill span,
+body[data-theme="light"] .dice-label {
+  color: var(--text-primary) !important;
+}
+
+body[data-theme="light"] .gameplay-hud .value,
+body[data-theme="light"] .top-hud .value,
+body[data-theme="light"] .turn-bar .value,
+body[data-theme="light"] .last-roll-panel .value,
+body[data-theme="light"] .year-turn-panel .value,
+body[data-theme="light"] .hud-pill strong,
+body[data-theme="light"] #year-counter,
+body[data-theme="light"] #turn-counter,
+body[data-theme="light"] #dice-result {
+  color: var(--text-primary) !important;
+}
+
+body[data-theme="light"] .gameplay-hud .help,
+body[data-theme="light"] .top-hud .help,
+body[data-theme="light"] .turn-bar .help,
+body[data-theme="light"] .last-roll-panel .help,
+body[data-theme="light"] .year-turn-panel .help,
+body[data-theme="light"] .dice-caption,
+body[data-theme="light"] .hud-condition {
+  color: var(--text-secondary) !important;
+}
+
+body[data-theme="light"] .dice-preview,
+body[data-theme="light"] .last-roll-dice,
+body[data-theme="light"] .roll-preview-box,
+body[data-theme="light"] .dice-face,
+body[data-theme="light"] .hud-dice .dice-face {
+  background: var(--bg-soft) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+body[data-theme="light"] .rules-info-card,
+body[data-theme="light"] .rules-summary-card,
+body[data-theme="light"] .ready-stat,
+body[data-theme="light"] .year-card,
+body[data-theme="light"] .year-stats > div,
+body[data-theme="light"] .year-insights,
+body[data-theme="light"] .year-planning-notes {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+body[data-theme="light"] .ready-stat,
+body[data-theme="light"] .year-stats > div,
+body[data-theme="light"] .year-insights,
+body[data-theme="light"] .year-planning-notes {
+  background: var(--bg-soft) !important;
+}
+
+body[data-theme="light"] .ready-stat span,
+body[data-theme="light"] .year-stats span,
+body[data-theme="light"] .year-insights p,
+body[data-theme="light"] .year-event-note,
+body[data-theme="light"] .year-reflection {
+  color: var(--text-secondary) !important;
+}
+
+body[data-theme="light"] .ready-stat strong,
+body[data-theme="light"] .year-stats strong,
+body[data-theme="light"] .year-card h3,
+body[data-theme="light"] #year-title,
+body[data-theme="light"] #year-summary,
+body[data-theme="light"] #year-strongest,
+body[data-theme="light"] #year-weakest,
+body[data-theme="light"] #year-financial-state,
+body[data-theme="light"] #year-investments,
+body[data-theme="light"] #year-loans {
+  color: var(--text-primary) !important;
+}
+
+body[data-theme="light"] .ready-stat.money strong,
+body[data-theme="light"] .ready-stat.environment strong,
+body[data-theme="light"] .ready-stat.trust strong {
+  color: var(--text-primary) !important;
+}
+
+/* Final polish pass */
+body {
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+
+.screen.active {
+  animation: screen-fade-in 0.58s ease-out;
+}
+
+.modal {
+  animation: modal-fade-in 0.42s ease-out;
+}
+
+.home-card,
+.start-card,
+.end-card,
+.settings-card,
+.modal-card,
+.rules-summary-card,
+.rules-info-card,
+.rules-reminder,
+.mode-detail-card,
+.round-picker,
+.mode-picker-block,
+.character-picker,
+.board-panel,
+.panel {
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--ui-shadow) !important;
+}
+
+.home-card,
+.start-card,
+.end-card {
+  padding: var(--space-8);
+  border-radius: var(--radius-xl);
+}
+
+.home-card h1,
+.start-card h1,
+.end-card h2 {
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+}
+
+.home-subtitle,
+.lead,
+.home-lead,
+.rules-reminder p,
+.rules-list li,
+.card-description,
+.card-tone,
+.decision-option-copy,
+.education-copy,
+.performance-summary,
+#strategy-summary,
+#education-summary,
+#loan-description,
+#investment-description,
+#mode-description,
+#character-description,
+#rules-mode-goal,
+#rules-mode-win,
+#rules-mode-lose,
+.token-picker-note,
+.selected-token-label,
+.settings-note,
+.dice-caption,
+.hud-condition,
+.hud-status-text,
+.finance-alert {
+  color: var(--text-secondary) !important;
+}
+
+.eyebrow,
+.build-stamp,
+.step-indicator,
+.summary-label,
+.status-kicker,
+.center-kicker,
+.decision-option-label,
+.dice-label {
+  color: var(--text-muted) !important;
+}
+
+.home-actions,
+.setup-actions,
+.round-options,
+.card-choices,
+.year-actions,
+.settings-choice-row,
+.rules-summary-grid,
+.rules-layout,
+.ready-stat-grid,
+.end-actions {
+  gap: var(--space-4);
+}
+
+.mode-picker-block,
+.round-picker,
+.rules-summary-card,
+.rules-info-card,
+.rules-reminder,
+.mode-detail-card,
+.settings-section,
+.loan-summary,
+.year-insights {
+  border-radius: var(--radius-lg);
+}
+
+.mode-picker,
+.character-picker {
+  gap: var(--space-4);
+}
+
+.mode-option,
+.character-option,
+.round-option {
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06) !important;
+  min-height: 64px;
+}
+
+.mode-option {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+}
+
+.character-option {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  align-content: start;
+  text-align: center;
+}
+
+.character-icon {
+  justify-self: center;
+  margin-bottom: var(--space-2);
+}
+
+.character-title,
+.mode-option strong,
+.decision-option-title,
+.rules-summary-card strong,
+.rules-info-card h3,
+.rules-reminder h3,
+.mode-detail-card h3,
+.settings-header h3,
+.settings-section h4,
+#year-title,
+#loan-title,
+#investment-title,
+#card-title {
+  color: var(--text-primary) !important;
+}
+
+.mode-option span,
+.character-copy,
+.mode-detail-card p,
+.mode-detail-grid strong,
+.rules-mode-meta p,
+.settings-toggle small,
+.settings-select small {
+  color: var(--text-secondary) !important;
+}
+
+.mode-option.selected,
+.character-option.selected,
+.round-option.selected,
+.settings-choice.selected {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14), 0 12px 24px rgba(59, 130, 246, 0.12) !important;
+}
+
+.round-option {
+  min-height: 110px;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.round-option span {
+  display: inline-block;
+  margin-top: var(--space-2);
+  color: var(--text-primary) !important;
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.game-layout {
+  gap: var(--space-4);
+}
+
+.gameplay-hud {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: var(--space-4) !important;
+  gap: var(--space-3) var(--space-4) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+.hud-group {
+  gap: var(--space-3);
+}
+
+.hud-pill,
+.hud-dice,
+.dice-display {
+  background: var(--bg-soft) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: none !important;
+}
+
+.hud-pill {
+  padding: var(--space-3) var(--space-4);
+}
+
+.hud-pill span,
+.hud-pill strong,
+.dice-label,
+.dice-caption,
+#year-counter,
+#turn-counter,
+#dice-result,
+#money-stat,
+#debt-stat,
+#environment-stat,
+#trust-stat {
+  color: var(--text-primary) !important;
+}
+
+.hud-condition,
+.dice-caption,
+.finance-alert,
+#status-text {
+  color: var(--text-secondary) !important;
+}
+
+.finance-alert {
+  background: var(--bg-soft) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+
+.dice-face,
+.hud-dice .dice-face {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--text-primary) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+body[data-theme="light"] .board-panel,
+body[data-theme="light"] .board-center,
+body[data-theme="light"] .center-insert,
+body[data-theme="light"] .center-branding,
+body[data-theme="light"] .insert-card,
+body[data-theme="light"] .status-card,
+body[data-theme="light"] .mini-stats-card,
+body[data-theme="light"] .mini-stat {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+body[data-theme="light"] .board-center {
+  background: var(--bg-main) !important;
+}
+
+body[data-theme="light"] .center-branding,
+body[data-theme="light"] .insert-card,
+body[data-theme="light"] .mini-stat {
+  background: var(--bg-soft) !important;
+}
+
+.decision-card,
+.loan-card,
+.investment-card,
+.year-card {
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12) !important;
+}
+
+.decision-card {
+  width: min(680px, 95vw);
+  max-width: 95vw;
+  padding: var(--space-6);
+}
+
+.decision-card.ready {
+  animation: decision-card-enter 0.4s ease-out forwards;
+}
+
+.decision-card.resolved {
+  animation: decision-card-settle 0.3s ease-out forwards;
+}
+
+.decision-card.closing {
+  animation: decision-card-exit 0.22s ease-in forwards;
+}
+
+.decision-card-header,
+.year-card .year-stats,
+.year-card .year-insights,
+.loan-card .year-insights {
+  margin-bottom: var(--space-4);
+}
+
+.decision-card-header .eyebrow {
+  background: var(--bg-soft) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border);
+}
+
+.card-feedback {
+  background: var(--bg-soft) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  animation: feedback-fade-in 0.3s ease-out;
+}
+
+.decision-button {
+  min-height: 56px;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg) !important;
+}
+
+.decision-button-positive,
+.decision-button-risky {
+  background: var(--bg-soft) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.year-card {
+  padding: var(--space-6);
+}
+
+.year-stats {
+  gap: var(--space-3);
+}
+
+.year-stats > div,
+.year-insights,
+.end-stats div,
+.end-breakdown div,
+.end-planning-summary,
+.rules-summary-card,
+.rules-info-card,
+.rules-reminder,
+.mode-detail-card {
+  background: var(--bg-soft) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.settings-modal .modal-card,
+.settings-card {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.settings-toggle span,
+.settings-range span,
+.settings-select span,
+.settings-choice,
+label,
+.simple-mode-toggle span {
+  color: var(--text-primary) !important;
+}
+
+.settings-note,
+.simple-mode-toggle small {
+  color: var(--text-secondary) !important;
+}
+
+.primary-button,
+.secondary-button,
+.settings-choice,
+.decision-button,
+.round-option,
+.mode-option,
+.character-option {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.primary-button {
+  min-height: 48px;
+  border-radius: var(--radius-pill);
+}
+
+.secondary-button {
+  min-height: 48px;
+  border-radius: var(--radius-pill);
+}
+
+.stat-feedback-bubble {
+  animation: stat-fade-out 1.2s ease forwards;
+}
+
+body[data-theme="light"] .year-modal .modal-card,
+body[data-theme="light"] .year-card,
+body[data-theme="light"] .year-card .year-stats,
+body[data-theme="light"] .year-card .year-insights,
+body[data-theme="light"] .year-card .year-planning-notes,
+body[data-theme="light"] .year-card .year-event-note,
+body[data-theme="light"] .year-card .year-reflection,
+body[data-theme="light"] .rules-screen .rules-summary-card,
+body[data-theme="light"] .rules-screen .rules-info-card,
+body[data-theme="light"] .rules-screen .ready-stat {
+  background: var(--bg-elevated) !important;
+  background-image: none !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08) !important;
+}
+
+body[data-theme="light"] .year-card .year-stats > div,
+body[data-theme="light"] .year-card .year-insights,
+body[data-theme="light"] .year-card .year-planning-notes,
+body[data-theme="light"] .year-card .year-event-note,
+body[data-theme="light"] .year-card .year-reflection,
+body[data-theme="light"] .rules-screen .ready-stat {
+  background: var(--bg-soft) !important;
+  background-image: none !important;
+}
+
+body[data-theme="light"] .year-card span,
+body[data-theme="light"] .year-card p,
+body[data-theme="light"] .rules-screen .rules-summary-card p,
+body[data-theme="light"] .rules-screen .rules-info-card p,
+body[data-theme="light"] .rules-screen .ready-stat span {
+  color: var(--text-secondary) !important;
+}
+
+body[data-theme="light"] .year-card h3,
+body[data-theme="light"] .year-card strong,
+body[data-theme="light"] .rules-screen .rules-summary-card strong,
+body[data-theme="light"] .rules-screen .rules-info-card h3,
+body[data-theme="light"] .rules-screen .ready-stat strong {
+  color: var(--text-primary) !important;
+}
+
+@keyframes screen-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes decision-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes decision-card-settle {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-1px) scale(1.008);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 760px) {
+  .screen {
+    padding: var(--space-3);
+  }
+
+  .home-card,
+  .start-card,
+  .end-card,
+  .decision-card,
+  .loan-card,
+  .investment-card,
+  .year-card {
+    padding: var(--space-4);
+  }
+
+  .home-actions,
+  .setup-actions,
+  .end-actions {
+    gap: var(--space-3);
+  }
+
+  .gameplay-hud {
+    padding: var(--space-3) !important;
+  }
+
+  .hud-group {
+    gap: var(--space-2);
+  }
+
+  .hud-pill {
+    min-width: 0;
+    padding: var(--space-3);
+  }
+
+  .decision-card {
+    width: min(95vw, 680px);
+  }
+
+  .decision-button,
+  .primary-button,
+  .secondary-button,
+  .round-option {
+    min-height: 52px;
+  }
+}
