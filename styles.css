@@ -7034,6 +7034,178 @@ body {
   }
 }
 
+/* Pixel map safety layer: keep terrain art visible after theme/mobile overrides. */
+.game-screen.active .island-grid {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.game-screen.active .island-cell {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+}
+
+.game-screen.active .island-theme-grassland .terrain-grass,
+.game-screen.active .island-theme-grassland .terrain-grassland-healthy {
+  background:
+    url("assets/grassland-tiles/grass.png") center / cover no-repeat,
+    #68b64a !important;
+}
+
+.game-screen.active .island-theme-grassland .terrain-grassland-thriving,
+.game-screen.active .island-theme-grassland .terrain-lush {
+  background:
+    linear-gradient(rgba(111, 211, 61, 0.18), rgba(111, 211, 61, 0.18)),
+    url("assets/grassland-tiles/grass.png") center / cover no-repeat,
+    #7bd256 !important;
+}
+
+.game-screen.active .island-theme-grassland .terrain-grassland-struggling,
+.game-screen.active .island-theme-grassland .terrain-dull-grass {
+  background:
+    linear-gradient(rgba(136, 102, 44, 0.44), rgba(136, 102, 44, 0.44)),
+    url("assets/grassland-tiles/grass.png") center / cover no-repeat,
+    #8e8b3d !important;
+}
+
+.game-screen.active .island-theme-grassland .terrain-grassland-dead,
+.game-screen.active .island-theme-grassland .terrain-dirt,
+.game-screen.active .island-theme-grassland .terrain-dirt-path {
+  background:
+    url("assets/grassland-tiles/dirt-path.png") center / cover no-repeat,
+    #9a6a3b !important;
+}
+
+.game-screen.active .island-theme-grassland .terrain-water,
+.game-screen.active .island-theme-grassland .terrain-shallow-water {
+  background:
+    url("assets/grassland-tiles/water.png") center / cover no-repeat,
+    #22a7c9 !important;
+}
+
+.game-screen.active .island-theme-grassland .terrain-rock,
+.game-screen.active .island-theme-grassland .terrain-cliff-edge {
+  background:
+    url("assets/grassland-tiles/stone.png") center / cover no-repeat,
+    #7c8589 !important;
+}
+
+.game-screen.active .island-theme-desert .terrain-sand {
+  background:
+    url("assets/desert-tiles/sand.png") center / cover no-repeat,
+    #d9b36f !important;
+}
+
+.game-screen.active .island-theme-desert .terrain-dirt,
+.game-screen.active .island-theme-desert .terrain-dirt-path {
+  background:
+    url("assets/desert-tiles/dirt-path.png") center / cover no-repeat,
+    #b98243 !important;
+}
+
+.game-screen.active .island-theme-desert .terrain-water,
+.game-screen.active .island-theme-desert .terrain-shallow-water {
+  background:
+    url("assets/desert-tiles/oasis.png") center / cover no-repeat,
+    #22a7c9 !important;
+}
+
+.game-screen.active .island-theme-desert .terrain-rock,
+.game-screen.active .island-theme-desert .terrain-cliff-edge {
+  background:
+    url("assets/desert-tiles/stone.png") center / cover no-repeat,
+    #8b6a3a !important;
+}
+
+.game-screen.active .island-theme-volcanic .terrain-ash {
+  background:
+    url("assets/volcanic-tiles/ash.png") center / cover no-repeat,
+    #78716c !important;
+}
+
+.game-screen.active .island-theme-volcanic .terrain-basalt,
+.game-screen.active .island-theme-volcanic .terrain-basalt-lush {
+  background:
+    url("assets/volcanic-tiles/basalt.png") center / cover no-repeat,
+    #44403c !important;
+}
+
+.game-screen.active .island-theme-volcanic .terrain-lava {
+  background:
+    url("assets/volcanic-tiles/lava.png") center / cover no-repeat,
+    #3f1d14 !important;
+}
+
+.game-screen.active .island-theme-volcanic .terrain-rock,
+.game-screen.active .island-theme-volcanic .terrain-cliff-edge {
+  background:
+    url("assets/volcanic-tiles/stone.png") center / cover no-repeat,
+    #57534e !important;
+}
+
+.game-screen.active .island-cell::after {
+  background-position: center bottom !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+}
+
+.game-screen.active .island-theme-grassland .object-tree::after {
+  background-image: url("assets/grassland-tiles/tree.png") !important;
+}
+
+.game-screen.active .island-theme-grassland .object-house::after,
+.game-screen.active .island-theme-grassland .object-townhall::after {
+  background-image: url("assets/grassland-tiles/house.png") !important;
+}
+
+.game-screen.active .island-theme-grassland .object-market::after {
+  background-image: url("assets/grassland-tiles/market.png") !important;
+}
+
+.game-screen.active .island-theme-grassland .object-bush::after,
+.game-screen.active .island-theme-grassland .object-flower::after {
+  background-image: url("assets/grassland-tiles/bush.png") !important;
+}
+
+.game-screen.active .island-theme-desert .object-tree::after {
+  background-image: url("assets/desert-tiles/palm.png") !important;
+}
+
+.game-screen.active .island-theme-desert .object-shelter::after {
+  background-image: url("assets/desert-tiles/shelter.png") !important;
+}
+
+.game-screen.active .island-theme-desert .object-market::after {
+  background-image: url("assets/desert-tiles/market.png") !important;
+}
+
+.game-screen.active .island-theme-desert .object-bush::after,
+.game-screen.active .island-theme-desert .object-flower::after {
+  background-image: url("assets/desert-tiles/plant.png") !important;
+}
+
+.game-screen.active .island-theme-volcanic .object-tree::after {
+  background-image: url("assets/volcanic-tiles/tree.png") !important;
+}
+
+.game-screen.active .island-theme-volcanic .object-shelter::after {
+  background-image: url("assets/volcanic-tiles/shelter.png") !important;
+}
+
+.game-screen.active .island-theme-volcanic .object-market::after {
+  background-image: url("assets/volcanic-tiles/market.png") !important;
+}
+
+.game-screen.active .island-theme-volcanic .object-bush::after,
+.game-screen.active .island-theme-volcanic .object-flower::after {
+  background-image: url("assets/volcanic-tiles/shrub.png") !important;
+}
+
 @keyframes screen-fade-in {
   from {
     opacity: 0;

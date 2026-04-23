@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Acts of Conservation</title>
-  <link rel="stylesheet" href="styles.css?v=2026-04-23-2">
+  <link rel="stylesheet" href="styles.css?v=2026-04-23-3">
 </head>
 <body>
   <div class="app-shell">
@@ -566,16 +566,16 @@
 
   <div id="stat-feedback" class="stat-feedback-layer" aria-live="polite" aria-atomic="false"></div>
 
-  <script src="js/islands/island-engine.js?v=2026-04-23-2"></script>
-  <script src="js/data/game-content.js?v=2026-04-23-2"></script>
-  <script src="js/core/game-state.js?v=2026-04-23-2"></script>
-  <script src="js/core/game-modes.js?v=2026-04-23-2"></script>
-  <script src="js/core/game-rules.js?v=2026-04-23-2"></script>
-  <script src="js/ui/game-ui.js?v=2026-04-23-2"></script>
-  <script src="js/app.js?v=2026-04-23-2"></script>
+  <script src="js/islands/island-engine.js?v=2026-04-23-3"></script>
+  <script src="js/data/game-content.js?v=2026-04-23-3"></script>
+  <script src="js/core/game-state.js?v=2026-04-23-3"></script>
+  <script src="js/core/game-modes.js?v=2026-04-23-3"></script>
+  <script src="js/core/game-rules.js?v=2026-04-23-3"></script>
+  <script src="js/ui/game-ui.js?v=2026-04-23-3"></script>
+  <script src="js/app.js?v=2026-04-23-3"></script>
   <script>
     (function () {
-      window.GAME_VERSION = "2.1.21";
+      window.GAME_VERSION = "2.1.22";
 
       function setVersionStatus(text) {
         var stamps = document.querySelectorAll(".build-stamp");
@@ -595,7 +595,7 @@
 
         setVersionStatus("Version " + window.GAME_VERSION);
         var retryScript = document.createElement("script");
-        retryScript.src = "js/app.js?v=2026-04-23-2-retry";
+        retryScript.src = "js/app.js?v=2026-04-23-3-retry";
         document.body.appendChild(retryScript);
       }, 60);
     })();
