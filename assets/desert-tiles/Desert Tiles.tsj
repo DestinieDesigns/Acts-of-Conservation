@@ -1,0 +1,15 @@
+{ "columns":21,
+ "image":"Desert Tile set 1.png",
+ "imageheight":1122,
+ "imagewidth":1402,
+ "margin":0,
+ "name":"Desert Tiles",
+ "spacing":0,
+ "tilecount":357,
+ "tiledversion":"1.12.1",
+ "tileheight":64,
+ "tilewidth":64,
+ "transparentcolor":"#fefefe",
+ "type":"tileset",
+ "version":"1.10"
+}

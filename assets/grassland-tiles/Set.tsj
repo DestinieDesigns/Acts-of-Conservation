@@ -1,0 +1,15 @@
+{ "columns":21,
+ "image":"ChatGPT Image Apr 22, 2026, 09_10_07 PM.png",
+ "imageheight":1122,
+ "imagewidth":1402,
+ "margin":0,
+ "name":"Set",
+ "spacing":0,
+ "tilecount":357,
+ "tiledversion":"1.12.1",
+ "tileheight":64,
+ "tilewidth":64,
+ "transparentcolor":"#fefefe",
+ "type":"tileset",
+ "version":"1.10"
+}

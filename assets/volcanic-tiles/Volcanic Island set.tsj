@@ -1,0 +1,15 @@
+{ "columns":21,
+ "image":"ChatGPT Image Apr 22, 2026, 10_09_36 PM.png",
+ "imageheight":1122,
+ "imagewidth":1402,
+ "margin":0,
+ "name":"Volcanic Island set",
+ "spacing":0,
+ "tilecount":357,
+ "tiledversion":"1.12.1",
+ "tileheight":64,
+ "tilewidth":64,
+ "transparentcolor":"#fefefe",
+ "type":"tileset",
+ "version":"1.10"
+}
