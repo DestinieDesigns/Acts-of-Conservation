@@ -7299,3 +7299,73 @@ body {
     min-height: 52px;
   }
 }
+
+/* Final summary readability guard: keep year and ending text on clear surfaces across themes. */
+.year-card,
+.end-card {
+  background: var(--bg-elevated) !important;
+  background-image: none !important;
+  color: var(--text-primary) !important;
+}
+
+.year-card .year-stats > div,
+.year-card .year-insights,
+.year-card .year-planning-notes,
+.year-card #year-event-note,
+.year-card #year-reflection,
+.end-card .end-stats > div,
+.end-card .end-breakdown > div,
+.end-card .end-planning-summary,
+.end-card .education-copy {
+  background: var(--bg-soft) !important;
+  background-image: none !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+
+.year-card #year-summary,
+.year-card .year-insights strong,
+.year-card .year-stats strong,
+.year-card #year-title,
+.end-card #ending-title,
+.end-card #strategy-summary,
+.end-card .end-stats strong,
+.end-card .end-breakdown strong,
+.end-card .end-planning-summary strong {
+  color: var(--text-primary) !important;
+}
+
+.year-card .eyebrow,
+.end-card .eyebrow,
+.year-card .year-stats span,
+.year-card .year-insights p,
+.end-card .performance-summary,
+.end-card #education-summary,
+.end-card .reflection-line,
+.end-card .end-breakdown span {
+  color: var(--text-secondary) !important;
+}
+
+/* Gameplay center cleanup: once the intro fades, let the island visual fill the board center. */
+.center-intro.fading-out {
+  display: none !important;
+}
+
+.center-intro.fading-out + .island-visual.active {
+  min-height: 100% !important;
+  height: 100% !important;
+}
+
+.game-screen.active .board-center .center-insert {
+  grid-template-rows: 1fr !important;
+  min-height: 0 !important;
+}
+
+.game-screen.active .island-visual.active {
+  width: 100%;
+  min-height: 100% !important;
+  height: 100%;
+  align-content: center !important;
+  padding: clamp(0.45rem, 1vw, 0.8rem) !important;
+}
