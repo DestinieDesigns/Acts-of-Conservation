@@ -7,6 +7,7 @@ window.VOTF_BOOTED = true;
 
   function selectRounds(rounds) {
     state.selectedRounds = rounds;
+    AOC.ui.renderRoundPicker(el, state.selectedRounds, selectRounds);
     AOC.ui.updateUI(el, state);
   }
 
@@ -19,6 +20,11 @@ window.VOTF_BOOTED = true;
         break;
       }
     }
+    AOC.ui.renderModePicker(el, state.selectedMode ? state.selectedMode.id : "", function (nextModeId) {
+      return function () {
+        selectMode(nextModeId);
+      };
+    });
     AOC.ui.updateUI(el, state);
     if (state.selectedMode) {
       AOC.ui.narrateWarning(
@@ -30,14 +36,51 @@ window.VOTF_BOOTED = true;
 
   function selectCharacter(characterId) {
     var i;
+    var character;
 
     for (i = 0; i < AOC.data.characters.length; i += 1) {
       if (AOC.data.characters[i].id === characterId) {
-        state.selectedCharacter = AOC.data.characters[i];
-        state.selectedToken = AOC.data.characters[i];
+        character = AOC.data.characters[i];
+        if (!(character.unlocked || state.unlockedCharacters[character.id])) {
+          state.selectedCharacter = null;
+          state.selectedToken = null;
+          AOC.ui.renderCharacterPicker(el, character.id, function (nextCharacterId) {
+            return function () {
+              selectCharacter(nextCharacterId);
+            };
+          }, state.unlockedCharacters);
+          AOC.ui.updateUI(el, state);
+          AOC.ui.updateCharacterDetails(el, character);
+          AOC.ui.updateStatus(el, character.name + " is locked. " + character.unlockText);
+          return;
+        }
+        state.selectedCharacter = character;
+        state.selectedToken = character;
         break;
       }
     }
+    AOC.ui.renderCharacterPicker(el, state.selectedCharacter ? state.selectedCharacter.id : "", function (nextCharacterId) {
+      return function () {
+        selectCharacter(nextCharacterId);
+      };
+    }, state.unlockedCharacters);
+    AOC.ui.updateUI(el, state);
+  }
+
+  function selectIsland(islandId) {
+    var i;
+
+    for (i = 0; i < AOC.data.islands.length; i += 1) {
+      if (AOC.data.islands[i].id === islandId) {
+        state.selectedIsland = AOC.data.islands[i];
+        break;
+      }
+    }
+    AOC.ui.renderIslandPicker(el, state.selectedIsland ? state.selectedIsland.id : "", function (nextIslandId) {
+      return function () {
+        selectIsland(nextIslandId);
+      };
+    });
     AOC.ui.updateUI(el, state);
   }
 
@@ -64,11 +107,13 @@ window.VOTF_BOOTED = true;
 
   function setTheme(theme) {
     state.theme = theme === "dark" ? "dark" : "light";
+    AOC.storage.write("aoc.theme", state.theme);
     AOC.ui.updateUI(el, state);
   }
 
   function updateVoiceSetting(key, value) {
     state.voiceSettings[key] = value;
+    AOC.storage.write("aoc.voice." + key, value);
     AOC.ui.updateUI(el, state);
   }
 
@@ -119,6 +164,13 @@ window.VOTF_BOOTED = true;
     if (!state.selectedCharacter) {
       return;
     }
+    goToScreen("islandSelect");
+  }
+
+  function continueFromIsland() {
+    if (!state.selectedIsland) {
+      return;
+    }
     goToScreen("roundSelect");
   }
 
@@ -130,28 +182,48 @@ window.VOTF_BOOTED = true;
   }
 
   function startGame() {
-    if (!state.selectedMode || !state.selectedCharacter || !state.selectedRounds) {
+    if (!state.selectedMode || !state.selectedCharacter || !state.selectedIsland || !state.selectedRounds) {
       return;
     }
     resetStateForNewSession();
     applySelectedModeSetup();
+    state.hasGameStarted = true;
     seedInvestmentOffers(4);
     closeSettings();
     goToScreen("playing");
-    AOC.ui.updateStatus(el, state.selectedMode.name + " is active. Roll to move and face new planning challenges.");
-    AOC.ui.setCenterMessage(el, state.selectedMode.name, state.selectedMode.description);
+    AOC.ui.updateStatus(el, state.selectedMode.name + " is active on " + state.selectedIsland.name + ". Roll to move and face new planning challenges.");
+    AOC.ui.setCenterMessage(el, state.selectedIsland.name, state.selectedIsland.description);
+    AOC.ui.updateUI(el, state);
   }
 
   function resetSetupSelections() {
     state.selectedMode = null;
     state.selectedCharacter = null;
     state.selectedToken = null;
+    state.selectedIsland = null;
     state.selectedRounds = null;
+    AOC.ui.renderModePicker(el, "", function (modeId) {
+      return function () {
+        selectMode(modeId);
+      };
+    });
+    AOC.ui.renderCharacterPicker(el, "", function (characterId) {
+      return function () {
+        selectCharacter(characterId);
+      };
+    }, state.unlockedCharacters);
+    AOC.ui.renderIslandPicker(el, "", function (islandId) {
+      return function () {
+        selectIsland(islandId);
+      };
+    });
+    AOC.ui.renderRoundPicker(el, null, selectRounds);
     AOC.ui.updateUI(el, state);
   }
 
   function toggleSimpleMode(enabled) {
     state.simpleMode = !!enabled;
+    AOC.storage.write("aoc.simpleMode", state.simpleMode);
     AOC.ui.updateUI(el, state);
   }
 
@@ -164,8 +236,12 @@ window.VOTF_BOOTED = true;
   }
 
   function applySelectedModeSetup() {
-    var startingStats = AOC.rules.getStartingStatsPreview(state.selectedMode, state.selectedCharacter);
+    var startingStats;
 
+    if (!state.selectedIsland || !AOC.islands.hasConfig(state.selectedIsland)) {
+      state.selectedIsland = AOC.data.islands[0];
+    }
+    startingStats = AOC.rules.getStartingStatsPreview(state.selectedMode, state.selectedCharacter, state.selectedIsland);
     state.stats.money = startingStats.money;
     state.stats.environment = startingStats.environment;
     state.stats.trust = startingStats.trust;
@@ -178,6 +254,7 @@ window.VOTF_BOOTED = true;
     state.promiseTrustPenaltyThisYear = 0;
     state.shortcutDamageThisYear = 0;
     state.yearlyRollCount = 0;
+    state.islandGrid = AOC.rules.createIslandGrid(state);
   }
 
   function collectUnavailableInvestmentIds() {
@@ -229,6 +306,9 @@ window.VOTF_BOOTED = true;
     }
 
     state.isAnimating = true;
+    if (!state.hasGameStarted) {
+      state.hasGameStarted = true;
+    }
     AOC.ui.updateUI(el, state);
     AOC.ui.hideBoardTooltip(el);
     roll = Math.floor(Math.random() * 6) + 1;
@@ -243,6 +323,7 @@ window.VOTF_BOOTED = true;
     completedLoop = false;
     await animateTokenMovement(roll);
     completedLoop = rawPosition >= AOC.data.plots.length || state.position === 0;
+    await handleLandingTileEffects({ isTeleport: false });
 
     plot = AOC.data.plots[state.position];
     scenarioIndex = AOC.rules.pickScenarioIndex(state, state.position);
@@ -279,6 +360,49 @@ window.VOTF_BOOTED = true;
     }
   }
 
+  async function animateTeleportMovement(destinationIndex) {
+    AOC.ui.showTileFeedback(el, state.position, {
+      type: "goToCrisis",
+      feedbackText: "Go to Crisis",
+      message: "Moving to a crisis tile."
+    });
+    await AOC.utils.wait(160);
+    state.position = destinationIndex;
+    AOC.ui.updateUI(el, state);
+    AOC.ui.showTileFeedback(el, state.position, {
+      type: "crisis",
+      feedbackText: "Crisis",
+      message: "Arrived at a crisis tile."
+    });
+    await AOC.utils.wait(260);
+  }
+
+  async function handleLandingTileEffects(options) {
+    var tile = AOC.data.plots[state.position];
+    var result = AOC.rules.handleTile(tile, state, AOC.data, options || {});
+
+    if (!result || result.type === "normal") {
+      return;
+    }
+
+    AOC.ui.showTileFeedback(el, state.position, result);
+    if (result.teleportTo !== undefined && result.teleportTo !== state.position && !(options && options.isTeleport)) {
+      AOC.ui.updateStatus(el, result.message);
+      await animateTeleportMovement(result.teleportTo);
+      await handleLandingTileEffects({ isTeleport: true });
+      return;
+    }
+
+    if (result.effects && ((result.effects.money || 0) !== 0 || (result.effects.environment || 0) !== 0 || (result.effects.trust || 0) !== 0)) {
+      applyEffects(result.effects);
+      AOC.ui.showStatFeedback(el, result.effects);
+      AOC.ui.triggerIslandReaction(el, result.effects);
+      AOC.ui.updateStatus(el, result.message);
+      AOC.ui.updateUI(el, state);
+      await AOC.utils.wait(360);
+    }
+  }
+
   function createChoiceHandler(option) {
     return function () {
       handleChoice(option);
@@ -296,7 +420,8 @@ window.VOTF_BOOTED = true;
   }
 
   function applyEffects(effects) {
-    AOC.rules.applyStatEffects(state.stats, effects);
+    AOC.rules.applyModeStatEffects(state, effects);
+    AOC.rules.mutateIslandGrid(state, effects || {});
   }
 
   function buildYearSummarySnapshot() {
@@ -307,7 +432,8 @@ window.VOTF_BOOTED = true;
     snapshot.debt = Math.round((state.debtOwed || 0) * 100) / 100;
     snapshot.interest = Math.round((state.interestThisYear || 0) * 100) / 100;
     snapshot.financialState = AOC.rules.getMoneyCondition(state.stats.money).label;
-    snapshot.canReviewInvestments = !!(state.availableInvestments.length && !state.investmentPurchasedThisYear && state.loopsCompleted < state.selectedRounds);
+    snapshot.canReviewInvestments = !!(state.availableInvestments.length && !state.investmentPurchasedThisYear &&
+      (!AOC.rules.modeSupportsGameLength(state.selectedMode) || state.loopsCompleted < state.selectedRounds));
     return snapshot;
   }
 
@@ -858,7 +984,7 @@ window.VOTF_BOOTED = true;
     var plot;
     var scenarioObj;
 
-    if (state.loopsCompleted >= state.selectedRounds) {
+    if (AOC.rules.modeSupportsGameLength(state.selectedMode) && state.loopsCompleted >= state.selectedRounds) {
       endGame(AOC.rules.getModeFinalEnding(state));
       return;
     }
@@ -887,6 +1013,7 @@ window.VOTF_BOOTED = true;
     var educationNote;
 
     applyEffects(resolvedOption);
+    AOC.ui.triggerIslandReaction(el, resolvedOption);
     state.history.push({
       turn: state.turnsTaken,
       year: state.loopsCompleted,
@@ -943,7 +1070,7 @@ window.VOTF_BOOTED = true;
       state.awaitingYearSummary = false;
       return;
     }
-    if (state.loopsCompleted >= state.selectedRounds) {
+    if (AOC.rules.modeSupportsGameLength(state.selectedMode) && state.loopsCompleted >= state.selectedRounds) {
       hideYearSummary();
       endGame(AOC.rules.getModeFinalEnding(state));
       return;
@@ -987,7 +1114,7 @@ window.VOTF_BOOTED = true;
       return;
     }
 
-    if (state.loopsCompleted >= state.selectedRounds) {
+    if (AOC.rules.modeSupportsGameLength(state.selectedMode) && state.loopsCompleted >= state.selectedRounds) {
       endGame(AOC.rules.getModeFinalEnding(state));
     }
   }
@@ -1011,7 +1138,8 @@ window.VOTF_BOOTED = true;
     el.performanceSummary.textContent = performanceSummary;
     el.educationSummary.textContent = summary.education;
     if (el.endMode) {
-      el.endMode.textContent = state.selectedMode ? state.selectedMode.name : "Unknown";
+      el.endMode.textContent = (state.selectedMode ? state.selectedMode.name : "Unknown") +
+        (state.selectedIsland ? " on " + state.selectedIsland.name : "");
     }
     if (el.endInvestments) {
       el.endInvestments.textContent = AOC.rules.summarizeInvestments(state.activeInvestments).replace("None yet.", "None activated.");
@@ -1023,13 +1151,43 @@ window.VOTF_BOOTED = true;
     el.endTurns.textContent = state.turnsTaken;
     el.endStrongest.textContent = ranking.strongest.label;
     el.endWeakest.textContent = ranking.weakest.label;
-    el.endToken.textContent = state.selectedToken ? state.selectedToken.icon + " " + state.selectedToken.name : "None";
+    if (state.selectedToken) {
+      el.endToken.innerHTML = "<span class=\"selected-character-badge\"><span class=\"character-sprite selected-character-sprite character-sprite-" +
+        (state.selectedToken.sprite || state.selectedToken.id) + "\" aria-hidden=\"true\"></span><span>" +
+        state.selectedToken.name + "</span></span>";
+    } else {
+      el.endToken.textContent = "None";
+    }
     el.endMoney.textContent = state.stats.money;
     el.endEnvironment.textContent = state.stats.environment;
     el.endTrust.textContent = state.stats.trust;
     el.reflectionLine.textContent = summary.reflection;
     AOC.ui.narrateEnding(state, summary.strategy + " " + summary.education);
+    updateUnlocksFromRun();
     goToScreen("gameOver");
+  }
+
+  function updateUnlocksFromRun() {
+    var changed = false;
+    if (state.stats.environment >= 50 && !state.unlockedCharacters.tree) {
+      state.unlockedCharacters.tree = true;
+      changed = true;
+    }
+    if (state.stats.trust >= 60 && !state.unlockedCharacters.dog) {
+      state.unlockedCharacters.dog = true;
+      changed = true;
+    }
+    if (state.stats.money >= 1300 && !state.unlockedCharacters.car) {
+      state.unlockedCharacters.car = true;
+      changed = true;
+    }
+    if (state.selectedMode && state.selectedMode.id === "survival" && state.loopsCompleted >= state.selectedRounds && !state.unlockedCharacters.cat) {
+      state.unlockedCharacters.cat = true;
+      changed = true;
+    }
+    if (changed) {
+      AOC.storage.write("aoc.unlockedCharacters", state.unlockedCharacters);
+    }
   }
 
   function resetGame() {
@@ -1055,6 +1213,8 @@ window.VOTF_BOOTED = true;
     var selectedMode = state.selectedMode;
     var selectedCharacter = state.selectedCharacter;
     var selectedToken = state.selectedToken;
+    var selectedIsland = state.selectedIsland;
+    var unlockedCharacters = state.unlockedCharacters;
 
     state = AOC.createInitialState();
     state.simpleMode = simpleMode;
@@ -1063,7 +1223,9 @@ window.VOTF_BOOTED = true;
     state.selectedRounds = selectedRounds;
     state.selectedMode = selectedMode;
     state.selectedCharacter = selectedCharacter;
-    state.selectedToken = selectedToken;
+    state.selectedToken = selectedCharacter || selectedToken;
+    state.selectedIsland = selectedIsland;
+    state.unlockedCharacters = unlockedCharacters;
     state.currentScreen = currentScreen || "home";
     AOC.ui.hideChoiceModal(el);
     AOC.ui.hideYearSummary(el);
@@ -1084,6 +1246,7 @@ window.VOTF_BOOTED = true;
       onOpenSettings: openSettings,
       onCloseSettings: closeSettings,
       onSelectMode: selectMode,
+      onSelectIsland: selectIsland,
       onSelectRounds: selectRounds,
       onToggleSimpleMode: toggleSimpleMode,
       onSetTheme: setTheme,
@@ -1092,6 +1255,7 @@ window.VOTF_BOOTED = true;
       onSelectCharacter: selectCharacter,
       onContinueFromMode: continueFromMode,
       onContinueFromCharacter: continueFromCharacter,
+      onContinueFromIsland: continueFromIsland,
       onContinueFromRounds: continueFromRounds,
       onStartGame: startGame,
       onBackToHome: function () {
@@ -1103,6 +1267,9 @@ window.VOTF_BOOTED = true;
       },
       onBackToCharacterSelect: function () {
         goToScreen("characterSelect");
+      },
+      onBackToIslandSelect: function () {
+        goToScreen("islandSelect");
       },
       onBackToRounds: function () {
         goToScreen("roundSelect");
@@ -1128,7 +1295,13 @@ window.VOTF_BOOTED = true;
       return function () {
         selectCharacter(characterId);
       };
+    }, state.unlockedCharacters);
+    AOC.ui.renderIslandPicker(el, state.selectedIsland ? state.selectedIsland.id : "", function (islandId) {
+      return function () {
+        selectIsland(islandId);
+      };
     });
+    AOC.ui.renderRoundPicker(el, state.selectedRounds, selectRounds);
     AOC.ui.renderBoard(el);
     AOC.ui.updateUI(el, state);
     syncVoiceOptions();

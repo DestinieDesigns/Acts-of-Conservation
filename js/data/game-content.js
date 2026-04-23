@@ -473,54 +473,74 @@
     {
       id: "boy",
       name: "Boy",
+      sprite: "boy",
       icon: "👦",
       shortDescription: "Balanced and adaptable.",
       bonusText: "+5 Money, +5 Environment, +5 Trust",
-      bonuses: { money: 5, environment: 5, trust: 5 }
+      bonuses: { money: 5, environment: 5, trust: 5 },
+      unlocked: true,
+      unlockText: "Available from the start."
     },
     {
       id: "girl",
       name: "Girl",
+      sprite: "girl",
       icon: "👧",
       shortDescription: "Calm and community-minded.",
       bonusText: "+10 Trust, +2 Money, +3 Environment",
-      bonuses: { money: 2, environment: 3, trust: 10 }
+      bonuses: { money: 2, environment: 3, trust: 10 },
+      unlocked: true,
+      unlockText: "Available from the start."
     },
     {
       id: "cat",
       name: "Cat",
+      sprite: "cat",
       icon: "🐱",
       shortDescription: "Independent and clever.",
       bonusText: "+8 Money, -2 Trust, +2 Environment",
-      bonuses: { money: 8, environment: 2, trust: -2 }
+      bonuses: { money: 8, environment: 2, trust: -2 },
+      unlocked: false,
+      unlockText: "Unlock by surviving a difficult run."
     },
     {
       id: "dog",
       name: "Dog",
+      sprite: "dog",
       icon: "🐶",
       shortDescription: "Loyal and social.",
       bonusText: "+12 Trust",
-      bonuses: { money: 0, environment: 0, trust: 12 }
+      bonuses: { money: 0, environment: 0, trust: 12 },
+      unlocked: false,
+      unlockText: "Unlock by reaching 60 Community Trust."
     },
     {
       id: "car",
       name: "Car",
+      sprite: "car",
       icon: "🚗",
       shortDescription: "Fast growth, higher impact.",
       bonusText: "+15 Money, -8 Environment, -3 Trust",
-      bonuses: { money: 15, environment: -8, trust: -3 }
+      bonuses: { money: 15, environment: -8, trust: -3 },
+      unlocked: false,
+      unlockText: "Unlock by finishing with high Available Budget."
     },
     {
       id: "tree",
       name: "Tree",
+      sprite: "tree",
       icon: "🌳",
       shortDescription: "Stable and eco-focused.",
       bonusText: "+15 Environment, -5 Money, +2 Trust",
-      bonuses: { money: -5, environment: 15, trust: 2 }
+      bonuses: { money: -5, environment: 15, trust: 2 },
+      unlocked: false,
+      unlockText: "Unlock by reaching 50 Environment."
     }
   ];
 
   data.tokens = data.characters;
+
+  data.islands = AOC.islands ? AOC.islands.list() : [];
 
   data.gameLengths = [
     { id: "super-short", name: "Super Short", years: 5, description: "A quick planning run with fast lessons." },
@@ -531,15 +551,15 @@
 
   data.modes = [
     {
-      id: "classic",
-      name: "Classic",
+      id: "guided",
+      name: "Guided",
       philosophy: "Balance all systems equally.",
       shortDescription: "Balanced gameplay across all systems.",
       description: "A balanced mode where money, environment, and trust must all be managed carefully.",
       goal: "Finish the game with all systems stable.",
       winConditionText: "Finish all selected years with money above 0 and both environment and trust above safe levels.",
       loseConditionText: "Lose only if Money drops below -100, or Environment or Trust reach -100 or lower.",
-      riskText: "Classic feels thoughtful and steady. It rewards balance and punishes overcommitting to a single pillar.",
+      riskText: "Guided feels thoughtful and steady. It rewards balance and punishes overcommitting to a single pillar.",
       startingStats: { money: 1000, environment: 25, trust: 25 },
       modifiers: {
         difficulty: "steady",
@@ -662,8 +682,8 @@
       shortDescription: "Free play with no strict win or lose state.",
       description: "Experiment with the system without pressure.",
       goal: "Explore the consequences of choices freely.",
-      winConditionText: "None. Use the run to learn how the systems interact.",
-      loseConditionText: "None. Natural collapse still appears in the ending for reflection, but it does not stop the run early.",
+      winConditionText: "None. Sandbox is open-ended free play.",
+      loseConditionText: "None. Budget, Environment, and Trust can go high or low without forcing game over.",
       riskText: "Sandbox mode feels open and exploratory. It is the best place to test bold ideas and observe their long-term consequences.",
       startingStats: { money: 1000, environment: 25, trust: 25 },
       modifiers: {
@@ -952,11 +972,27 @@
 
   data.decisionCards = data.rawDecisionCards.map(convertLegacyCard);
 
+  data.tileTypes = {
+    0: "start",
+    3: "community",
+    5: "environment",
+    7: "crisis",
+    9: "community",
+    11: "goToCrisis",
+    13: "environment",
+    15: "crisis",
+    17: "community",
+    19: "environment",
+    21: "goToCrisis",
+    23: "crisis"
+  };
+
   data.plots = data.plots.map(function (plot, index) {
     var plotId = "plot-" + index;
     return {
       id: plotId,
       tileName: plot.tileName,
+      type: data.tileTypes[index] || "normal",
       locationDescription: plot.locationDescription,
       scenarios: plot.scenarios.map(function (scenarioConfig, scenarioIndex) {
         return normalizeScenario(plotId, scenarioIndex, scenarioConfig);

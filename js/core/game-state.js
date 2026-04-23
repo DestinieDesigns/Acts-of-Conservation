@@ -19,6 +19,24 @@
     }
   };
 
+  AOC.storage = {
+    read: function (key, fallback) {
+      try {
+        var value = window.localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+      } catch (error) {
+        return fallback;
+      }
+    },
+    write: function (key, value) {
+      try {
+        window.localStorage.setItem(key, JSON.stringify(value));
+      } catch (error) {
+        return;
+      }
+    }
+  };
+
   AOC.utils = {
     byId: function (id) {
       return document.getElementById(id);
@@ -45,17 +63,17 @@
   AOC.createInitialState = function () {
     return {
       currentScreen: "home",
-      theme: "light",
-      simpleMode: false,
+      theme: AOC.storage.read("aoc.theme", "light"),
+      simpleMode: AOC.storage.read("aoc.simpleMode", false),
       voiceSettings: {
-        enabled: AOC.config.voiceSettings.enabled,
-        readCards: AOC.config.voiceSettings.readCards,
-        readWarnings: AOC.config.voiceSettings.readWarnings,
-        readEndings: AOC.config.voiceSettings.readEndings,
-        rate: AOC.config.voiceSettings.rate,
-        pitch: AOC.config.voiceSettings.pitch,
-        lang: AOC.config.voiceSettings.lang,
-        voiceName: AOC.config.voiceSettings.voiceName
+        enabled: AOC.storage.read("aoc.voice.enabled", AOC.config.voiceSettings.enabled),
+        readCards: AOC.storage.read("aoc.voice.readCards", AOC.config.voiceSettings.readCards),
+        readWarnings: AOC.storage.read("aoc.voice.readWarnings", AOC.config.voiceSettings.readWarnings),
+        readEndings: AOC.storage.read("aoc.voice.readEndings", AOC.config.voiceSettings.readEndings),
+        rate: AOC.storage.read("aoc.voice.rate", AOC.config.voiceSettings.rate),
+        pitch: AOC.storage.read("aoc.voice.pitch", AOC.config.voiceSettings.pitch),
+        lang: AOC.storage.read("aoc.voice.lang", AOC.config.voiceSettings.lang),
+        voiceName: AOC.storage.read("aoc.voice.voiceName", AOC.config.voiceSettings.voiceName)
       },
       stats: {
         money: AOC.config.startingStats.money,
@@ -67,10 +85,15 @@
       turnsTaken: 0,
       yearlyRollCount: 0,
       loopsCompleted: 0,
+      hasGameStarted: false,
+      islandReaction: "",
+      islandGrid: null,
       selectedRounds: null,
       selectedMode: null,
       selectedCharacter: null,
       selectedToken: null,
+      selectedIsland: null,
+      unlockedCharacters: AOC.storage.read("aoc.unlockedCharacters", { boy: true, girl: true }),
       activeInvestments: [],
       availableInvestments: [],
       investmentPurchasedThisYear: false,
@@ -109,6 +132,7 @@
     return {
       homeScreen: null,
       startScreen: null,
+      islandScreen: null,
       roundsScreen: null,
       rulesScreen: null,
       gameScreen: null,
@@ -136,6 +160,14 @@
       characterScreen: null,
       characterNextButton: null,
       characterBackButton: null,
+      islandPicker: null,
+      islandName: null,
+      islandDescription: null,
+      islandStats: null,
+      islandWin: null,
+      islandLose: null,
+      islandNextButton: null,
+      islandBackButton: null,
       roundsNextButton: null,
       roundsBackButton: null,
       rulesStartButton: null,
@@ -162,6 +194,7 @@
       selectedTokenName: null,
       rulesModeName: null,
       rulesCharacterName: null,
+      rulesIslandName: null,
       rulesLengthName: null,
       rulesModeGoal: null,
       rulesModeWin: null,
@@ -246,7 +279,12 @@
       centerMessageBody: null,
       centerMoneyMini: null,
       centerEnvironmentMini: null,
-      centerTrustMini: null
+      centerTrustMini: null,
+      centerIntro: null,
+      islandVisual: null,
+      islandGrid: null,
+      islandStageLabel: null,
+      islandStageMessage: null
     };
   };
 }());

@@ -8,6 +8,8 @@ A browser-based single-player eco strategy board game built as a long-term produ
   Browser shell, screen markup, modals, and script load order.
 - `styles.css`
   Visual system, board layout, HUD, modals, and responsive behavior.
+- `assets/`
+  Pixel art used by island maps and selectable character tokens. See `assets/README.md`.
 - `UI_STYLE_MAP.md`
   Reusable component style map, text hierarchy, surfaces, spacing, and interaction rules for future UI work.
 - `js/data/game-content.js`
@@ -45,3 +47,9 @@ The current UI layer uses reusable theme tokens and utility classes in `styles.c
 - utility classes: `.text-primary`, `.text-secondary`, `.text-muted`, `.bg-main`, `.bg-elevated`, `.bg-soft`, `.surface-card`, `.surface-soft`, `.touch-target`
 
 For new screens and components, use the guidance in `UI_STYLE_MAP.md` first so the interface stays consistent, readable, and mobile-friendly.
+
+## Current Polish Notes
+
+- The board uses responsive guardrails in `styles.css` so tiles, HUD panels, modals, and character tokens stay readable on mobile.
+- Island maps keep fixed layout positions while visual states and sprite skins change through CSS classes.
+- Character selection and board movement share the same token sprite source so the selected character appears on the map.

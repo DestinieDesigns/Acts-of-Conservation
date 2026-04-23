@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Acts of Conservation</title>
-  <link rel="stylesheet" href="styles.css?v=2026-04-20-15">
+  <link rel="stylesheet" href="styles.css?v=2026-04-23-1">
 </head>
 <body>
   <div class="app-shell">
@@ -34,7 +34,7 @@
       <div class="start-card setup-card">
         <p class="eyebrow">Acts of Conservation</p>
         <p class="build-stamp text-muted">Version</p>
-        <p class="step-indicator text-muted">Step 1 of 4</p>
+        <p class="step-indicator text-muted">Step 1 of 5</p>
         <h1>Choose Mode</h1>
         <p class="lead text-secondary">
           Pick the planning philosophy you want this run to follow.
@@ -84,7 +84,7 @@
       <div class="start-card setup-card">
         <p class="eyebrow">Acts of Conservation</p>
         <p class="build-stamp text-muted">Version</p>
-        <p class="step-indicator text-muted">Step 2 of 4</p>
+        <p class="step-indicator text-muted">Step 2 of 5</p>
         <h1>Choose Character</h1>
         <p class="lead text-secondary">
           Pick a guide for your island. Each one gives a small starting bonus.
@@ -94,7 +94,7 @@
           <div class="mode-picker-heading">
             <div>
               <p class="picker-label text-primary">Select Character</p>
-              <p class="token-picker-note text-muted">Only one character can be selected.</p>
+          <p class="token-picker-note text-muted">Only one character can be selected. Locked characters show how to unlock them.</p>
             </div>
           </div>
           <div id="character-picker" class="character-picker" role="radiogroup" aria-label="Character selection"></div>
@@ -118,18 +118,64 @@
       </div>
     </section>
 
+    <section id="island-screen" class="screen island-screen" aria-hidden="true">
+      <div class="start-card setup-card">
+        <p class="eyebrow">Acts of Conservation</p>
+        <p class="build-stamp text-muted">Version</p>
+        <p class="step-indicator text-muted">Step 3 of 5</p>
+        <h1>Choose Island</h1>
+        <p class="lead text-secondary">
+          Pick the world your board will represent. The center island changes as your environment changes.
+        </p>
+
+        <div class="mode-picker-block setup-block">
+          <div class="mode-picker-heading">
+            <div>
+              <p class="picker-label text-primary">Select Island</p>
+              <p class="token-picker-note text-muted">Only one island can be selected.</p>
+            </div>
+          </div>
+          <div id="island-picker" class="island-picker" role="radiogroup" aria-label="Island selection"></div>
+          <div class="mode-detail-card island-overview-card">
+            <p class="status-kicker text-muted">Selected World</p>
+            <h3 id="island-name">Select an island</h3>
+            <p id="island-description">Choose a world to preview its goal and starting pressure.</p>
+            <div class="mode-detail-grid compact-world-summary">
+              <div>
+                <span>Starting Shift</span>
+                <strong id="island-stats">Starting changes will appear here.</strong>
+              </div>
+              <div>
+                <span>World Goal</span>
+                <strong id="island-win">Win guidance will appear here.</strong>
+              </div>
+              <div>
+                <span>World Risk</span>
+                <strong id="island-lose">Risk guidance will appear here.</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="setup-actions">
+          <button id="island-back-button" class="secondary-button" type="button">Back</button>
+          <button id="island-next-button" class="primary-button" disabled>Next</button>
+        </div>
+      </div>
+    </section>
+
     <section id="rounds-screen" class="screen rounds-screen" aria-hidden="true">
       <div class="start-card setup-card rounds-card">
         <p class="eyebrow">Acts of Conservation</p>
         <p class="build-stamp text-muted">Version</p>
-        <p class="step-indicator text-muted">Step 3 of 4</p>
+        <p class="step-indicator text-muted">Step 4 of 5</p>
         <h1>Game Length</h1>
         <p class="lead text-secondary">
           Decide how long you want this island planning run to last.
         </p>
 
         <div class="round-picker setup-block">
-          <p class="picker-label text-primary">Select Length</p>
+          <p class="picker-label text-primary">Select Years</p>
           <p class="token-picker-note text-muted">Only one game length can be selected.</p>
           <div class="round-options" role="radiogroup" aria-label="Game length selection">
             <button class="round-option" data-rounds="5" type="button" role="radio" aria-checked="false">Super Short<br><span>5 Years</span></button>
@@ -150,7 +196,7 @@
       <div class="start-card rules-card">
         <p class="eyebrow">Acts of Conservation</p>
         <p class="build-stamp text-muted">Version</p>
-        <p class="step-indicator text-muted">Step 4 of 4</p>
+        <p class="step-indicator text-muted">Step 5 of 5</p>
         <h1>Ready to Play</h1>
         <p class="lead text-secondary">
           Review your choices, then start the island planning run when you feel ready.
@@ -159,11 +205,15 @@
         <div class="rules-summary-grid">
           <section class="rules-summary-card">
             <span class="summary-label">Mode</span>
-            <strong id="rules-mode-name">Classic</strong>
+            <strong id="rules-mode-name">Guided</strong>
           </section>
           <section class="rules-summary-card">
             <span class="summary-label">Character</span>
             <strong id="rules-character-name">Boy</strong>
+          </section>
+          <section class="rules-summary-card">
+            <span class="summary-label">Island</span>
+            <strong id="rules-island-name">Grassland Island</strong>
           </section>
           <section class="rules-summary-card">
             <span class="summary-label">Years</span>
@@ -516,14 +566,16 @@
 
   <div id="stat-feedback" class="stat-feedback-layer" aria-live="polite" aria-atomic="false"></div>
 
-  <script src="js/data/game-content.js?v=2026-04-20-15"></script>
-  <script src="js/core/game-state.js?v=2026-04-20-15"></script>
-  <script src="js/core/game-rules.js?v=2026-04-20-15"></script>
-  <script src="js/ui/game-ui.js?v=2026-04-20-15"></script>
-  <script src="js/app.js?v=2026-04-20-15"></script>
+  <script src="js/islands/island-engine.js?v=2026-04-23-1"></script>
+  <script src="js/data/game-content.js?v=2026-04-23-1"></script>
+  <script src="js/core/game-state.js?v=2026-04-23-1"></script>
+  <script src="js/core/game-modes.js?v=2026-04-23-1"></script>
+  <script src="js/core/game-rules.js?v=2026-04-23-1"></script>
+  <script src="js/ui/game-ui.js?v=2026-04-23-1"></script>
+  <script src="js/app.js?v=2026-04-23-1"></script>
   <script>
     (function () {
-      window.GAME_VERSION = "2.0.8";
+      window.GAME_VERSION = "2.1.20";
 
       function setVersionStatus(text) {
         var stamps = document.querySelectorAll(".build-stamp");
@@ -543,7 +595,7 @@
 
         setVersionStatus("Version " + window.GAME_VERSION);
         var retryScript = document.createElement("script");
-        retryScript.src = "js/app.js?v=2026-04-20-15-retry";
+        retryScript.src = "js/app.js?v=2026-04-23-1-retry";
         document.body.appendChild(retryScript);
       }, 60);
     })();

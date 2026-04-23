@@ -1087,6 +1087,83 @@ h2 {
   box-shadow: 0 0 0 4px rgba(62, 131, 149, 0.2);
 }
 
+.space[data-tile-type="start"] {
+  border-color: rgba(230, 184, 0, 0.6);
+}
+
+.space[data-tile-type="community"] {
+  border-color: rgba(59, 130, 246, 0.45);
+}
+
+.space[data-tile-type="environment"] {
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+.space[data-tile-type="crisis"],
+.space[data-tile-type="goToCrisis"] {
+  border-color: rgba(239, 68, 68, 0.48);
+}
+
+.tile-effect-float {
+  position: absolute;
+  top: -0.72rem;
+  left: 50%;
+  z-index: 5;
+  padding: 0.28rem 0.52rem;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: tile-effect-rise 1.05s ease-out forwards;
+}
+
+.tile-effect-start {
+  color: #e6b800;
+  border-color: rgba(230, 184, 0, 0.42);
+}
+
+.tile-effect-community {
+  color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.36);
+}
+
+.tile-effect-environment {
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.36);
+}
+
+.tile-effect-crisis,
+.tile-effect-goToCrisis {
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.36);
+}
+
+.tile-flash-start {
+  animation: tile-glow-start 0.9s ease-out;
+}
+
+.tile-flash-community {
+  animation: tile-pulse-community 0.9s ease-out;
+}
+
+.tile-flash-environment {
+  animation: tile-pulse-environment 0.9s ease-out;
+}
+
+.tile-flash-crisis {
+  animation: tile-warning-shake 0.75s ease-out;
+}
+
+.tile-flash-goToCrisis {
+  animation: tile-teleport-flash 0.7s ease-out;
+}
+
 .board-center {
   position: absolute;
   left: 21%;
@@ -1321,6 +1398,94 @@ h2 {
   font-size: 1rem;
   line-height: 1;
   z-index: 2;
+}
+
+.character-sprite,
+.token-sprite {
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: contain;
+  image-rendering: pixelated;
+  color: transparent;
+  overflow: hidden;
+}
+
+.character-sprite {
+  display: block;
+  width: 5rem;
+  height: 5.4rem;
+  justify-self: center;
+  font-size: 0;
+}
+
+.token-icon.character-sprite {
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 3rem;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.selected-character-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  max-width: 100%;
+  line-height: 1.1;
+  vertical-align: middle;
+}
+
+.selected-character-sprite {
+  flex: 0 0 auto;
+  width: 2.35rem;
+  height: 2.7rem;
+}
+
+.player-token.token-sprite {
+  top: 0.26rem;
+  right: 0.26rem;
+  width: 1.85rem;
+  height: 2.1rem;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: 0 10px 16px rgba(17, 24, 39, 0.2);
+  font-size: 0;
+}
+
+.token-moving {
+  animation: token-step-pop 0.22s ease-out;
+}
+
+.character-sprite-boy,
+.token-sprite-boy {
+  background-image: url("assets/character-tokens/boy.png");
+}
+
+.character-sprite-girl,
+.token-sprite-girl {
+  background-image: url("assets/character-tokens/girl.png");
+}
+
+.character-sprite-cat,
+.token-sprite-cat {
+  background-image: url("assets/character-tokens/cat.png");
+}
+
+.character-sprite-dog,
+.token-sprite-dog {
+  background-image: url("assets/character-tokens/dog.png");
+}
+
+.character-sprite-car,
+.token-sprite-car {
+  background-image: url("assets/character-tokens/car.png");
+}
+
+.character-sprite-tree,
+.token-sprite-tree {
+  background-image: url("assets/character-tokens/tree.png");
 }
 
 .modal {
@@ -3641,7 +3806,7 @@ option {
   color: var(--ui-text-soft);
 }
 
-.mode-option[data-mode-tone="classic"] {
+.mode-option[data-mode-tone="guided"] {
   border-left-color: #3b82f6;
 }
 
@@ -4698,6 +4863,1844 @@ label,
   animation: stat-fade-out 1.2s ease forwards;
 }
 
+.board-center .center-insert {
+  position: relative;
+  overflow: hidden;
+  min-height: 230px;
+}
+
+.center-intro {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: var(--space-4);
+  text-align: center;
+  transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease;
+}
+
+.center-intro .center-roll-hint {
+  margin: var(--space-3) auto 0;
+  width: fit-content;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-soft);
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.center-intro.fading-out {
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+}
+
+.island-visual.intro {
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+}
+
+.island-visual.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.island-grid-visual {
+  align-content: center;
+  justify-content: center;
+  padding: clamp(0.5rem, 1.4vw, 0.9rem);
+  image-rendering: pixelated;
+}
+
+.island-grid {
+  position: absolute;
+  inset: 9% 9% 17%;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--grid-size, 6), 1fr);
+  grid-template-rows: repeat(var(--grid-size, 6), 1fr);
+  gap: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: #5f7f93;
+  box-shadow:
+    inset 0 0 0 4px rgba(255, 255, 255, 0.28),
+    inset 0 -12px 0 rgba(15, 23, 42, 0.1),
+    0 14px 28px rgba(15, 23, 42, 0.16);
+  image-rendering: pixelated;
+  overflow: hidden;
+}
+
+.island-cell {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+  border: 0;
+  color: transparent;
+  overflow: visible;
+  image-rendering: pixelated;
+  transition: background-color 0.45s ease, background-image 0.45s ease, opacity 0.45s ease, transform 0.45s ease, filter 0.45s ease;
+}
+
+.island-cell::before,
+.island-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  image-rendering: pixelated;
+  transition: opacity 0.45s ease, transform 0.45s ease, filter 0.45s ease;
+}
+
+.terrain-sand {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.1) 0 12%, transparent 12% 100%),
+    linear-gradient(0deg, rgba(92, 64, 24, 0.08) 0 12%, transparent 12% 100%),
+    #d9b36f;
+  background-size: 14px 14px;
+}
+
+.terrain-dull-grass {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.07) 0 12%, transparent 12% 100%),
+    linear-gradient(0deg, rgba(92, 64, 24, 0.14) 0 12%, transparent 12% 100%),
+    #7f8f45;
+  background-size: 14px 14px;
+}
+
+.terrain-dirt {
+  background:
+    linear-gradient(90deg, rgba(77, 43, 20, 0.12) 0 12%, transparent 12% 100%),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.06) 0 12%, transparent 12% 100%),
+    #9a6a3b;
+  background-size: 14px 14px;
+}
+
+.terrain-dirt-path {
+  background:
+    linear-gradient(90deg, rgba(77, 43, 20, 0.12) 0 12%, transparent 12% 100%),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.06) 0 12%, transparent 12% 100%),
+    #b98243;
+  background-size: 14px 14px;
+}
+
+.terrain-grass {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.1) 0 12%, transparent 12% 100%),
+    linear-gradient(0deg, rgba(22, 101, 52, 0.12) 0 12%, transparent 12% 100%),
+    #68b64a;
+  background-size: 14px 14px;
+}
+
+.terrain-lush {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.13) 0 12%, transparent 12% 100%),
+    linear-gradient(0deg, rgba(20, 83, 45, 0.16) 0 12%, transparent 12% 100%),
+    linear-gradient(135deg, transparent 0 64%, rgba(187, 247, 208, 0.22) 64% 78%, transparent 78%),
+    #2f9d50;
+  background-size: 14px 14px, 14px 14px, 20px 20px, auto;
+}
+
+.terrain-ash {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.08) 0 12%, transparent 12% 100%),
+    linear-gradient(0deg, rgba(15, 23, 42, 0.12) 0 12%, transparent 12% 100%),
+    #78716c;
+  background-size: 14px 14px;
+}
+
+.terrain-lava {
+  background:
+    linear-gradient(90deg, rgba(251, 146, 60, 0.6) 0 10%, transparent 10% 100%),
+    linear-gradient(0deg, rgba(127, 29, 29, 0.54) 0 12%, transparent 12% 100%),
+    #3f1d14;
+  background-size: 14px 14px;
+  animation: lava-flicker 1.2s ease-in-out infinite;
+}
+
+.terrain-basalt {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.08) 0 12%, transparent 12% 100%),
+    linear-gradient(0deg, rgba(0,0,0,0.16) 0 12%, transparent 12% 100%),
+    #44403c;
+  background-size: 14px 14px;
+}
+
+.terrain-basalt-lush {
+  background:
+    linear-gradient(90deg, rgba(134, 239, 172, 0.18) 0 12%, transparent 12% 100%),
+    linear-gradient(0deg, rgba(0,0,0,0.14) 0 12%, transparent 12% 100%),
+    linear-gradient(135deg, transparent 0 64%, rgba(187, 247, 208, 0.18) 64% 78%, transparent 78%),
+    #3f6212;
+  background-size: 14px 14px, 14px 14px, 20px 20px, auto;
+}
+
+.terrain-water,
+.terrain-shallow-water {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.22) 0 12%, transparent 12% 100%),
+    linear-gradient(0deg, rgba(14, 116, 144, 0.18) 0 12%, transparent 12% 100%),
+    #22a7c9;
+  background-size: 14px 14px;
+  animation: water-shimmer 1.8s linear infinite;
+}
+
+.terrain-shallow-water {
+  background-color: #5cc7d8;
+}
+
+.terrain-rock {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.08) 0 12%, transparent 12% 100%),
+    linear-gradient(0deg, rgba(15, 23, 42, 0.16) 0 12%, transparent 12% 100%),
+    #7c8589;
+  background-size: 14px 14px;
+}
+
+.terrain-cliff-edge {
+  background:
+    linear-gradient(90deg, rgba(92, 64, 24, 0.18) 0 18%, transparent 18% 100%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 30%, transparent 30% 100%),
+    #6b4a2b;
+  background-size: 14px 14px;
+}
+
+.object-tree::after,
+.object-building::after,
+.object-house::after,
+.object-townhall::after,
+.object-shelter::after,
+.object-market::after,
+.object-water::after,
+.object-person::after,
+.object-bush::after,
+.object-flower::after,
+.object-rock::after,
+.object-well::after,
+.object-bridge::after,
+.object-fence::after,
+.object-dock::after,
+.object-windmill::after,
+.object-farm::after,
+.object-signpost::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 8%;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.object-tree::after {
+  width: 58%;
+  height: 78%;
+  background:
+    linear-gradient(90deg, transparent 42%, #7c4a26 42% 58%, transparent 58%),
+    linear-gradient(90deg, transparent 14%, #15803d 14% 86%, transparent 86%),
+    linear-gradient(0deg, transparent 38%, #22c55e 38% 86%, transparent 86%);
+  background-size: 100% 100%, 100% 58%, 78% 100%;
+  background-position: center bottom, center 18%, center 0;
+  background-repeat: no-repeat;
+}
+
+.object-tree.object-stage-0::after {
+  width: 28%;
+  height: 34%;
+  background:
+    linear-gradient(90deg, transparent 42%, #7c4a26 42% 58%, transparent 58%),
+    linear-gradient(0deg, transparent 42%, #86efac 42% 78%, transparent 78%);
+  background-size: 100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.object-tree.object-stage-1::after {
+  width: 44%;
+  height: 58%;
+}
+
+.object-tree.object-stage-2::after {
+  width: 70%;
+  height: 88%;
+}
+
+.object-large {
+  z-index: 2;
+}
+
+.object-part {
+  opacity: 0.9;
+  filter: brightness(0.95);
+}
+
+.object-part::after {
+  display: none;
+}
+
+.object-building::after,
+.object-house::after,
+.object-townhall::after,
+.object-shelter::after,
+.object-market::after {
+  width: 68%;
+  height: 54%;
+  background:
+    linear-gradient(90deg, transparent 40%, rgba(15, 23, 42, 0.34) 40% 56%, transparent 56%),
+    linear-gradient(135deg, #b45309 0 35%, #f59e0b 36% 100%);
+  box-shadow: inset 0 -5px 0 rgba(120, 53, 15, 0.35);
+}
+
+.object-house::after {
+  background:
+    linear-gradient(90deg, transparent 40%, rgba(15, 23, 42, 0.34) 40% 56%, transparent 56%),
+    linear-gradient(135deg, #1d4ed8 0 35%, #dbeafe 36% 100%);
+}
+
+.object-townhall::after {
+  width: 78%;
+  height: 66%;
+  background:
+    linear-gradient(90deg, transparent 44%, #1e293b 44% 56%, transparent 56%),
+    linear-gradient(135deg, #1d4ed8 0 32%, #f8fafc 33% 100%);
+  box-shadow: inset 0 -6px 0 rgba(30, 41, 59, 0.18);
+}
+
+.object-shelter::after {
+  background:
+    linear-gradient(90deg, transparent 40%, rgba(15, 23, 42, 0.32) 40% 56%, transparent 56%),
+    linear-gradient(135deg, #92400e 0 35%, #fbbf24 36% 100%);
+}
+
+.object-market::after {
+  background:
+    linear-gradient(90deg, #ef4444 0 25%, #f8fafc 25% 50%, #ef4444 50% 75%, #f8fafc 75%),
+    linear-gradient(135deg, #7c2d12 0 35%, #f97316 36% 100%);
+  background-size: 100% 28%, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: top, bottom;
+}
+
+.object-building.object-stage-0::after,
+.object-shelter.object-stage-0::after,
+.object-market.object-stage-0::after {
+  width: 44%;
+  height: 24%;
+  background: rgba(120, 53, 15, 0.55);
+}
+
+.object-water {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.28) 0 12%, transparent 12% 100%),
+    #38bdf8;
+  background-size: 14px 14px;
+  animation: water-shimmer 1.6s linear infinite;
+}
+
+.object-water::after {
+  inset: 14%;
+  width: auto;
+  height: auto;
+  left: 14%;
+  bottom: 14%;
+  transform: none;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.32) 0 18%, transparent 18% 100%),
+    rgba(14, 165, 233, 0.55);
+  background-size: 10px 10px;
+}
+
+.object-bush::after {
+  width: 56%;
+  height: 42%;
+  bottom: 16%;
+  background:
+    linear-gradient(90deg, transparent 8%, #15803d 8% 92%, transparent 92%),
+    linear-gradient(0deg, transparent 18%, #22c55e 18% 82%, transparent 82%);
+  background-size: 100% 72%, 78% 100%;
+  background-position: center bottom, center center;
+  background-repeat: no-repeat;
+}
+
+.object-flower::after {
+  width: 60%;
+  height: 46%;
+  bottom: 16%;
+  background:
+    linear-gradient(90deg, transparent 0 12%, #facc15 12% 26%, transparent 26% 38%, #f472b6 38% 52%, transparent 52% 64%, #facc15 64% 78%, transparent 78%),
+    linear-gradient(0deg, transparent 0 48%, #16a34a 48% 62%, transparent 62%);
+}
+
+.object-rock::after {
+  width: 56%;
+  height: 44%;
+  bottom: 14%;
+  background:
+    linear-gradient(135deg, #94a3b8 0 38%, #64748b 39% 72%, #475569 73%);
+}
+
+.object-well::after {
+  width: 48%;
+  height: 48%;
+  bottom: 14%;
+  background:
+    linear-gradient(90deg, transparent 34%, #38bdf8 34% 66%, transparent 66%),
+    linear-gradient(0deg, #64748b 0 24%, #94a3b8 24% 78%, #475569 78%);
+}
+
+.object-bridge::after {
+  width: 88%;
+  height: 34%;
+  bottom: 34%;
+  background:
+    linear-gradient(90deg, #7c4a26 0 16%, #a16207 16% 32%, #7c4a26 32% 48%, #a16207 48% 64%, #7c4a26 64% 80%, #a16207 80%),
+    linear-gradient(0deg, transparent 0 38%, #4b2e16 38% 56%, transparent 56%);
+}
+
+.object-fence::after {
+  width: 90%;
+  height: 46%;
+  bottom: 20%;
+  background:
+    linear-gradient(90deg, #7c4a26 0 12%, transparent 12% 32%, #7c4a26 32% 44%, transparent 44% 64%, #7c4a26 64% 76%, transparent 76%),
+    linear-gradient(0deg, transparent 0 42%, #a16207 42% 56%, transparent 56%);
+}
+
+.object-dock::after {
+  width: 88%;
+  height: 48%;
+  bottom: 8%;
+  background:
+    linear-gradient(90deg, #7c4a26 0 18%, #a16207 18% 36%, #7c4a26 36% 54%, #a16207 54% 72%, #7c4a26 72%),
+    linear-gradient(0deg, transparent 0 58%, #4b2e16 58% 70%, transparent 70%);
+}
+
+.object-windmill::after {
+  width: 78%;
+  height: 82%;
+  bottom: 8%;
+  background:
+    linear-gradient(90deg, transparent 46%, #7c4a26 46% 56%, transparent 56%),
+    linear-gradient(45deg, transparent 0 40%, #f8fafc 40% 48%, transparent 48% 52%, #f8fafc 52% 60%, transparent 60%),
+    linear-gradient(0deg, #92400e 0 42%, transparent 42%);
+}
+
+.object-farm::after {
+  width: 82%;
+  height: 62%;
+  bottom: 16%;
+  background:
+    linear-gradient(90deg, rgba(22, 101, 52, 0.55) 0 16%, transparent 16% 28%, rgba(22, 101, 52, 0.55) 28% 44%, transparent 44% 56%, rgba(22, 101, 52, 0.55) 56% 72%, transparent 72%),
+    #8b5e34;
+}
+
+.object-signpost::after {
+  width: 44%;
+  height: 58%;
+  bottom: 14%;
+  background:
+    linear-gradient(90deg, transparent 42%, #7c4a26 42% 58%, transparent 58%),
+    linear-gradient(0deg, transparent 52%, #f59e0b 52% 78%, transparent 78%);
+}
+
+.object-person::after {
+  width: 26%;
+  height: 42%;
+  background:
+    linear-gradient(90deg, transparent 28%, #facc15 28% 72%, transparent 72%),
+    linear-gradient(90deg, transparent 30%, #2563eb 30% 70%, transparent 70%);
+  background-size: 100% 36%, 100% 72%;
+  background-position: top, bottom;
+  background-repeat: no-repeat;
+  animation: person-wander 2.6s ease-in-out infinite;
+}
+
+.overlay-crack::before {
+  background:
+    linear-gradient(135deg, transparent 0 42%, rgba(69, 26, 3, 0.58) 42% 47%, transparent 47%),
+    linear-gradient(45deg, transparent 0 56%, rgba(69, 26, 3, 0.38) 56% 60%, transparent 60%);
+}
+
+.overlay-heat::before {
+  background:
+    linear-gradient(90deg, transparent 0 18%, rgba(239, 68, 68, 0.18) 18% 30%, transparent 30% 70%, rgba(239, 68, 68, 0.16) 70% 82%, transparent 82%),
+    linear-gradient(45deg, transparent 0 42%, rgba(251, 146, 60, 0.46) 42% 47%, transparent 47%);
+}
+
+.island-theme-grassland .island-grid {
+  background: #4f7d39;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 0 0 3px rgba(28, 52, 28, 0.28),
+    inset 0 -12px 0 rgba(55, 31, 13, 0.18),
+    0 16px 30px rgba(15, 23, 42, 0.18);
+}
+
+.island-theme-grassland .terrain-grass,
+.island-theme-grassland .terrain-lush,
+.island-theme-grassland .terrain-dull-grass,
+.island-theme-grassland .terrain-grassland-dead,
+.island-theme-grassland .terrain-grassland-struggling,
+.island-theme-grassland .terrain-grassland-healthy,
+.island-theme-grassland .terrain-grassland-thriving,
+.island-theme-grassland .terrain-dirt,
+.island-theme-grassland .terrain-dirt-path,
+.island-theme-grassland .terrain-water,
+.island-theme-grassland .terrain-shallow-water,
+.island-theme-grassland .terrain-rock,
+.island-theme-grassland .terrain-cliff-edge {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.island-theme-grassland .terrain-grass {
+  background-image: url("assets/grassland-tiles/grass.png");
+}
+
+.island-theme-grassland .terrain-grassland-dead {
+  background-image:
+    linear-gradient(rgba(104, 67, 32, 0.62), rgba(104, 67, 32, 0.62)),
+    url("assets/grassland-tiles/dirt-path.png");
+  filter: saturate(0.56) brightness(0.76);
+}
+
+.island-theme-grassland .terrain-grassland-struggling {
+  background-image:
+    linear-gradient(rgba(136, 102, 44, 0.44), rgba(136, 102, 44, 0.44)),
+    url("assets/grassland-tiles/grass.png");
+  filter: saturate(0.68) brightness(0.84);
+}
+
+.island-theme-grassland .terrain-grassland-healthy {
+  background-image:
+    linear-gradient(rgba(74, 148, 48, 0.08), rgba(74, 148, 48, 0.08)),
+    url("assets/grassland-tiles/grass.png");
+  filter: saturate(1.08) brightness(1.02);
+}
+
+.island-theme-grassland .terrain-lush,
+.island-theme-grassland .terrain-grassland-thriving {
+  background-image:
+    linear-gradient(rgba(111, 211, 61, 0.18), rgba(111, 211, 61, 0.18)),
+    url("assets/grassland-tiles/grass.png");
+  filter: saturate(1.28) brightness(1.1);
+}
+
+.island-theme-grassland .terrain-dull-grass {
+  background-image:
+    linear-gradient(rgba(99, 91, 36, 0.38), rgba(99, 91, 36, 0.38)),
+    url("assets/grassland-tiles/grass.png");
+  filter: saturate(0.72) brightness(0.86);
+}
+
+.island-theme-grassland .terrain-dirt,
+.island-theme-grassland .terrain-dirt-path {
+  background-image: url("assets/grassland-tiles/dirt-path.png");
+}
+
+.island-theme-grassland .terrain-water,
+.island-theme-grassland .terrain-shallow-water,
+.island-theme-grassland .object-water {
+  background-image: url("assets/grassland-tiles/water.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation: none;
+}
+
+.island-theme-grassland.stage-grassland-dead .terrain-water,
+.island-theme-grassland.stage-grassland-dead .terrain-shallow-water,
+.island-theme-grassland.stage-grassland-dead .object-water {
+  background-image:
+    linear-gradient(rgba(103, 71, 35, 0.7), rgba(103, 71, 35, 0.7)),
+    url("assets/grassland-tiles/dirt-path.png");
+  filter: saturate(0.48) brightness(0.72);
+}
+
+.island-theme-grassland.stage-grassland-struggling .terrain-water,
+.island-theme-grassland.stage-grassland-struggling .terrain-shallow-water,
+.island-theme-grassland.stage-grassland-struggling .object-water,
+.island-theme-grassland.stage-grass .terrain-water,
+.island-theme-grassland.stage-grass .terrain-shallow-water,
+.island-theme-grassland.stage-grass .object-water {
+  background-image:
+    linear-gradient(rgba(96, 105, 58, 0.42), rgba(96, 105, 58, 0.42)),
+    url("assets/grassland-tiles/water.png");
+  filter: saturate(0.68) brightness(0.82);
+}
+
+.island-theme-grassland.stage-grassland-healthy .terrain-water,
+.island-theme-grassland.stage-grassland-healthy .terrain-shallow-water,
+.island-theme-grassland.stage-grassland-healthy .object-water,
+.island-theme-grassland.stage-grassland-thriving .terrain-water,
+.island-theme-grassland.stage-grassland-thriving .terrain-shallow-water,
+.island-theme-grassland.stage-grassland-thriving .object-water {
+  filter: saturate(1.18) brightness(1.08);
+}
+
+.island-theme-grassland .terrain-rock,
+.island-theme-grassland .terrain-cliff-edge {
+  background-image: url("assets/grassland-tiles/stone.png");
+}
+
+.island-theme-grassland .object-tree::after,
+.island-theme-grassland .object-house::after,
+.island-theme-grassland .object-townhall::after,
+.island-theme-grassland .object-market::after,
+.island-theme-grassland .object-bush::after,
+.island-theme-grassland .object-flower::after {
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: contain;
+  box-shadow: none;
+}
+
+.island-theme-grassland .object-tree::after {
+  width: 112%;
+  height: 128%;
+  bottom: 0;
+  background-image: url("assets/grassland-tiles/tree.png");
+}
+
+.island-theme-grassland .object-tree.object-stage-0::after {
+  width: 62%;
+  height: 72%;
+}
+
+.island-theme-grassland .object-tree.object-stage-1::after {
+  width: 92%;
+  height: 108%;
+}
+
+.island-theme-grassland .object-tree.object-stage-2::after {
+  width: 126%;
+  height: 142%;
+}
+
+.island-theme-grassland .object-house::after,
+.island-theme-grassland .object-townhall::after {
+  width: 142%;
+  height: 132%;
+  bottom: -4%;
+  background-image: url("assets/grassland-tiles/house.png");
+}
+
+.island-theme-grassland .object-market::after {
+  width: 136%;
+  height: 118%;
+  bottom: -2%;
+  background-image: url("assets/grassland-tiles/market.png");
+}
+
+.island-theme-grassland .object-bush::after,
+.island-theme-grassland .object-flower::after {
+  width: 110%;
+  height: 92%;
+  bottom: -2%;
+  background-image: url("assets/grassland-tiles/bush.png");
+}
+
+.island-theme-grassland.stage-grassland-dead .object-tree::after {
+  opacity: 0.12;
+  transform: translateX(-50%) scale(0.74);
+  filter: grayscale(1) sepia(0.8) saturate(0.5) brightness(0.55);
+}
+
+.island-theme-grassland.stage-grassland-struggling .object-tree::after,
+.island-theme-grassland.stage-grass .object-tree::after {
+  opacity: 0.72;
+  transform: translateX(-50%) scale(0.78);
+  filter: saturate(0.68) brightness(0.82);
+}
+
+.island-theme-grassland.stage-grassland-healthy .object-tree::after,
+.island-theme-grassland.stage-grassland-thriving .object-tree::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  filter: saturate(1.12) brightness(1.04);
+}
+
+.island-theme-grassland.stage-grassland-dead .object-bush::after,
+.island-theme-grassland.stage-grassland-dead .object-flower::after,
+.island-theme-grassland.stage-grassland-struggling .object-bush::after,
+.island-theme-grassland.stage-grassland-struggling .object-flower::after,
+.island-theme-grassland.stage-grass .object-bush::after,
+.island-theme-grassland.stage-grass .object-flower::after {
+  opacity: 0;
+  transform: translateX(-50%) scale(0.72);
+}
+
+.island-theme-grassland.stage-grassland-healthy .object-bush::after,
+.island-theme-grassland.stage-grassland-healthy .object-flower::after,
+.island-theme-grassland.stage-grassland-thriving .object-bush::after,
+.island-theme-grassland.stage-grassland-thriving .object-flower::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+.island-theme-grassland.stage-grassland-thriving .island-cell[data-object=""]::before {
+  inset: 46% 12% 10%;
+  opacity: 0.34;
+  background-image: url("assets/grassland-tiles/bush.png");
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.island-theme-desert .island-grid {
+  background: #d6a75e;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 0 0 3px rgba(107, 71, 28, 0.3),
+    inset 0 -12px 0 rgba(91, 55, 24, 0.2),
+    0 16px 30px rgba(15, 23, 42, 0.18);
+}
+
+.island-theme-desert .terrain-sand,
+.island-theme-desert .terrain-dirt,
+.island-theme-desert .terrain-dirt-path,
+.island-theme-desert .terrain-grass,
+.island-theme-desert .terrain-lush,
+.island-theme-desert .terrain-water,
+.island-theme-desert .terrain-shallow-water,
+.island-theme-desert .terrain-rock,
+.island-theme-desert .terrain-cliff-edge {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.island-theme-desert .terrain-sand {
+  background-image: url("assets/desert-tiles/sand.png");
+}
+
+.island-theme-desert .terrain-dirt,
+.island-theme-desert .terrain-dirt-path {
+  background-image: url("assets/desert-tiles/dirt-path.png");
+}
+
+.island-theme-desert .terrain-grass {
+  background-image:
+    linear-gradient(rgba(91, 146, 54, 0.16), rgba(91, 146, 54, 0.16)),
+    url("assets/desert-tiles/sand.png");
+  filter: saturate(1.08) brightness(1.02);
+}
+
+.island-theme-desert .terrain-lush {
+  background-image:
+    linear-gradient(rgba(56, 140, 73, 0.24), rgba(56, 140, 73, 0.24)),
+    url("assets/desert-tiles/sand.png");
+  filter: saturate(1.16) brightness(1.04);
+}
+
+.island-theme-desert .terrain-water,
+.island-theme-desert .terrain-shallow-water,
+.island-theme-desert .object-water {
+  background-image: url("assets/desert-tiles/oasis.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation: none;
+}
+
+.island-theme-desert .terrain-rock,
+.island-theme-desert .terrain-cliff-edge {
+  background-image: url("assets/desert-tiles/stone.png");
+}
+
+.island-theme-desert .object-tree::after,
+.island-theme-desert .object-shelter::after,
+.island-theme-desert .object-market::after,
+.island-theme-desert .object-bush::after,
+.island-theme-desert .object-flower::after {
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: contain;
+  box-shadow: none;
+}
+
+.island-theme-desert .object-tree::after {
+  width: 112%;
+  height: 136%;
+  bottom: -2%;
+  background-image: url("assets/desert-tiles/palm.png");
+}
+
+.island-theme-desert .object-tree.object-stage-0::after {
+  width: 58%;
+  height: 76%;
+}
+
+.island-theme-desert .object-tree.object-stage-1::after {
+  width: 88%;
+  height: 112%;
+}
+
+.island-theme-desert .object-tree.object-stage-2::after {
+  width: 120%;
+  height: 146%;
+}
+
+.island-theme-desert .object-shelter::after {
+  width: 142%;
+  height: 132%;
+  bottom: -4%;
+  background-image: url("assets/desert-tiles/shelter.png");
+}
+
+.island-theme-desert .object-market::after {
+  width: 140%;
+  height: 126%;
+  bottom: -4%;
+  background-image: url("assets/desert-tiles/market.png");
+}
+
+.island-theme-desert .object-bush::after,
+.island-theme-desert .object-flower::after {
+  width: 106%;
+  height: 92%;
+  bottom: -2%;
+  background-image: url("assets/desert-tiles/plant.png");
+}
+
+.island-theme-volcanic .island-grid {
+  background: #3f3f46;
+  border-color: rgba(239, 68, 68, 0.34);
+  border-radius: 10px;
+  box-shadow:
+    inset 0 0 0 3px rgba(24, 24, 27, 0.38),
+    inset 0 -12px 0 rgba(127, 29, 29, 0.24),
+    0 16px 30px rgba(15, 23, 42, 0.2);
+}
+
+.island-theme-volcanic .terrain-ash,
+.island-theme-volcanic .terrain-basalt,
+.island-theme-volcanic .terrain-basalt-lush,
+.island-theme-volcanic .terrain-lava,
+.island-theme-volcanic .terrain-rock,
+.island-theme-volcanic .terrain-cliff-edge {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.island-theme-volcanic .terrain-ash {
+  background-image: url("assets/volcanic-tiles/ash.png");
+}
+
+.island-theme-volcanic .terrain-basalt {
+  background-image: url("assets/volcanic-tiles/basalt.png");
+}
+
+.island-theme-volcanic .terrain-basalt-lush {
+  background-image:
+    linear-gradient(rgba(70, 140, 78, 0.16), rgba(70, 140, 78, 0.16)),
+    url("assets/volcanic-tiles/basalt.png");
+  filter: saturate(1.12) brightness(1.04);
+}
+
+.island-theme-volcanic .terrain-lava {
+  background-image: url("assets/volcanic-tiles/lava.png");
+  animation: lava-flicker 1.2s ease-in-out infinite;
+}
+
+.island-theme-volcanic .terrain-rock,
+.island-theme-volcanic .terrain-cliff-edge {
+  background-image: url("assets/volcanic-tiles/stone.png");
+}
+
+.island-theme-volcanic .object-tree::after,
+.island-theme-volcanic .object-shelter::after,
+.island-theme-volcanic .object-market::after,
+.island-theme-volcanic .object-bush::after,
+.island-theme-volcanic .object-flower::after {
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: contain;
+  box-shadow: none;
+}
+
+.island-theme-volcanic .object-tree::after {
+  width: 110%;
+  height: 132%;
+  bottom: -2%;
+  background-image: url("assets/volcanic-tiles/tree.png");
+}
+
+.island-theme-volcanic .object-tree.object-stage-0::after {
+  width: 58%;
+  height: 74%;
+}
+
+.island-theme-volcanic .object-tree.object-stage-1::after {
+  width: 88%;
+  height: 108%;
+}
+
+.island-theme-volcanic .object-tree.object-stage-2::after {
+  width: 120%;
+  height: 142%;
+}
+
+.island-theme-volcanic .object-shelter::after {
+  width: 140%;
+  height: 130%;
+  bottom: -4%;
+  background-image: url("assets/volcanic-tiles/shelter.png");
+}
+
+.island-theme-volcanic .object-market::after {
+  width: 140%;
+  height: 126%;
+  bottom: -4%;
+  background-image: url("assets/volcanic-tiles/market.png");
+}
+
+.island-theme-volcanic .object-bush::after,
+.island-theme-volcanic .object-flower::after {
+  width: 106%;
+  height: 92%;
+  bottom: -2%;
+  background-image: url("assets/volcanic-tiles/shrub.png");
+}
+
+.player-token.token-sprite {
+  top: 0.26rem !important;
+  right: 0.26rem !important;
+  width: 1.85rem !important;
+  height: 2.1rem !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  background-position: center bottom !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  box-shadow: 0 10px 16px rgba(17, 24, 39, 0.2) !important;
+  color: transparent !important;
+}
+
+.player-token.token-sprite-boy {
+  background-image: url("assets/character-tokens/boy.png") !important;
+}
+
+.player-token.token-sprite-girl {
+  background-image: url("assets/character-tokens/girl.png") !important;
+}
+
+.player-token.token-sprite-cat {
+  background-image: url("assets/character-tokens/cat.png") !important;
+}
+
+.player-token.token-sprite-dog {
+  background-image: url("assets/character-tokens/dog.png") !important;
+}
+
+.player-token.token-sprite-car {
+  background-image: url("assets/character-tokens/car.png") !important;
+}
+
+.player-token.token-sprite-tree {
+  background-image: url("assets/character-tokens/tree.png") !important;
+}
+
+@media (max-width: 760px) {
+  .player-token.token-sprite {
+    top: 0.18rem !important;
+    right: 0.18rem !important;
+    width: 1.35rem !important;
+    height: 1.55rem !important;
+  }
+}
+
+.cell-changed {
+  animation: cell-pop 0.46s ease-out;
+}
+
+.reaction-positive .island-grid {
+  animation: grid-good-pulse 0.75s ease-out;
+}
+
+.reaction-negative .island-grid {
+  animation: grid-bad-shake 0.55s ease-out;
+}
+
+.mode-picker,
+.character-picker,
+.island-picker,
+.round-options {
+  display: block;
+}
+
+.carousel-shell {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 52px;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.carousel-card {
+  min-height: 180px;
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+  animation: carousel-card-in 0.28s ease-out;
+}
+
+.island-world-card {
+  display: grid;
+  gap: var(--space-4);
+  min-height: 560px;
+  padding: clamp(1rem, 2.4vw, 1.5rem);
+  text-align: left;
+  border: 2px solid rgba(59, 130, 246, 0.14);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.98)),
+    var(--bg-elevated);
+  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.14);
+  transform-origin: center;
+  animation: island-card-swap 0.34s ease-out;
+}
+
+.island-world-card.selected {
+  border-color: rgba(59, 130, 246, 0.52);
+  box-shadow: 0 26px 52px rgba(59, 130, 246, 0.18);
+}
+
+.island-world-grassland {
+  background:
+    linear-gradient(180deg, rgba(236, 253, 245, 0.9), rgba(255, 255, 255, 0.98)),
+    var(--bg-elevated);
+}
+
+.island-world-desert {
+  background:
+    linear-gradient(180deg, rgba(254, 243, 199, 0.88), rgba(255, 255, 255, 0.98)),
+    var(--bg-elevated);
+}
+
+.island-world-volcanic {
+  background:
+    linear-gradient(180deg, rgba(254, 226, 226, 0.78), rgba(255, 255, 255, 0.98)),
+    var(--bg-elevated);
+}
+
+.island-preview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 0;
+  min-height: 145px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 3px solid rgba(15, 23, 42, 0.14);
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.28);
+  image-rendering: pixelated;
+}
+
+.island-preview span {
+  position: relative;
+  min-height: 34px;
+  image-rendering: pixelated;
+}
+
+.island-preview-grassland span {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.12) 0 18%, transparent 18%),
+    #5fbf52;
+  background-size: 12px 12px;
+}
+
+.island-preview-grassland span:nth-child(3n)::after,
+.island-preview-grassland span:nth-child(7)::after {
+  content: "";
+  position: absolute;
+  left: 28%;
+  bottom: 10%;
+  width: 46%;
+  height: 68%;
+  background:
+    linear-gradient(90deg, transparent 42%, #7c4a26 42% 58%, transparent 58%),
+    linear-gradient(90deg, transparent 14%, #15803d 14% 86%, transparent 86%),
+    linear-gradient(0deg, transparent 38%, #22c55e 38% 86%, transparent 86%);
+  background-size: 100% 100%, 100% 58%, 78% 100%;
+  background-position: center bottom, center 18%, center 0;
+  background-repeat: no-repeat;
+}
+
+.island-preview-desert span {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.16) 0 16%, transparent 16%),
+    #d9b36f;
+  background-size: 12px 12px;
+}
+
+.island-preview-desert span:nth-child(4n)::after,
+.island-preview-desert span:nth-child(6)::after {
+  content: "";
+  position: absolute;
+  inset: 18%;
+  background:
+    linear-gradient(135deg, transparent 0 42%, rgba(69, 26, 3, 0.52) 42% 48%, transparent 48%),
+    linear-gradient(45deg, transparent 0 58%, rgba(69, 26, 3, 0.38) 58% 63%, transparent 63%);
+}
+
+.island-preview-volcanic span {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.08) 0 14%, transparent 14%),
+    #44403c;
+  background-size: 12px 12px;
+}
+
+.island-preview-volcanic span:nth-child(2n)::after,
+.island-preview-volcanic span:nth-child(11)::after {
+  content: "";
+  position: absolute;
+  inset: 34% 0;
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.45);
+}
+
+.island-card-header {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.island-card-header strong {
+  color: var(--text-primary);
+  font-size: clamp(1.45rem, 4vw, 2rem);
+  font-weight: var(--weight-extrabold);
+  line-height: 1;
+}
+
+.island-card-header em {
+  color: var(--text-secondary);
+  font-style: normal;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.difficulty-badge {
+  width: fit-content;
+  padding: 0.42rem 0.72rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+}
+
+.difficulty-beginner {
+  background: #dcfce7;
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.difficulty-medium {
+  background: #fef3c7;
+  border-color: rgba(245, 158, 11, 0.38);
+}
+
+.difficulty-hard {
+  background: #fee2e2;
+  border-color: rgba(239, 68, 68, 0.38);
+}
+
+.island-card-description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.45;
+}
+
+.island-stat-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.island-stat-preview span {
+  padding: 0.52rem 0.68rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.money-chip {
+  color: #8a6d00;
+}
+
+.environment-chip {
+  color: #15803d;
+}
+
+.trust-chip {
+  color: #1d4ed8;
+}
+
+.island-card-info-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.island-card-info-grid section {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.island-card-info-grid span {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.island-card-info-grid strong {
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  line-height: 1.35;
+}
+
+.island-overview-card {
+  margin-top: var(--space-4);
+  opacity: 0.94;
+}
+
+.compact-world-summary {
+  grid-template-columns: 1fr;
+}
+
+.carousel-arrow {
+  min-height: 52px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.carousel-arrow:hover,
+.carousel-arrow:focus-visible {
+  border-color: var(--button-primary);
+  transform: translateY(-1px);
+}
+
+.carousel-dots {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--border);
+}
+
+.carousel-dot.active {
+  width: 22px;
+  background: var(--button-primary);
+}
+
+.locked-badge {
+  display: inline-flex;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: var(--space-2) auto 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.character-option.locked {
+  opacity: 1;
+  filter: grayscale(0.18);
+}
+
+.character-option.locked .character-icon {
+  opacity: 0.72;
+}
+
+.island-visual {
+  position: relative;
+  display: grid;
+  align-content: end;
+  min-height: 210px;
+  overflow: hidden;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, #e0f2fe 0%, #fef3c7 52%, #d6b06f 100%);
+  transition: opacity 0.5s ease, transform 0.5s ease, filter 0.55s ease, background 0.55s ease, border-color 0.3s ease;
+}
+
+.island-visual > div {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.island-terrain {
+  background:
+    radial-gradient(circle at 25% 68%, rgba(120, 83, 40, 0.22), transparent 18%),
+    radial-gradient(circle at 72% 70%, rgba(80, 120, 70, 0.18), transparent 20%);
+}
+
+.island-cracks {
+  opacity: 0;
+  background:
+    linear-gradient(35deg, transparent 0 44%, rgba(91, 55, 24, 0.42) 45% 46%, transparent 47% 100%),
+    linear-gradient(125deg, transparent 0 55%, rgba(91, 55, 24, 0.34) 56% 57%, transparent 58% 100%);
+}
+
+.island-water {
+  opacity: 0.15;
+  background: radial-gradient(ellipse at 50% 78%, rgba(59, 130, 246, 0.72), transparent 28%);
+  animation: water-shimmer 3.8s ease-in-out infinite;
+}
+
+.island-grass {
+  opacity: 0;
+  transform: scale(0.5);
+  transform-origin: center bottom;
+  animation: grass-sway 2.8s ease-in-out infinite;
+}
+
+.grass-a {
+  background: radial-gradient(circle at 30% 65%, rgba(34, 197, 94, 0.78), transparent 10%);
+}
+
+.grass-b {
+  background: radial-gradient(circle at 56% 56%, rgba(34, 197, 94, 0.72), transparent 12%);
+  animation-delay: 0.35s;
+}
+
+.grass-c {
+  background: radial-gradient(circle at 74% 68%, rgba(22, 163, 74, 0.72), transparent 11%);
+  animation-delay: 0.7s;
+}
+
+.island-tree {
+  position: absolute;
+  width: 28px;
+  height: 42px;
+  opacity: 0;
+  transform: translateY(10px) scale(0.2);
+  transform-origin: center bottom;
+  transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.2, 1.45, 0.4, 1);
+}
+
+.island-tree::before,
+.island-tree::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.island-tree::before {
+  bottom: 0;
+  width: 5px;
+  height: 20px;
+  border-radius: var(--radius-pill);
+  background: #7c4a26;
+}
+
+.island-tree::after {
+  top: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: inset 0 -5px 0 rgba(21, 128, 61, 0.25);
+  animation: tree-sway 3.2s ease-in-out infinite;
+}
+
+.tree-a {
+  left: 25%;
+  top: 38%;
+}
+
+.tree-b {
+  left: 58%;
+  top: 30%;
+  transition-delay: 0.1s;
+}
+
+.tree-c {
+  left: 72%;
+  top: 48%;
+  transition-delay: 0.2s;
+}
+
+.island-building {
+  position: absolute;
+  bottom: 22%;
+  width: 34px;
+  height: 28px;
+  border-radius: 6px 6px 3px 3px;
+  opacity: 0;
+  transform: translateY(10px);
+  background: #f8fafc;
+  border: 2px solid rgba(15, 23, 42, 0.16);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.12);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.island-building::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  top: -10px;
+  height: 10px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: #e6b800;
+}
+
+.building-a {
+  left: 16%;
+}
+
+.building-b {
+  right: 17%;
+}
+
+.island-person {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  opacity: 0;
+  background: #3b82f6;
+  box-shadow: 0 7px 0 rgba(59, 130, 246, 0.55);
+}
+
+.person-a {
+  left: 30%;
+  top: 62%;
+  animation: person-walk-a 8s linear infinite;
+}
+
+.person-b {
+  left: 62%;
+  top: 62%;
+  animation: person-walk-b 9s linear infinite;
+}
+
+.person-c {
+  left: 46%;
+  top: 50%;
+  animation: person-walk-c 11s linear infinite;
+}
+
+.island-birds {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 35% 22%, rgba(15, 23, 42, 0.45) 0 2px, transparent 3px),
+    radial-gradient(circle at 52% 18%, rgba(15, 23, 42, 0.45) 0 2px, transparent 3px),
+    radial-gradient(circle at 68% 24%, rgba(15, 23, 42, 0.45) 0 2px, transparent 3px);
+  animation: birds-drift 7s ease-in-out infinite;
+}
+
+.island-dust {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 20% 64%, rgba(202, 138, 4, 0.32), transparent 6%),
+    radial-gradient(circle at 74% 70%, rgba(202, 138, 4, 0.28), transparent 8%),
+    radial-gradient(circle at 48% 76%, rgba(202, 138, 4, 0.24), transparent 7%);
+  animation: dust-float 4s ease-in-out infinite;
+}
+
+.island-wildlife {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 38% 38%, rgba(15, 23, 42, 0.5) 0 2px, transparent 3px),
+    radial-gradient(circle at 68% 36%, rgba(15, 23, 42, 0.5) 0 2px, transparent 3px);
+}
+
+.island-feedback-overlay {
+  opacity: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
+.island-visual strong,
+.island-visual span {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.82);
+  color: #0f172a;
+}
+
+.island-visual.active .island-stage-message {
+  display: none;
+}
+
+.island-visual strong {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.island-visual span {
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  color: #334155;
+}
+
+.stage-dead,
+.stage-cracked {
+  background: linear-gradient(180deg, #d6c0a3 0%, #b88b56 62%, #7c4a26 100%);
+}
+
+.stage-dead .island-water,
+.stage-cracked .island-water,
+.stage-dead .island-grass {
+  opacity: 0;
+}
+
+.env-critical,
+.combo-depleted {
+  filter: saturate(0.52) brightness(0.9);
+}
+
+.env-critical .island-cracks,
+.env-damaged .island-cracks {
+  opacity: 0.8;
+}
+
+.env-critical .island-dust,
+.env-damaged .island-dust {
+  opacity: 0.82;
+}
+
+.stage-small-life .grass-a,
+.stage-recovery .grass-a {
+  --growth-scale: 0.68;
+  opacity: 0.32;
+}
+
+.stage-grass .grass-a,
+.stage-grass .grass-b,
+.stage-growing .grass-a,
+.stage-growing .grass-b {
+  --growth-scale: 0.86;
+  opacity: 0.56;
+}
+
+.stage-lush .island-grass,
+.stage-paradise .island-grass,
+.combo-thriving .island-grass {
+  --growth-scale: 1.04;
+  opacity: 0.82;
+}
+
+.stage-grass .tree-a {
+  opacity: 0.75;
+  transform: translateY(0) scale(0.42);
+}
+
+.stage-growing .tree-a,
+.stage-growing .tree-b {
+  opacity: 0.9;
+  transform: translateY(0) scale(0.72);
+}
+
+.stage-lush .island-tree,
+.stage-paradise .island-tree,
+.combo-thriving .island-tree {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.budget-mid .building-a,
+.budget-high .island-building {
+  opacity: 1;
+  transform: translateY(0);
+  animation: build-rise 0.55s ease-out;
+}
+
+.budget-low .building-a {
+  opacity: 0.55;
+  transform: translateY(2px);
+}
+
+.budget-debt .island-building {
+  opacity: 0.24;
+  filter: grayscale(0.65);
+}
+
+.trust-mid .person-a,
+.trust-high .person-a,
+.trust-high .person-b,
+.trust-high .person-c,
+.combo-thriving .island-person {
+  opacity: 1;
+}
+
+.trust-low .person-a {
+  opacity: 0.42;
+}
+
+.trust-broken .island-person {
+  opacity: 0;
+}
+
+.stage-lush .island-water,
+.stage-paradise .island-water {
+  opacity: 0.52;
+}
+
+.stage-grass .island-water {
+  opacity: 0.24;
+  transform: scale(0.78);
+}
+
+.stage-growing .island-water {
+  opacity: 0.38;
+  transform: scale(0.92);
+}
+
+.stage-paradise .island-wildlife {
+  opacity: 1;
+}
+
+.stage-paradise .island-birds,
+.combo-thriving .island-birds {
+  opacity: 1;
+}
+
+.reaction-positive {
+  animation: island-positive-pulse 0.65s ease-out;
+}
+
+.reaction-negative {
+  animation: island-negative-shake 0.42s ease-out;
+}
+
+.reaction-positive .island-feedback-overlay {
+  animation: positive-glow 0.75s ease-out;
+}
+
+.reaction-negative .island-feedback-overlay {
+  animation: negative-flash 0.65s ease-out;
+}
+
+@keyframes carousel-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes island-card-swap {
+  from {
+    opacity: 0;
+    transform: translateX(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes grass-sway {
+  0%, 100% { transform: translateX(0) scale(var(--growth-scale, 1)); }
+  50% { transform: translateX(2px) scale(var(--growth-scale, 1)); }
+}
+
+@keyframes tree-sway {
+  0%, 100% { transform: translateX(-50%) rotate(-1deg); }
+  50% { transform: translateX(-50%) rotate(2deg); }
+}
+
+@keyframes water-shimmer {
+  0%, 100% { filter: brightness(1); transform: scale(0.96); }
+  50% { filter: brightness(1.18); transform: scale(1.02); }
+}
+
+@keyframes build-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dust-float {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(6px) translateY(-4px); }
+}
+
+@keyframes birds-drift {
+  0%, 100% { transform: translateX(-8px); }
+  50% { transform: translateX(10px) translateY(-3px); }
+}
+
+@keyframes person-walk-a {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(48px, -14px); }
+}
+
+@keyframes person-walk-b {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-52px, 12px); }
+}
+
+@keyframes person-walk-c {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(28px, 22px); }
+}
+
+@keyframes island-positive-pulse {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.015); }
+  100% { transform: scale(1); }
+}
+
+@keyframes island-negative-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-2px); }
+}
+
+@keyframes positive-glow {
+  0% { opacity: 0; background: rgba(34, 197, 94, 0); }
+  35% { opacity: 1; background: rgba(34, 197, 94, 0.16); }
+  100% { opacity: 0; background: rgba(34, 197, 94, 0); }
+}
+
+@keyframes negative-flash {
+  0% { opacity: 0; background: rgba(239, 68, 68, 0); }
+  35% { opacity: 1; background: rgba(239, 68, 68, 0.12); }
+  100% { opacity: 0; background: rgba(239, 68, 68, 0); }
+}
+
+@keyframes tile-effect-rise {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.92);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.03);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -22px) scale(1);
+  }
+}
+
+@keyframes tile-glow-start {
+  0% { box-shadow: 0 0 0 0 rgba(230, 184, 0, 0); }
+  40% { box-shadow: 0 0 0 7px rgba(230, 184, 0, 0.3), 0 12px 26px rgba(230, 184, 0, 0.2); }
+  100% { box-shadow: 0 0 0 0 rgba(230, 184, 0, 0); }
+}
+
+@keyframes tile-pulse-community {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+  45% { box-shadow: 0 0 0 7px rgba(59, 130, 246, 0.24), 0 10px 24px rgba(59, 130, 246, 0.16); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+@keyframes tile-pulse-environment {
+  0% { filter: saturate(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  45% { filter: saturate(1.25) sepia(0.12); box-shadow: 0 0 0 7px rgba(34, 197, 94, 0.22), 0 10px 24px rgba(120, 83, 45, 0.14); }
+  100% { filter: saturate(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+@keyframes tile-warning-shake {
+  0%, 100% { transform: translateX(0); }
+  18% { transform: translateX(-3px); box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.18); }
+  36% { transform: translateX(3px); }
+  54% { transform: translateX(-2px); }
+  72% { transform: translateX(2px); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+@keyframes tile-teleport-flash {
+  0% { opacity: 1; transform: scale(1); }
+  35% { opacity: 0.62; transform: scale(0.94); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.2); }
+  100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+@keyframes token-step-pop {
+  0% { transform: translateY(4px) scale(0.92); }
+  62% { transform: translateY(-3px) scale(1.06); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes cell-pop {
+  0% { transform: scale(0.72); opacity: 0.45; }
+  62% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes water-shimmer {
+  from { background-position: 0 0; }
+  to { background-position: 12px 0; }
+}
+
+@keyframes lava-flicker {
+  0%, 100% { filter: brightness(1) saturate(1); }
+  50% { filter: brightness(1.18) saturate(1.22); }
+}
+
+@keyframes person-wander {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(2px, -1px); }
+}
+
+@keyframes grid-good-pulse {
+  0% { filter: saturate(1); }
+  45% { filter: saturate(1.32) brightness(1.08); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.18), 0 14px 28px rgba(15, 23, 42, 0.16); }
+  100% { filter: saturate(1); }
+}
+
+@keyframes grid-bad-shake {
+  0%, 100% { transform: translateX(0); filter: saturate(1); }
+  25% { transform: translateX(-3px); filter: saturate(0.72); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-2px); }
+}
+
+.island-visual .island-grid {
+  inset: 9% 9% 17%;
+}
+
 body[data-theme="light"] .year-modal .modal-card,
 body[data-theme="light"] .year-card,
 body[data-theme="light"] .year-card .year-stats,
@@ -4739,6 +6742,250 @@ body[data-theme="light"] .rules-screen .rules-summary-card strong,
 body[data-theme="light"] .rules-screen .rules-info-card h3,
 body[data-theme="light"] .rules-screen .ready-stat strong {
   color: var(--text-primary) !important;
+}
+
+/* Final polish pass: keep the board, setup flow, and modals readable across small screens. */
+html,
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.app-shell {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.screen {
+  min-height: 100dvh;
+}
+
+.home-card,
+.start-card,
+.end-card,
+.modal-card {
+  max-width: calc(100vw - 2rem);
+}
+
+.primary-button,
+.secondary-button,
+.decision-button,
+.round-option,
+.settings-choice,
+.carousel-arrow {
+  min-height: 44px;
+  overflow-wrap: anywhere;
+}
+
+.space {
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+.space-name,
+.space-badge,
+.hud-pill span,
+.hud-pill strong,
+.hud-condition,
+.character-title,
+.character-copy,
+.character-bonus-chip,
+.rules-summary-card strong,
+.mode-detail-grid strong {
+  overflow-wrap: anywhere;
+}
+
+.space-name {
+  hyphens: auto;
+}
+
+.gameplay-hud,
+.hud-group,
+.home-actions,
+.setup-actions,
+.end-actions,
+.card-choices {
+  min-width: 0;
+}
+
+.board-panel {
+  width: min(100%, 1080px);
+}
+
+.board {
+  width: min(100%, 72dvh, 860px);
+}
+
+@media (max-width: 760px) {
+  .screen {
+    padding: 0.75rem;
+  }
+
+  .home-card,
+  .start-card,
+  .end-card,
+  .modal-card {
+    max-width: calc(100vw - 1.5rem);
+    padding: 1rem !important;
+    border-radius: 18px !important;
+  }
+
+  .setup-actions,
+  .home-actions,
+  .end-actions,
+  .card-choices {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .setup-actions .primary-button,
+  .setup-actions .secondary-button,
+  .home-actions .primary-button,
+  .home-actions .secondary-button,
+  .end-actions .primary-button,
+  .end-actions .secondary-button,
+  .card-choices .decision-button {
+    width: 100%;
+  }
+
+  .game-header {
+    margin-bottom: 0.35rem;
+  }
+
+  .game-header h2 {
+    margin-bottom: 0;
+    font-size: 1.25rem;
+  }
+
+  .gameplay-hud {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 0.45rem !important;
+  }
+
+  .hud-group {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .hud-actions {
+    justify-content: stretch;
+  }
+
+  .hud-pill,
+  .hud-dice,
+  .hud-roll-button {
+    width: 100%;
+    min-width: 0 !important;
+  }
+
+  .hud-roll-button,
+  .hud-dice {
+    grid-column: 1 / -1;
+  }
+
+  .board-panel {
+    width: 100%;
+    min-height: auto;
+    padding: 0.55rem !important;
+    border-radius: 16px !important;
+  }
+
+  .board {
+    width: min(100%, 92vw, 76dvh);
+    max-height: none;
+  }
+
+  .space {
+    padding: 0.28rem !important;
+    border-width: 1px !important;
+    border-radius: 10px !important;
+  }
+
+  .space.corner {
+    border-radius: 14px !important;
+  }
+
+  .space-name {
+    font-size: 0.58rem !important;
+    line-height: 1.05 !important;
+    -webkit-line-clamp: 2;
+  }
+
+  .space-index,
+  .space-badge {
+    font-size: 0.48rem !important;
+  }
+
+  .space-badge {
+    padding: 0.18rem 0.3rem !important;
+  }
+
+  .board-center {
+    padding: 0.45rem !important;
+    border-radius: 14px !important;
+  }
+
+  .center-insert,
+  .board-center .center-insert {
+    min-height: 0 !important;
+  }
+
+  .island-grid {
+    inset: 8% 8% 14% !important;
+    border-radius: 8px !important;
+  }
+
+  .island-stage-label {
+    font-size: 0.62rem !important;
+  }
+
+  .modal {
+    padding: 0.75rem;
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
+  .decision-card,
+  .year-card,
+  .loan-card,
+  .investment-card {
+    width: 100%;
+    max-height: calc(100dvh - 1.5rem);
+    overflow-y: auto;
+  }
+
+  .rules-summary-grid,
+  .rules-layout,
+  .mode-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .character-sprite {
+    width: 4rem;
+    height: 4.4rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .hud-group {
+    grid-template-columns: 1fr;
+  }
+
+  .space-name {
+    font-size: 0.52rem !important;
+  }
+
+  .space-badge {
+    display: none;
+  }
+
+  .player-token.token-sprite {
+    width: 1.1rem !important;
+    height: 1.3rem !important;
+  }
 }
 
 @keyframes screen-fade-in {

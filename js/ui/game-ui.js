@@ -43,6 +43,18 @@
     return html;
   }
 
+  function getCharacterSpriteClass(character) {
+    return "character-sprite-" + ((character && (character.sprite || character.id)) || "boy");
+  }
+
+  function renderSelectedCharacterBadge(character) {
+    if (!character) {
+      return "-";
+    }
+    return "<span class=\"selected-character-badge\"><span class=\"character-sprite selected-character-sprite " +
+      getCharacterSpriteClass(character) + "\" aria-hidden=\"true\"></span><span>" + character.name + "</span></span>";
+  }
+
   function getChoicePreview(choice) {
     if (choice.outcomes && choice.outcomes.length > 0) {
       return choice.outcomes[0];
@@ -108,6 +120,15 @@
       el.characterScreen = AOC.utils.byId("character-screen");
       el.characterNextButton = AOC.utils.byId("character-next-button");
       el.characterBackButton = AOC.utils.byId("character-back-button");
+      el.islandScreen = AOC.utils.byId("island-screen");
+      el.islandPicker = AOC.utils.byId("island-picker");
+      el.islandName = AOC.utils.byId("island-name");
+      el.islandDescription = AOC.utils.byId("island-description");
+      el.islandStats = AOC.utils.byId("island-stats");
+      el.islandWin = AOC.utils.byId("island-win");
+      el.islandLose = AOC.utils.byId("island-lose");
+      el.islandNextButton = AOC.utils.byId("island-next-button");
+      el.islandBackButton = AOC.utils.byId("island-back-button");
       el.roundsNextButton = AOC.utils.byId("rounds-next-button");
       el.roundsBackButton = AOC.utils.byId("rounds-back-button");
       el.rulesStartButton = AOC.utils.byId("rules-start-button");
@@ -129,6 +150,7 @@
       el.characterBonus = AOC.utils.byId("character-bonus");
       el.rulesModeName = AOC.utils.byId("rules-mode-name");
       el.rulesCharacterName = AOC.utils.byId("rules-character-name");
+      el.rulesIslandName = AOC.utils.byId("rules-island-name");
       el.rulesLengthName = AOC.utils.byId("rules-length-name");
       el.rulesModeGoal = AOC.utils.byId("rules-mode-goal");
       el.rulesModeWin = AOC.utils.byId("rules-mode-win");
@@ -301,7 +323,13 @@
         el.roundsNextButton.onclick = callbacks.onContinueFromRounds;
       }
       if (el.roundsBackButton) {
-        el.roundsBackButton.onclick = callbacks.onBackToCharacterSelect;
+        el.roundsBackButton.onclick = callbacks.onBackToIslandSelect;
+      }
+      if (el.islandNextButton) {
+        el.islandNextButton.onclick = callbacks.onContinueFromIsland;
+      }
+      if (el.islandBackButton) {
+        el.islandBackButton.onclick = callbacks.onBackToCharacterSelect;
       }
       if (el.rulesStartButton) {
         el.rulesStartButton.onclick = callbacks.onStartGame;
@@ -360,8 +388,8 @@
         button.setAttribute("role", "radio");
         button.setAttribute("aria-checked", selectedTokenId === token.id ? "true" : "false");
         button.innerHTML =
-          "<span class=\"token-icon\" aria-hidden=\"true\">" + token.icon + "</span>" +
-          "<span class=\"token-name\">" + token.name + "</span>";
+        "<span class=\"token-icon character-sprite " + getCharacterSpriteClass(token) + "\" aria-hidden=\"true\"></span>" +
+        "<span class=\"token-name\">" + token.name + "</span>";
         button.onclick = onSelectToken(token.id);
         el.tokenPicker.appendChild(button);
       }
@@ -369,10 +397,22 @@
       el.tokenOptions = el.tokenPicker.querySelectorAll(".token-option");
     },
 
-    renderCharacterPicker: function (el, selectedCharacterId, onSelectCharacter) {
+    renderCarouselDots: function (count, activeIndex) {
+      var html = "";
+      var i;
+      for (i = 0; i < count; i += 1) {
+        html += "<span class=\"carousel-dot" + (i === activeIndex ? " active" : "") + "\"></span>";
+      }
+      return html;
+    },
+
+    renderCharacterPicker: function (el, selectedCharacterId, onSelectCharacter, unlockedCharacters) {
       var i;
       var character;
       var button;
+      var selectedIndex = 0;
+      var unlocked;
+      var current;
 
       if (!el.characterPicker) {
         return;
@@ -380,21 +420,39 @@
 
       el.characterPicker.innerHTML = "";
       for (i = 0; i < AOC.data.characters.length; i += 1) {
-        character = AOC.data.characters[i];
-        button = document.createElement("button");
-        button.type = "button";
-        button.className = "character-option" + (selectedCharacterId === character.id ? " selected" : "");
-        button.setAttribute("data-character-id", character.id);
-        button.setAttribute("role", "radio");
-        button.setAttribute("aria-checked", selectedCharacterId === character.id ? "true" : "false");
-        button.innerHTML =
-          "<span class=\"character-icon\" aria-hidden=\"true\">" + character.icon + "</span>" +
-          "<strong class=\"character-title\">" + character.name + "</strong>" +
-          "<span class=\"character-copy\">" + character.shortDescription + "</span>" +
-          "<span class=\"character-bonus-chip\">" + character.bonusText + "</span>";
-        button.onclick = onSelectCharacter(character.id);
-        el.characterPicker.appendChild(button);
+        if (AOC.data.characters[i].id === selectedCharacterId) {
+          selectedIndex = i;
+        }
       }
+      current = AOC.data.characters[selectedIndex];
+      unlocked = !!(current.unlocked || (unlockedCharacters && unlockedCharacters[current.id]));
+      button = document.createElement("button");
+      button.type = "button";
+      button.className = "character-option carousel-card selected" + (unlocked ? "" : " locked");
+      button.setAttribute("data-character-id", current.id);
+      button.setAttribute("role", "radio");
+      button.setAttribute("aria-checked", selectedCharacterId === current.id ? "true" : "false");
+      button.disabled = !unlocked;
+      button.innerHTML =
+        "<span class=\"character-icon character-sprite " + getCharacterSpriteClass(current) + "\" aria-hidden=\"true\"></span>" +
+        "<strong class=\"character-title\">" + current.name + "</strong>" +
+        "<span class=\"character-copy\">" + current.shortDescription + "</span>" +
+        "<span class=\"character-bonus-chip\">" + current.bonusText + "</span>" +
+        (unlocked ? "" : "<span class=\"locked-badge\">Locked: " + current.unlockText + "</span>");
+      if (unlocked) {
+        button.onclick = onSelectCharacter(current.id);
+      }
+      el.characterPicker.appendChild(this.buildCarouselShell(AOC.data.characters.length, selectedIndex, function (direction) {
+        return function () {
+          var nextIndex = (selectedIndex + direction + AOC.data.characters.length) % AOC.data.characters.length;
+          var nextCharacter = AOC.data.characters[nextIndex];
+          if (nextCharacter.unlocked || (unlockedCharacters && unlockedCharacters[nextCharacter.id])) {
+            onSelectCharacter(nextCharacter.id)();
+            return;
+          }
+          onSelectCharacter(nextCharacter.id)();
+        };
+      }, button));
 
       el.characterOptions = el.characterPicker.querySelectorAll(".character-option");
     },
@@ -403,6 +461,7 @@
       var i;
       var mode;
       var button;
+      var selectedIndex = 0;
 
       if (!el.modePicker) {
         return;
@@ -410,22 +469,156 @@
 
       el.modePicker.innerHTML = "";
       for (i = 0; i < AOC.data.modes.length; i += 1) {
-        mode = AOC.data.modes[i];
-        button = document.createElement("button");
-        button.type = "button";
-        button.className = "mode-option" + (selectedModeId === mode.id ? " selected" : "");
-        button.setAttribute("data-mode-id", mode.id);
-        button.setAttribute("data-mode-tone", mode.id);
-        button.setAttribute("role", "radio");
-        button.setAttribute("aria-checked", selectedModeId === mode.id ? "true" : "false");
-        button.innerHTML =
-          "<strong>" + mode.name + "</strong>" +
-          "<span>" + mode.shortDescription + "</span>";
-        button.onclick = onSelectMode(mode.id);
-        el.modePicker.appendChild(button);
+        if (AOC.data.modes[i].id === selectedModeId) {
+          selectedIndex = i;
+        }
       }
+      mode = AOC.data.modes[selectedIndex];
+      button = document.createElement("button");
+      button.type = "button";
+      button.className = "mode-option carousel-card selected";
+      button.setAttribute("data-mode-id", mode.id);
+      button.setAttribute("data-mode-tone", mode.id);
+      button.setAttribute("role", "radio");
+      button.setAttribute("aria-checked", selectedModeId === mode.id ? "true" : "false");
+      button.innerHTML =
+        "<strong>" + mode.name + "</strong>" +
+        "<span>" + mode.shortDescription + "</span>";
+      button.onclick = onSelectMode(mode.id);
+      el.modePicker.appendChild(this.buildCarouselShell(AOC.data.modes.length, selectedIndex, function (direction) {
+        return function () {
+          var nextIndex = (selectedIndex + direction + AOC.data.modes.length) % AOC.data.modes.length;
+          onSelectMode(AOC.data.modes[nextIndex].id)();
+        };
+      }, button));
 
       el.modeOptions = el.modePicker.querySelectorAll(".mode-option");
+    },
+
+    buildCarouselShell: function (count, selectedIndex, onMove, cardNode) {
+      var shell = document.createElement("div");
+      var previous = document.createElement("button");
+      var next = document.createElement("button");
+      var dots = document.createElement("div");
+
+      shell.className = "carousel-shell";
+      previous.type = "button";
+      next.type = "button";
+      previous.className = "carousel-arrow";
+      next.className = "carousel-arrow";
+      previous.setAttribute("aria-label", "Previous option");
+      next.setAttribute("aria-label", "Next option");
+      previous.textContent = "<";
+      next.textContent = ">";
+      previous.onclick = onMove(-1);
+      next.onclick = onMove(1);
+      dots.className = "carousel-dots";
+      dots.innerHTML = this.renderCarouselDots(count, selectedIndex);
+
+      shell.appendChild(previous);
+      shell.appendChild(cardNode);
+      shell.appendChild(next);
+      shell.appendChild(dots);
+      return shell;
+    },
+
+    renderIslandPicker: function (el, selectedIslandId, onSelectIsland) {
+      var i;
+      var island;
+      var selectedIndex = 0;
+      var button;
+      var stats;
+      var difficulty;
+
+      if (!el.islandPicker) {
+        return;
+      }
+
+      el.islandPicker.innerHTML = "";
+      for (i = 0; i < AOC.data.islands.length; i += 1) {
+        if (AOC.data.islands[i].id === selectedIslandId) {
+          selectedIndex = i;
+        }
+      }
+      island = AOC.data.islands[selectedIndex];
+      stats = island.baseStats || island.startingStats || { money: 0, environment: 0, trust: 0 };
+      difficulty = island.difficulty || "Beginner";
+      button = document.createElement("button");
+      button.type = "button";
+      button.className = "island-option carousel-card island-world-card selected island-world-" + island.theme;
+      button.setAttribute("data-island-id", island.id);
+      button.setAttribute("role", "radio");
+      button.setAttribute("aria-checked", selectedIslandId === island.id ? "true" : "false");
+      button.innerHTML =
+        "<div class=\"island-preview island-preview-" + island.theme + "\" aria-hidden=\"true\">" +
+        "<span></span><span></span><span></span><span></span>" +
+        "<span></span><span></span><span></span><span></span>" +
+        "<span></span><span></span><span></span><span></span>" +
+        "<span></span><span></span><span></span><span></span>" +
+        "</div>" +
+        "<div class=\"island-card-header\">" +
+        "<span class=\"difficulty-badge difficulty-" + difficulty.toLowerCase() + "\">" + difficulty + "</span>" +
+        "<strong>" + island.name + "</strong>" +
+        "<em>" + island.shortDescription + "</em>" +
+        "</div>" +
+        "<p class=\"island-card-description\">" + island.description + "</p>" +
+        "<div class=\"island-stat-preview\">" +
+        "<span class=\"money-chip\">💰 " + AOC.utils.formatDelta(stats.money || 0) + "</span>" +
+        "<span class=\"environment-chip\">🌿 " + AOC.utils.formatDelta(stats.environment || 0) + "</span>" +
+        "<span class=\"trust-chip\">👥 " + AOC.utils.formatDelta(stats.trust || 0) + "</span>" +
+        "</div>" +
+        "<div class=\"island-card-info-grid\">" +
+        "<section><span>Starting Stats</span><strong>Money " + (stats.money || 0) + ", Environment " + (stats.environment || 0) + ", Trust " + (stats.trust || 0) + "</strong></section>" +
+        "<section><span>World Goal</span><strong>" + (island.goal || island.winConditionText) + "</strong></section>" +
+        "<section><span>World Risk</span><strong>" + island.loseConditionText + "</strong></section>" +
+        "</div>";
+      button.onclick = onSelectIsland(island.id);
+      el.islandPicker.appendChild(this.buildCarouselShell(AOC.data.islands.length, selectedIndex, function (direction) {
+        return function () {
+          var nextIndex = (selectedIndex + direction + AOC.data.islands.length) % AOC.data.islands.length;
+          onSelectIsland(AOC.data.islands[nextIndex].id)();
+        };
+      }, button));
+
+      el.islandOptions = el.islandPicker.querySelectorAll(".island-option");
+    },
+
+    renderRoundPicker: function (el, selectedYears, onSelectRounds) {
+      var container;
+      var selectedIndex = 0;
+      var i;
+      var length;
+      var button;
+
+      container = document.querySelector(".round-options");
+      if (!container || !AOC.data.gameLengths) {
+        return;
+      }
+
+      for (i = 0; i < AOC.data.gameLengths.length; i += 1) {
+        if (AOC.data.gameLengths[i].years === selectedYears) {
+          selectedIndex = i;
+        }
+      }
+      length = AOC.data.gameLengths[selectedIndex];
+      container.innerHTML = "";
+      button = document.createElement("button");
+      button.className = "round-option carousel-card selected";
+      button.type = "button";
+      button.setAttribute("data-rounds", String(length.years));
+      button.setAttribute("role", "radio");
+      button.setAttribute("aria-checked", selectedYears === length.years ? "true" : "false");
+      button.innerHTML = "<strong>" + length.name + "</strong><span>" + length.years + " Years</span><small>" + length.description + "</small>";
+      button.onclick = function () {
+        onSelectRounds(length.years);
+      };
+      container.appendChild(this.buildCarouselShell(AOC.data.gameLengths.length, selectedIndex, function (direction) {
+        return function () {
+          var nextIndex = (selectedIndex + direction + AOC.data.gameLengths.length) % AOC.data.gameLengths.length;
+          onSelectRounds(AOC.data.gameLengths[nextIndex].years);
+        };
+      }, button));
+      el.roundOptions = container.querySelectorAll(".round-option");
     },
 
     updateModeDetails: function (el, mode) {
@@ -485,7 +678,7 @@
       }
 
       if (el.characterName) {
-        el.characterName.textContent = character.icon + " " + character.name;
+        el.characterName.innerHTML = renderSelectedCharacterBadge(character);
       }
       if (el.characterDescription) {
         el.characterDescription.textContent = character.shortDescription;
@@ -493,6 +686,26 @@
       if (el.characterBonus) {
         el.characterBonus.textContent = character.bonusText;
       }
+    },
+
+    updateIslandDetails: function (el, island) {
+      if (!island) {
+        if (el.islandName) el.islandName.textContent = "Select an island";
+        if (el.islandDescription) el.islandDescription.textContent = "Choose a world to preview its goal and starting pressure.";
+        if (el.islandStats) el.islandStats.textContent = "Starting changes will appear here.";
+        if (el.islandWin) el.islandWin.textContent = "Win guidance will appear here.";
+        if (el.islandLose) el.islandLose.textContent = "Risk guidance will appear here.";
+        return;
+      }
+      if (el.islandName) el.islandName.textContent = island.name;
+      if (el.islandDescription) el.islandDescription.textContent = island.description;
+      if (el.islandStats) {
+        el.islandStats.textContent = "Budget " + AOC.utils.formatDelta(island.startingStats.money || 0) +
+          ", Environment " + AOC.utils.formatDelta(island.startingStats.environment || 0) +
+          ", Trust " + AOC.utils.formatDelta(island.startingStats.trust || 0);
+      }
+      if (el.islandWin) el.islandWin.textContent = island.winConditionText;
+      if (el.islandLose) el.islandLose.textContent = island.loseConditionText;
     },
 
     updateRulesSummary: function (el, state) {
@@ -509,11 +722,15 @@
         lengthLabel = "Long - 30 Years";
       }
 
+      if (AOC.rules.isFreePlayMode(state.selectedMode)) {
+        lengthLabel = "Free Play - years become checkpoints";
+      }
+
       if (el.rulesModeName) {
         el.rulesModeName.textContent = state.selectedMode ? state.selectedMode.name : "-";
       }
       if (el.rulesCharacterName) {
-        el.rulesCharacterName.textContent = state.selectedCharacter ? state.selectedCharacter.icon + " " + state.selectedCharacter.name : "-";
+        el.rulesCharacterName.innerHTML = renderSelectedCharacterBadge(state.selectedCharacter);
       }
       if (el.rulesLengthName) {
         el.rulesLengthName.textContent = lengthLabel;
@@ -522,15 +739,20 @@
         el.rulesModeGoal.textContent = state.selectedMode ? state.selectedMode.goal : "Select a mode to preview its goal.";
       }
       if (el.rulesModeWin) {
-        el.rulesModeWin.textContent = state.selectedMode ? state.selectedMode.winConditionText : "Complete the run with a stable island.";
+        el.rulesModeWin.textContent = AOC.rules.isFreePlayMode(state.selectedMode) ? "No win condition. Keep playing and experimenting." :
+          (state.selectedMode ? state.selectedMode.winConditionText : "Complete the run with a stable island.");
       }
       if (el.rulesModeLose) {
-        el.rulesModeLose.textContent = state.selectedMode ? state.selectedMode.loseConditionText : "Avoid a system collapse before the end.";
+        el.rulesModeLose.textContent = AOC.rules.isFreePlayMode(state.selectedMode) ? "No lose condition. Negative values are allowed for testing." :
+          (state.selectedMode ? state.selectedMode.loseConditionText : "Avoid a system collapse before the end.");
       }
       if (el.simpleModeBadge) {
         el.simpleModeBadge.textContent = state.simpleMode ? "On" : "Off";
       }
-      previewStats = AOC.rules.getStartingStatsPreview(state.selectedMode, state.selectedCharacter);
+      if (el.rulesIslandName) {
+        el.rulesIslandName.textContent = state.selectedIsland ? state.selectedIsland.name : "-";
+      }
+      previewStats = AOC.rules.getStartingStatsPreview(state.selectedMode, state.selectedCharacter, state.selectedIsland);
       if (el.readyMoney) {
         el.readyMoney.textContent = previewStats.money;
       }
@@ -557,6 +779,7 @@
         tile.className = "space " + layout.side + (layout.corner ? " corner" : "");
         tile.setAttribute("data-index", String(i));
         tile.setAttribute("data-band", AOC.board.getBand(i));
+        tile.setAttribute("data-tile-type", plot.type || "normal");
         tile.setAttribute("tabindex", "0");
         tile.style.left = layout.left;
         tile.style.top = layout.top;
@@ -573,22 +796,17 @@
       center.className = "board-center";
       center.innerHTML =
         "<div class=\"center-insert\">" +
-        "<div class=\"center-branding\">" +
+        "<div id=\"center-intro\" class=\"center-intro center-branding\">" +
         "<p class=\"center-kicker\">Island Stewardship Board</p>" +
         "<h3>Acts of Conservation</h3>" +
         "<p class=\"center-purpose\">Every stop asks you to weigh economy, ecology, and community well-being together.</p>" +
+        "<p class=\"center-roll-hint\">Roll to begin.</p>" +
         "</div>" +
-        "<div class=\"center-sections compact status-layout\">" +
-        "<section class=\"insert-card status-card\">" +
-        "<p class=\"status-kicker\">Game Status</p>" +
-        "<h4 id=\"center-message-title\">Island Outlook</h4>" +
-        "<p id=\"center-message-body\">Watch your token move across the island and make choices that shape its future.</p>" +
-        "</section>" +
-        "<section class=\"insert-card compact-card mini-stats-card\">" +
-        "<div class=\"mini-stat\"><span>Budget</span><strong id=\"center-money-mini\">1000</strong></div>" +
-        "<div class=\"mini-stat\"><span>Environment</span><strong id=\"center-environment-mini\">50</strong></div>" +
-        "<div class=\"mini-stat\"><span>Trust</span><strong id=\"center-trust-mini\">50</strong></div>" +
-        "</section>" +
+        "<div id=\"island-visual\" class=\"island-visual island-grid-visual stage-growing\">" +
+        "<div id=\"island-grid\" class=\"island-grid\" aria-label=\"Evolving island grid\"></div>" +
+        "<div class=\"island-feedback-overlay\"></div>" +
+        "<strong id=\"island-stage-label\" class=\"island-stage-label\">Stable Nature</strong>" +
+        "<span id=\"island-stage-message\" class=\"island-stage-message\">The island is holding steady.</span>" +
         "</div>" +
         "</div>";
       el.board.appendChild(center);
@@ -598,6 +816,11 @@
       el.centerMoneyMini = AOC.utils.byId("center-money-mini");
       el.centerEnvironmentMini = AOC.utils.byId("center-environment-mini");
       el.centerTrustMini = AOC.utils.byId("center-trust-mini");
+      el.centerIntro = AOC.utils.byId("center-intro");
+      el.islandVisual = AOC.utils.byId("island-visual");
+      el.islandGrid = AOC.utils.byId("island-grid");
+      el.islandStageLabel = AOC.utils.byId("island-stage-label");
+      el.islandStageMessage = AOC.utils.byId("island-stage-message");
     },
 
     attachTileHover: function (el, tile, plot) {
@@ -810,7 +1033,9 @@
         state.awaitingYearSummary = false;
         return;
       }
-      el.yearTitle.textContent = state.loopsCompleted >= state.selectedRounds ? "Year " + state.loopsCompleted + " Final Summary" : "Year " + state.loopsCompleted + " Summary";
+      el.yearTitle.textContent = AOC.rules.modeSupportsGameLength(state.selectedMode) && state.loopsCompleted >= state.selectedRounds ?
+        "Year " + state.loopsCompleted + " Final Summary" :
+        "Year " + state.loopsCompleted + " Summary";
       el.yearMoney.textContent = state.stats.money;
       if (el.yearDebt) {
         el.yearDebt.textContent = snapshot.debt || 0;
@@ -835,7 +1060,9 @@
       el.yearEventNote.textContent = snapshot.eventNote || "";
       el.yearReflection.textContent = snapshot.reflection;
       if (el.continueYearButton) {
-        el.continueYearButton.textContent = state.loopsCompleted >= state.selectedRounds ? "See final results" : "Continue to next year";
+      el.continueYearButton.textContent = AOC.rules.modeSupportsGameLength(state.selectedMode) && state.loopsCompleted >= state.selectedRounds ?
+        "See final results" :
+        "Continue to next year";
       }
       if (el.reviewInvestmentsButton) {
         el.reviewInvestmentsButton.style.display = snapshot.canReviewInvestments ? "inline-flex" : "none";
@@ -996,6 +1223,9 @@
 
       for (i = 0; i < stats.length; i += 1) {
         item = stats[i];
+        if (!item.value) {
+          continue;
+        }
         sign = item.value > 0 ? "+" : "";
         bubble = document.createElement("div");
         bubble.className = "stat-feedback-bubble " + item.tone + (item.value >= 0 ? " positive" : " negative");
@@ -1013,6 +1243,48 @@
           }, 1200);
         }(bubble));
       }
+    },
+
+    showTileFeedback: function (el, tileIndex, result) {
+      var tile;
+      var badge;
+      var type;
+      var text;
+
+      if (!el.board || tileIndex === undefined || tileIndex === null || !result) {
+        return;
+      }
+
+      tile = el.board.querySelector('.space[data-index="' + tileIndex + '"]');
+      if (!tile) {
+        return;
+      }
+
+      type = result.type || "normal";
+      text = result.feedbackText || result.title || "";
+      tile.className = tile.className.replace(/\stile-flash-(start|community|environment|crisis|goToCrisis|teleport)/g, "");
+      void tile.offsetWidth;
+      tile.className += " tile-flash-" + type;
+
+      badge = tile.querySelector(".tile-effect-float");
+      if (badge && badge.parentNode) {
+        badge.parentNode.removeChild(badge);
+      }
+      if (text) {
+        badge = document.createElement("span");
+        badge.className = "tile-effect-float tile-effect-" + type;
+        badge.textContent = text;
+        tile.appendChild(badge);
+        window.setTimeout(function () {
+          if (badge.parentNode) {
+            badge.parentNode.removeChild(badge);
+          }
+        }, 1100);
+      }
+
+      window.setTimeout(function () {
+        tile.className = tile.className.replace(/\stile-flash-(start|community|environment|crisis|goToCrisis|teleport)/g, "");
+      }, 950);
     },
 
     updateUI: function (el, state) {
@@ -1056,7 +1328,10 @@
       if (el.centerTrustMini) {
         el.centerTrustMini.textContent = state.stats.trust;
       }
-      el.yearCounter.textContent = (state.loopsCompleted || 0) + " / " + (state.selectedRounds || 0);
+      this.updateIslandVisual(el, state);
+      el.yearCounter.textContent = AOC.rules.modeSupportsGameLength(state.selectedMode) ?
+        (state.loopsCompleted || 0) + " / " + (state.selectedRounds || 0) :
+        (state.loopsCompleted || 0) + " Free";
       el.turnCounter.textContent = state.yearlyRollCount + " this year";
       el.diceResult.textContent = state.lastRoll === null ? "-" : state.lastRoll;
       el.diceResult.className = state.lastRoll === null ? "dice-face dice-idle" : "dice-face";
@@ -1104,29 +1379,33 @@
       if (el.characterNextButton) {
         el.characterNextButton.disabled = !state.selectedCharacter;
       }
+      if (el.islandNextButton) {
+        el.islandNextButton.disabled = !state.selectedIsland;
+      }
       if (el.roundsNextButton) {
         el.roundsNextButton.disabled = !state.selectedRounds;
       }
       if (el.rulesStartButton) {
-        el.rulesStartButton.disabled = !(state.selectedMode && state.selectedCharacter && state.selectedRounds);
+        el.rulesStartButton.disabled = !(state.selectedMode && state.selectedCharacter && state.selectedIsland && state.selectedRounds);
       }
       this.updateRulesSummary(el, state);
       if (el.roundOptions && el.roundOptions.length) {
         for (var roundIndex = 0; roundIndex < el.roundOptions.length; roundIndex += 1) {
           var selectedLength = parseInt(el.roundOptions[roundIndex].getAttribute("data-rounds"), 10) === state.selectedRounds;
-          el.roundOptions[roundIndex].className = "round-option" + (selectedLength ? " selected" : "");
+          el.roundOptions[roundIndex].className = "round-option carousel-card" + (selectedLength ? " selected" : "");
           el.roundOptions[roundIndex].setAttribute("aria-checked", selectedLength ? "true" : "false");
         }
       }
       if (el.modeOptions && el.modeOptions.length) {
         for (var modeIndex = 0; modeIndex < el.modeOptions.length; modeIndex += 1) {
           var isModeSelected = el.modeOptions[modeIndex].getAttribute("data-mode-id") === (state.selectedMode ? state.selectedMode.id : "");
-          el.modeOptions[modeIndex].className = "mode-option" + (isModeSelected ? " selected" : "");
+          el.modeOptions[modeIndex].className = "mode-option carousel-card" + (isModeSelected ? " selected" : "");
           el.modeOptions[modeIndex].setAttribute("aria-checked", isModeSelected ? "true" : "false");
         }
       }
       this.updateModeDetails(el, state.selectedMode);
       this.updateCharacterDetails(el, state.selectedCharacter);
+      this.updateIslandDetails(el, state.selectedIsland);
       if (el.tokenOptions && el.tokenOptions.length) {
         for (var i = 0; i < el.tokenOptions.length; i += 1) {
           var isSelected = el.tokenOptions[i].getAttribute("data-token-id") === (state.selectedToken ? state.selectedToken.id : "");
@@ -1137,7 +1416,15 @@
       if (el.characterOptions && el.characterOptions.length) {
         for (var characterIndex = 0; characterIndex < el.characterOptions.length; characterIndex += 1) {
           var isCharacterSelected = el.characterOptions[characterIndex].getAttribute("data-character-id") === (state.selectedCharacter ? state.selectedCharacter.id : "");
-          el.characterOptions[characterIndex].className = "character-option" + (isCharacterSelected ? " selected" : "");
+          var characterId = el.characterOptions[characterIndex].getAttribute("data-character-id");
+          var isCharacterUnlocked = !!(state.unlockedCharacters[characterId]);
+          for (var unlockIndex = 0; unlockIndex < AOC.data.characters.length; unlockIndex += 1) {
+            if (AOC.data.characters[unlockIndex].id === characterId && AOC.data.characters[unlockIndex].unlocked) {
+              isCharacterUnlocked = true;
+              break;
+            }
+          }
+          el.characterOptions[characterIndex].className = "character-option carousel-card" + (isCharacterSelected ? " selected" : "") + (isCharacterUnlocked ? "" : " locked");
           el.characterOptions[characterIndex].setAttribute("aria-checked", isCharacterSelected ? "true" : "false");
         }
       }
@@ -1148,6 +1435,113 @@
       }
       el.rollButton.disabled = !!(state.awaitingChoice || state.awaitingYearSummary || state.awaitingLoanDecision || state.awaitingPromiseDecision || state.awaitingShortcutDecision || state.awaitingDebtDecision || state.awaitingInvestmentDecision || state.gameOver || state.isAnimating);
       this.renderToken(el, state);
+    },
+
+    renderIslandGrid: function (el, state) {
+      var grid;
+      var i;
+      var cell;
+      var node;
+      var signature;
+
+      if (!el.islandGrid) {
+        return;
+      }
+
+      grid = AOC.rules.ensureIslandGrid(state);
+      el.islandGrid.style.setProperty("--grid-size", grid.size);
+
+      while (el.islandGrid.children.length < grid.cells.length) {
+        node = document.createElement("span");
+        node.className = "island-cell";
+        el.islandGrid.appendChild(node);
+      }
+
+      for (i = 0; i < grid.cells.length; i += 1) {
+        cell = grid.cells[i];
+        node = el.islandGrid.children[i];
+        signature = [cell.terrain, cell.object || "empty", cell.objectRoot == null ? "root" : cell.objectRoot, cell.objectStage, cell.overlay || ""].join("|");
+        if (node.getAttribute("data-signature") !== signature || cell.changed) {
+          node.className = "island-cell";
+          void node.offsetWidth;
+          node.className = "island-cell terrain-" + cell.terrain +
+            (cell.object ? " object-" + cell.object + " object-stage-" + cell.objectStage : "") +
+            (cell.objectRoot != null && cell.objectRoot !== cell.id ? " object-part" : "") +
+            (cell.object && cell.objectStage >= 2 && (cell.objectRoot == null || cell.objectRoot === cell.id) ? " object-large" : "") +
+            (cell.overlay ? " overlay-" + cell.overlay : "") +
+            (cell.changed ? " cell-changed" : "");
+          node.setAttribute("data-signature", signature);
+          node.setAttribute("data-terrain", cell.terrain);
+          node.setAttribute("data-object", cell.object || "");
+          node.textContent = "";
+          cell.changed = false;
+        }
+      }
+    },
+
+    updateIslandVisual: function (el, state) {
+      var stage;
+      var env = state.stats.environment;
+      var trust = state.stats.trust;
+      var money = state.stats.money;
+      var envLevel;
+      var trustLevel;
+      var budgetLevel;
+      var comboLevel = "";
+      var reactionClass = "";
+      var islandTheme = state.selectedIsland && state.selectedIsland.theme ? state.selectedIsland.theme : "grassland";
+      if (!el.islandVisual) {
+        return;
+      }
+      stage = AOC.rules.getEnvironmentStage(state);
+      this.renderIslandGrid(el, state);
+      if (el.islandVisual.className.indexOf("reaction-positive") !== -1) {
+        reactionClass = " reaction-positive";
+      } else if (el.islandVisual.className.indexOf("reaction-negative") !== -1) {
+        reactionClass = " reaction-negative";
+      } else if (el.islandVisual.className.indexOf("reaction-neutral") !== -1) {
+        reactionClass = " reaction-neutral";
+      }
+
+      envLevel = env >= 75 ? "env-high" : env >= 25 ? "env-mid" : env >= 0 ? "env-low" : env >= -50 ? "env-damaged" : "env-critical";
+      trustLevel = trust >= 60 ? "trust-high" : trust >= 25 ? "trust-mid" : trust >= 0 ? "trust-low" : "trust-broken";
+      budgetLevel = money >= 800 ? "budget-high" : money >= 250 ? "budget-mid" : money >= 0 ? "budget-low" : "budget-debt";
+      if (env >= 60 && trust >= 60 && money >= 800) {
+        comboLevel = " combo-thriving";
+      } else if (env < -50 && trust < 0 && money < 0) {
+        comboLevel = " combo-depleted";
+      }
+
+      el.islandVisual.className = "island-visual island-grid-visual island-theme-" + islandTheme + " stage-" + stage.id + " " + envLevel + " " + trustLevel + " " + budgetLevel + comboLevel + (state.hasGameStarted ? " active" : " intro") + reactionClass;
+      if (el.centerIntro) {
+        el.centerIntro.className = "center-intro center-branding" + (state.hasGameStarted ? " fading-out" : "");
+      }
+      if (el.islandStageLabel) {
+        el.islandStageLabel.textContent = stage.label;
+      }
+      if (el.islandStageMessage) {
+        el.islandStageMessage.textContent = stage.message;
+      }
+    },
+
+    triggerIslandReaction: function (el, changes) {
+      var tone = "neutral";
+      var score;
+
+      if (!el.islandVisual || !changes) {
+        return;
+      }
+
+      score = (changes.environment || 0) + (changes.trust || 0) + Math.round((changes.money || 0) / 100);
+      if (score > 0) {
+        tone = "positive";
+      } else if (score < 0) {
+        tone = "negative";
+      }
+
+      el.islandVisual.className = el.islandVisual.className.replace(/\sreaction-(positive|negative|neutral)/g, "");
+      void el.islandVisual.offsetWidth;
+      el.islandVisual.className += " reaction-" + tone;
     },
 
     showHowToModal: function (el) {
@@ -1287,6 +1681,7 @@
       var existing;
       var currentTile;
       var token;
+      var tokenSource;
 
       if (!el.board) {
         return;
@@ -1305,10 +1700,13 @@
         return;
       }
       currentTile.className += " current";
+      tokenSource = state.selectedCharacter || state.selectedToken;
       token = document.createElement("span");
-      token.className = "player-token";
-      token.textContent = state.selectedToken ? state.selectedToken.icon : "\u25CF";
-      token.setAttribute("aria-label", state.selectedToken ? state.selectedToken.name + " token" : "Player token");
+      token.className = "player-token" +
+        (tokenSource ? " token-sprite token-sprite-" + (tokenSource.sprite || tokenSource.id) : "") +
+        (state.isAnimating ? " token-moving" : "");
+      token.textContent = tokenSource ? "" : "\u25CF";
+      token.setAttribute("aria-label", tokenSource ? tokenSource.name + " token" : "Player token");
       currentTile.appendChild(token);
     },
 
@@ -1339,6 +1737,10 @@
       if (el.characterScreen) {
         el.characterScreen.className = "screen character-screen" + (screen === "characterSelect" ? " active" : "");
         el.characterScreen.setAttribute("aria-hidden", screen === "characterSelect" ? "false" : "true");
+      }
+      if (el.islandScreen) {
+        el.islandScreen.className = "screen island-screen" + (screen === "islandSelect" ? " active" : "");
+        el.islandScreen.setAttribute("aria-hidden", screen === "islandSelect" ? "false" : "true");
       }
       if (el.roundsScreen) {
         el.roundsScreen.className = "screen rounds-screen" + (screen === "roundSelect" ? " active" : "");

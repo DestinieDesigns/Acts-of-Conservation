@@ -1,0 +1,15 @@
+{ "columns":24,
+ "image":"Character tokens.png",
+ "imageheight":1024,
+ "imagewidth":1536,
+ "margin":0,
+ "name":"Character set ",
+ "spacing":0,
+ "tilecount":384,
+ "tiledversion":"1.12.1",
+ "tileheight":64,
+ "tilewidth":64,
+ "transparentcolor":"#fefefe",
+ "type":"tileset",
+ "version":"1.10"
+}

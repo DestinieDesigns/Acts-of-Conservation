@@ -3,7 +3,37 @@
 
   AOC.rules = {
     getModeId: function (mode) {
-      return mode && mode.id ? mode.id : "classic";
+      return AOC.modeRegistry ? AOC.modeRegistry.getModeId(mode) : (mode && mode.id ? mode.id : "guided");
+    },
+
+    getModeRules: function (mode) {
+      return AOC.modeRegistry ? AOC.modeRegistry.getRules(mode) : {
+        supportsWinLose: true,
+        supportsGameLength: true,
+        supportsHardFailure: true,
+        supportsStatCaps: false,
+        freePlay: false
+      };
+    },
+
+    modeSupportsWinLose: function (mode) {
+      return this.getModeRules(mode).supportsWinLose;
+    },
+
+    modeSupportsGameLength: function (mode) {
+      return this.getModeRules(mode).supportsGameLength;
+    },
+
+    modeSupportsHardFailure: function (mode) {
+      return this.getModeRules(mode).supportsHardFailure;
+    },
+
+    modeSupportsStatCaps: function (mode) {
+      return this.getModeRules(mode).supportsStatCaps;
+    },
+
+    isFreePlayMode: function (mode) {
+      return this.getModeRules(mode).freePlay;
     },
 
     getModeStartingStats: function (mode) {
@@ -15,15 +45,319 @@
       };
     },
 
-    getStartingStatsPreview: function (mode, character) {
+    getStartingStatsPreview: function (mode, character, island) {
       var base = this.getModeStartingStats(mode);
       var bonus = character && character.bonuses ? character.bonuses : { money: 0, environment: 0, trust: 0 };
+      var islandStats = island && island.startingStats ? island.startingStats : { money: 0, environment: 0, trust: 0 };
 
       return {
-        money: base.money + (bonus.money || 0),
-        environment: base.environment + (bonus.environment || 0),
-        trust: base.trust + (bonus.trust || 0)
+        money: base.money + (islandStats.money || 0) + (bonus.money || 0),
+        environment: base.environment + (islandStats.environment || 0) + (bonus.environment || 0),
+        trust: base.trust + (islandStats.trust || 0) + (bonus.trust || 0)
       };
+    },
+
+    getEnvironmentStage: function (state) {
+      var env = state.stats.environment;
+      var islandStage;
+
+      if (AOC.islands) {
+        islandStage = AOC.islands.getStage(state);
+        return {
+          id: islandStage.terrain,
+          label: islandStage.label,
+          message: islandStage.message
+        };
+      }
+
+      if (env >= 76) return { id: "paradise", label: "Thriving Island", message: "The island feels alive and resilient." };
+      if (env >= 51) return { id: "lush", label: "Healthy Ecosystem", message: "Habitats are strong and recovery is visible." };
+      if (env >= 26) return { id: "growing", label: "Stable Nature", message: "The ecosystem is holding steady." };
+      if (env >= 1) return { id: "grass", label: "Stressed", message: "Nature is under pressure but still recovering." };
+      if (env >= -49) return { id: "cracked", label: "Damaged", message: "Environmental damage is spreading." };
+      return { id: "dead", label: "Severe Damage", message: "The island needs urgent ecological repair." };
+    },
+
+    getGridTerrainForEnvironment: function (environment) {
+      if (AOC.islands) {
+        return AOC.islands.getTerrain({ stats: { environment: environment }, selectedIsland: null });
+      }
+      if (environment >= 60) return "lush";
+      if (environment >= 20) return "grass";
+      if (environment >= -25) return "dirt";
+      return "sand";
+    },
+
+    createIslandGrid: function (state) {
+      if (AOC.islands) {
+        return AOC.islands.createGrid(state);
+      }
+      var size = 6;
+      var cells = [];
+      var terrain = this.getGridTerrainForEnvironment(state.stats.environment);
+      var i;
+
+      for (i = 0; i < size * size; i += 1) {
+        cells.push({
+          id: i,
+          terrain: terrain,
+          object: null,
+          objectRoot: null,
+          objectStage: 0,
+          overlay: "",
+          changed: true
+        });
+      }
+
+      return {
+        size: size,
+        cells: cells,
+        lastEnvironmentTerrain: terrain,
+        mutationCount: 0
+      };
+    },
+
+    ensureIslandGrid: function (state) {
+      if (AOC.islands) {
+        return AOC.islands.ensureGrid(state);
+      }
+      if (!state.islandGrid || !state.islandGrid.cells) {
+        state.islandGrid = this.createIslandGrid(state);
+      }
+      return state.islandGrid;
+    },
+
+    updateIslandGridTerrain: function (state) {
+      if (AOC.islands) {
+        AOC.islands.updateTerrain(state);
+        return;
+      }
+      var grid = this.ensureIslandGrid(state);
+      var terrain = this.getGridTerrainForEnvironment(state.stats.environment);
+      var i;
+
+      if (grid.lastEnvironmentTerrain === terrain) {
+        return;
+      }
+
+      grid.lastEnvironmentTerrain = terrain;
+      for (i = 0; i < grid.cells.length; i += 1) {
+        grid.cells[i].terrain = terrain;
+        grid.cells[i].changed = true;
+      }
+    },
+
+    getNeighborIndexes: function (grid, index) {
+      if (AOC.islands) {
+        return AOC.islands.getNeighborIndexes(grid, index);
+      }
+      var size = grid.size;
+      var row = Math.floor(index / size);
+      var col = index % size;
+      var neighbors = [];
+
+      if (row > 0) neighbors.push(index - size);
+      if (row < size - 1) neighbors.push(index + size);
+      if (col > 0) neighbors.push(index - 1);
+      if (col < size - 1) neighbors.push(index + 1);
+      return neighbors;
+    },
+
+    findGridCellForObject: function (state, preferredObjects) {
+      if (AOC.islands) {
+        return AOC.islands.findCellForObject(state, preferredObjects);
+      }
+      var grid = this.ensureIslandGrid(state);
+      var clustered = [];
+      var empty = [];
+      var i;
+      var j;
+      var neighbors;
+      var cell;
+
+      for (i = 0; i < grid.cells.length; i += 1) {
+        cell = grid.cells[i];
+        if (cell.object || cell.objectRoot != null) {
+          continue;
+        }
+        empty.push(cell);
+        neighbors = this.getNeighborIndexes(grid, i);
+        for (j = 0; j < neighbors.length; j += 1) {
+          if (preferredObjects.indexOf(grid.cells[neighbors[j]].object) !== -1) {
+            clustered.push(cell);
+            break;
+          }
+        }
+      }
+
+      if (clustered.length) {
+        return this.pickRandomValue(clustered);
+      }
+      if (empty.length) {
+        return this.pickRandomValue(empty);
+      }
+      return null;
+    },
+
+    clearGridObjectFootprint: function (grid, rootIndex) {
+      if (AOC.islands) {
+        AOC.islands.clearFootprint(grid, rootIndex);
+        return;
+      }
+      var i;
+
+      for (i = 0; i < grid.cells.length; i += 1) {
+        if (grid.cells[i].objectRoot === rootIndex && i !== rootIndex) {
+          grid.cells[i].object = null;
+          grid.cells[i].objectRoot = null;
+          grid.cells[i].objectStage = 0;
+          grid.cells[i].changed = true;
+        }
+      }
+    },
+
+    reserveLargeGridObject: function (grid, rootIndex, objectType) {
+      if (AOC.islands) {
+        return AOC.islands.reserveLargeObject(grid, rootIndex, objectType);
+      }
+      var size = grid.size;
+      var col = rootIndex % size;
+      var indexes;
+      var i;
+
+      if (col >= size - 1 || rootIndex + size + 1 >= grid.cells.length) {
+        return false;
+      }
+
+      indexes = [rootIndex, rootIndex + 1, rootIndex + size, rootIndex + size + 1];
+      for (i = 0; i < indexes.length; i += 1) {
+        if (indexes[i] !== rootIndex && (grid.cells[indexes[i]].object || grid.cells[indexes[i]].objectRoot != null)) {
+          return false;
+        }
+      }
+
+      for (i = 1; i < indexes.length; i += 1) {
+        grid.cells[indexes[i]].object = objectType;
+        grid.cells[indexes[i]].objectRoot = rootIndex;
+        grid.cells[indexes[i]].objectStage = 2;
+        grid.cells[indexes[i]].overlay = "";
+        grid.cells[indexes[i]].changed = true;
+      }
+      return true;
+    },
+
+    placeOrGrowGridObject: function (state, objectType) {
+      if (AOC.islands) {
+        AOC.islands.placeOrGrowObject(state, objectType);
+        return;
+      }
+      var grid = this.ensureIslandGrid(state);
+      var candidates = [];
+      var i;
+      var cell;
+
+      for (i = 0; i < grid.cells.length; i += 1) {
+        cell = grid.cells[i];
+        if (cell.object === objectType && (cell.objectRoot == null || cell.objectRoot === cell.id) && cell.objectStage < 2) {
+          candidates.push(cell);
+        }
+      }
+
+      if (candidates.length) {
+        cell = this.pickRandomValue(candidates);
+        this.clearGridObjectFootprint(grid, cell.id);
+        cell.objectStage += 1;
+        if (cell.objectStage >= 2) {
+          this.reserveLargeGridObject(grid, cell.id, objectType);
+        }
+        cell.overlay = "";
+        cell.changed = true;
+        grid.mutationCount += 1;
+        return;
+      }
+
+      cell = this.findGridCellForObject(state, [objectType]);
+      if (cell) {
+        cell.object = objectType;
+        cell.objectRoot = null;
+        cell.objectStage = 0;
+        cell.overlay = "";
+        cell.changed = true;
+        grid.mutationCount += 1;
+      }
+    },
+
+    damageIslandGrid: function (state, severity) {
+      if (AOC.islands) {
+        AOC.islands.damageGrid(state, severity);
+        return;
+      }
+      var grid = this.ensureIslandGrid(state);
+      var candidates = [];
+      var i;
+      var cell;
+
+      for (i = 0; i < grid.cells.length; i += 1) {
+        if (grid.cells[i].objectRoot == null && (grid.cells[i].object || grid.cells[i].terrain !== "sand")) {
+          candidates.push(grid.cells[i]);
+        }
+      }
+
+      if (!candidates.length) {
+        return;
+      }
+
+      cell = this.pickRandomValue(candidates);
+      if (cell.object && severity >= 2) {
+          this.clearGridObjectFootprint(grid, cell.objectRoot == null ? cell.id : cell.objectRoot);
+          if (cell.objectStage > 0) {
+            cell.objectStage -= 1;
+          } else {
+            cell.object = null;
+            cell.objectRoot = null;
+          }
+      } else if (cell.terrain === "lush") {
+        cell.terrain = "grass";
+      } else if (cell.terrain === "grass") {
+        cell.terrain = "dirt";
+      } else {
+        cell.terrain = "sand";
+      }
+      cell.overlay = "crack";
+      cell.changed = true;
+      grid.mutationCount += 1;
+    },
+
+    mutateIslandGrid: function (state, effects) {
+      if (AOC.islands) {
+        AOC.islands.mutate(state, effects || {});
+        return;
+      }
+      var environment = effects.environment || 0;
+      var trust = effects.trust || 0;
+      var money = effects.money || 0;
+
+      this.ensureIslandGrid(state);
+      this.updateIslandGridTerrain(state);
+
+      if (environment > 0) {
+        this.placeOrGrowGridObject(state, "tree");
+        if (environment >= 15) {
+          this.placeOrGrowGridObject(state, "water");
+        }
+      }
+      if (trust > 0) {
+        this.placeOrGrowGridObject(state, "person");
+      }
+      if (money > 0 || trust >= 12) {
+        this.placeOrGrowGridObject(state, "building");
+      }
+      if (environment < 0) {
+        this.damageIslandGrid(state, Math.abs(environment) >= 15 ? 2 : 1);
+      }
+      if (trust < 0 || money < 0) {
+        this.damageIslandGrid(state, Math.abs(trust) >= 12 || Math.abs(money) >= 120 ? 2 : 1);
+      }
     },
 
     getModeModifiers: function (mode) {
@@ -52,6 +386,119 @@
       stats.money += effects.money || 0;
       stats.environment += effects.environment || 0;
       stats.trust += effects.trust || 0;
+    },
+
+    applyModeStatEffects: function (state, effects) {
+      this.applyStatEffects(state.stats, effects);
+      if (this.modeSupportsStatCaps(state.selectedMode)) {
+        state.stats.money = AOC.utils.clampStat(state.stats.money);
+        state.stats.environment = AOC.utils.clampStat(state.stats.environment);
+        state.stats.trust = AOC.utils.clampStat(state.stats.trust);
+      }
+    },
+
+    pickRandomValue: function (values) {
+      return values[Math.floor(Math.random() * values.length)];
+    },
+
+    findTileIndexesByType: function (board, tileType) {
+      var indexes = [];
+      var plots = board && board.plots ? board.plots : [];
+      var i;
+
+      for (i = 0; i < plots.length; i += 1) {
+        if ((plots[i].type || "normal") === tileType) {
+          indexes.push(i);
+        }
+      }
+
+      return indexes;
+    },
+
+    handleTile: function (tile, state, board, options) {
+      var tileType = tile && tile.type ? tile.type : "normal";
+      var change;
+      var crisisIndexes;
+      var destination;
+      var crisisEffects;
+
+      options = options || {};
+
+      if (!tile || tileType === "normal") {
+        return { type: "normal", effects: { money: 0, environment: 0, trust: 0 } };
+      }
+
+      if (tileType === "start") {
+        return {
+          type: "start",
+          title: "Start Bonus",
+          message: "You landed on Start and received +250 available budget.",
+          feedbackText: "+250 Budget",
+          effects: { money: 250, environment: 0, trust: 0 }
+        };
+      }
+
+      if (tileType === "community") {
+        change = this.pickRandomValue([-20, -10, -5, 5, 10, 20]);
+        return {
+          type: "community",
+          title: "Community Boost",
+          message: change >= 0 ? "Community support grew at this stop." : "Community trust took a hit at this stop.",
+          feedbackText: (change > 0 ? "+" : "") + change + " Trust",
+          effects: { money: 0, environment: 0, trust: change }
+        };
+      }
+
+      if (tileType === "environment") {
+        change = this.pickRandomValue([-25, -15, -10, -5, 5]);
+        return {
+          type: "environment",
+          title: "Environment Crisis",
+          message: change >= 0 ? "A small recovery effort helped nature rebound." : "Environmental pressure worsened here.",
+          feedbackText: (change > 0 ? "+" : "") + change + " Environment",
+          effects: { money: 0, environment: change, trust: 0 }
+        };
+      }
+
+      if (tileType === "crisis") {
+        crisisEffects = [
+          { money: -120, environment: -10, trust: 0 },
+          { money: -80, environment: 0, trust: -10 },
+          { money: 0, environment: -20, trust: -5 },
+          { money: -150, environment: -8, trust: -8 }
+        ];
+        change = this.pickRandomValue(crisisEffects);
+        return {
+          type: "crisis",
+          title: "Crisis Tile",
+          message: "A sudden island crisis created immediate pressure.",
+          feedbackText: "Crisis",
+          effects: change
+        };
+      }
+
+      if (tileType === "goToCrisis") {
+        if (options.isTeleport) {
+          return { type: "goToCrisis", effects: { money: 0, environment: 0, trust: 0 } };
+        }
+
+        crisisIndexes = this.findTileIndexesByType(board, "crisis");
+        if (!crisisIndexes.length) {
+          return { type: "goToCrisis", effects: { money: 0, environment: 0, trust: 0 } };
+        }
+
+        destination = this.pickRandomValue(crisisIndexes);
+        return {
+          type: "goToCrisis",
+          title: "Go To Crisis",
+          message: "This tile sends you directly to a crisis space in the same turn.",
+          feedbackText: "Go to Crisis",
+          teleportTo: destination,
+          effects: { money: 0, environment: 0, trust: 0 }
+        };
+      }
+
+      return { type: tileType, effects: { money: 0, environment: 0, trust: 0 } };
     },
 
     pickScenarioIndex: function (state, plotIndex) {
@@ -270,7 +717,7 @@
 
       for (i = 0; i < state.activeInvestments.length; i += 1) {
         investment = state.activeInvestments[i];
-        this.applyStatEffects(state.stats, investment.annualEffects);
+        this.applyModeStatEffects(state, investment.annualEffects);
         note = {
           type: "investment",
           title: investment.name,
@@ -755,8 +1202,19 @@
 
     getModeFailureEnding: function (state) {
       var modeId = this.getModeId(state.selectedMode);
+      var islandId = state.selectedIsland && state.selectedIsland.id;
 
-      if (modeId === "sandbox") {
+      if (!this.modeSupportsHardFailure(state.selectedMode)) {
+        return null;
+      }
+
+      if (islandId === "desert") {
+        if (state.stats.money < -200) {
+          return "Financial Collapse";
+        }
+        if (state.stats.trust <= 0) {
+          return "Community Breakdown";
+        }
         return null;
       }
 
@@ -777,6 +1235,21 @@
       var modeId = this.getModeId(state.selectedMode);
       var stats = state.stats;
       var balanced = stats.money >= 40 && stats.environment >= 25 && stats.trust >= 25;
+      var islandId = state.selectedIsland && state.selectedIsland.id;
+
+      if (!this.modeSupportsWinLose(state.selectedMode)) {
+        return "Free Play Summary";
+      }
+
+      if (islandId === "desert") {
+        if (stats.money < -200 || stats.trust <= 0 || stats.environment < -25) {
+          return stats.money < -200 ? "Financial Collapse" : stats.trust <= 0 ? "Community Breakdown" : "Environmental Decline";
+        }
+        if (stats.environment >= 75 && stats.money >= 0 && stats.trust >= 50) {
+          return "Thriving Future";
+        }
+        return "Fragile Progress";
+      }
 
       if (stats.money < -100) {
         return "Financial Collapse";
@@ -788,7 +1261,7 @@
         return "Community Breakdown";
       }
 
-      if (modeId === "classic") {
+      if (modeId === "guided") {
         if (balanced) {
           return "Thriving Future";
         }
@@ -796,7 +1269,7 @@
       }
 
       if (modeId === "wealth") {
-        if (stats.money >= 180 && stats.environment > -25 && stats.trust > -25) {
+        if (stats.money >= 1300 && stats.environment > -25 && stats.trust > -25) {
           return "Thriving Future";
         }
         if (stats.environment <= -75) {
@@ -805,7 +1278,7 @@
         if (stats.trust <= -75) {
           return "Community Breakdown";
         }
-        return stats.money >= 140 ? "Fragile Progress" : this.getFinalEnding(stats);
+        return stats.money >= 1100 ? "Fragile Progress" : this.getFinalEnding(stats);
       }
 
       if (modeId === "conservation") {
@@ -841,10 +1314,6 @@
         return stats.trust >= 20 ? "Fragile Progress" : "Community Breakdown";
       }
 
-      if (modeId === "sandbox") {
-        return this.getFinalEnding(stats);
-      }
-
       if (modeId === "education") {
         if (stats.money > -25 && stats.environment >= 10 && stats.trust >= 10) {
           return "Thriving Future";
@@ -878,10 +1347,10 @@
     getOutcomeVerdict: function (mode, endingType) {
       var modeId = this.getModeId(mode);
 
-        if (modeId === "sandbox") {
+      if (modeId === "sandbox" || endingType === "Free Play Summary") {
         return {
-          label: endingType === "Thriving Future" ? "Reflective Outcome" : "Open Outcome",
-          tone: endingType === "Thriving Future" ? "win" : "mixed"
+          label: "Free Play",
+          tone: "mixed"
         };
       }
       if (endingType === "Thriving Future") {
@@ -937,6 +1406,14 @@
       var modeId = this.getModeId(state.selectedMode);
       var strategyStyle = this.describeStrategy(stats);
       var balanced = stats.money >= 40 && stats.environment >= 25 && stats.trust >= 25;
+
+      if (modeId === "sandbox" || endingType === "Free Play Summary") {
+        return {
+          strategy: "Sandbox is free play, so this is a reflection instead of a win or loss. " + strategyStyle + " Your island can keep going without forced collapse or a final score.",
+          education: "Open-ended simulations are useful for experimentation. Because there is no hard fail state here, you can safely test extreme budgets, damaged environments, or low trust and observe how the systems respond over time.",
+          reflection: "Free play is for curiosity, testing, and learning at your own pace."
+        };
+      }
 
       if (modeId === "wealth" && stats.money >= 160 && stats.trust < 35) {
         return {
@@ -1031,6 +1508,9 @@
       if (endingType === "Fragile Progress") {
         return base + " Your " + decisionCount + " decisions kept the island moving, but " +
           ranking.weakest.label + " became a visible weak point by the end.";
+      }
+      if (endingType === "Free Play Summary") {
+        return base + " Sandbox mode does not score this as a win or loss, so these results are a snapshot of your experiment.";
       }
       return base + " Your " + decisionCount + " decisions left " + ranking.weakest.label +
         " too weak to sustain the island's future.";
