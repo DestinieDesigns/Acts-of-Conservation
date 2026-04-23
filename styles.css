@@ -6988,6 +6988,52 @@ body {
   }
 }
 
+/* Board safety layer: prevent responsive/theme cleanup from collapsing the game board. */
+.game-screen.active .game-layout {
+  display: grid !important;
+}
+
+.game-screen.active .board-panel {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: min(100%, 1080px) !important;
+  min-height: clamp(360px, 68dvh, 820px) !important;
+  margin-inline: auto !important;
+}
+
+.game-screen.active .board {
+  display: block !important;
+  position: relative !important;
+  width: min(100%, 68dvh, 820px) !important;
+  min-width: min(100%, 320px) !important;
+  max-width: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  flex: 0 0 auto !important;
+}
+
+.game-screen.active .board-center {
+  display: flex !important;
+}
+
+@media (max-width: 760px) {
+  .game-screen.active .board-panel {
+    min-height: min(92vw, 560px) !important;
+    padding: 0.5rem !important;
+  }
+
+  .game-screen.active .board {
+    width: min(100%, 90vw, 560px) !important;
+    min-width: min(100%, 280px) !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .game-screen.active .board {
+    min-width: min(100%, 250px) !important;
+  }
+}
+
 @keyframes screen-fade-in {
   from {
     opacity: 0;
